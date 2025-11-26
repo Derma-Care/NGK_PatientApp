@@ -58,7 +58,7 @@ class TimerController extends GetxController {
         MaterialPageRoute(
           builder: (_) => BottomNavController(
             mobileNumber: mobileNumber,
-            username: username,
+            // username: username,
             index: 0,
           ),
         ),

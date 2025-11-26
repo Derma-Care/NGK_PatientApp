@@ -59,7 +59,7 @@ class customerRatingService {
           builder: (ctx) => BottomNavController(
             mobileNumber: mobileNumber,
             index: 0,
-            username: userName,
+            // username: userName,
           ),
         ),
         (route) => false, // Remove all previous routes

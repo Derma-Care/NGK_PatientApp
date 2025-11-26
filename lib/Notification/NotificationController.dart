@@ -38,9 +38,9 @@ class NotificationController extends GetxController {
     unreadCount.value++;
 
     // ✅ Navigate to Notifications screen only if not already there
-    if (Get.currentRoute != '/NotificationScreen') {
-      Get.to(() => NotificationScreen());
-    }
+    // if (Get.currentRoute != '/NotificationScreen') {
+    //   Get.to(() => NotificationScreen());
+    // }
   }
 
   // Remove a specific notification

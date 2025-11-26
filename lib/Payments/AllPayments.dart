@@ -22,26 +22,26 @@ import '../Utils/ScaffoldMessageSnacber.dart';
 
 class RazorpaySubscription extends StatefulWidget {
   final VoidCallback? onPaymentInitiated;
-  final HospitalDoctorModel serviceDetails;
+  // final HospitalDoctorModel serviceDetails;
   final String amount;
   final String mobileNumber;
-  final String branchName;
+  // final String branchName;
   final BuildContext context;
-  final String? bookingId;
-  final PostBookingModel bookingDetails;
-  final FollowUpModal? postFollowBookingPayload;
+  // final String? bookingId;
+  // final PostBookingModel bookingDetails;
+  // final FollowUpModal? postFollowBookingPayload;
 
   const RazorpaySubscription({
     super.key,
     required this.onPaymentInitiated,
-    required this.serviceDetails,
+    // required this.serviceDetails,
     required this.amount,
     required this.context,
-    required this.bookingDetails,
+    // required this.bookingDetails,
     required this.mobileNumber,
-    required this.branchName,
-    this.bookingId,
-    this.postFollowBookingPayload,
+    // required this.branchName,
+    // this.bookingId,
+    // this.postFollowBookingPayload,
   });
 
   @override
@@ -83,7 +83,7 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
             MaterialPageRoute(
                 builder: (_) => BottomNavController(
                       mobileNumber: widget.mobileNumber,
-                      username: "User",
+                      // username: "User",
                       index: 0,
                     )),
             (route) => false,
@@ -143,10 +143,7 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
                 // ),
               ],
             ),
-      floatingActionButton: GlobalTimerFAB(
-        doctorId: widget.serviceDetails.doctor.doctorId,
-        slot: widget.bookingDetails.patient.servicetime,
-      ),
+       
     );
   }
 
@@ -165,110 +162,95 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
     paymentId = response.paymentId;
     dynamic responseData;
 
-    try {
-      // ✅ Case 1: Follow-up appointment
-      if (widget.postFollowBookingPayload?.bookingId?.isNotEmpty ?? false) {
-        final followUpPayload = FollowUpModal(
-          visitType: "follow-up",
-          mobileNumber: widget.postFollowBookingPayload!.mobileNumber,
-          serviceDate: widget.postFollowBookingPayload!.serviceDate,
-          servicetime: widget.postFollowBookingPayload!.servicetime,
-          patientId: widget.postFollowBookingPayload!.patientId,
-          bookingId: widget.postFollowBookingPayload!.bookingId,
-          doctorId: widget.postFollowBookingPayload!.doctorId,
-          bookingFor: widget.postFollowBookingPayload!.bookingFor,
-          branchId: widget.postFollowBookingPayload!.branchId,
-        );
+    // try {
+    //   // ✅ Case 1: Follow-up appointment
+      
+    //   // ✅ Case 2: New appointment
+     
+    //     responseData = await postBookings(widget.bookingDetails);
+       
+    //   if (!mounted) return;
+    //   Navigator.pop(context); // close loader
 
-        responseData = await followUpBookings(followUpPayload);
-      }
-      // ✅ Case 2: New appointment
-      else {
-        responseData = await postBookings(widget.bookingDetails);
-      }
+    //   if (responseData == null) {
+    //     ScaffoldMessageSnackbar.show(
+    //       context: context,
+    //       message: "No response received. Please try again.",
+    //       type: SnackbarType.error,
+    //     );
+    //     return;
+    //   }
 
-      if (!mounted) return;
-      Navigator.pop(context); // close loader
+    //   final statusCode = responseData['statusCode'] ?? 0;
+    //   final message = responseData['message'] ?? "Booking failed. Try again";
 
-      if (responseData == null) {
-        ScaffoldMessageSnackbar.show(
-          context: context,
-          message: "No response received. Please try again.",
-          type: SnackbarType.error,
-        );
-        return;
-      }
+    //   // ✅ On success
+    //   if (statusCode == 200 || statusCode == 201) {
+    //     // Clear Timer Controller safely
+    //     if (Get.isRegistered<TimerController>()) {
+    //       Get.delete<TimerController>();
+    //     }
 
-      final statusCode = responseData['statusCode'] ?? 0;
-      final message = responseData['message'] ?? "Booking failed. Try again";
+    //     if (widget.postFollowBookingPayload?.bookingId?.isNotEmpty ?? false) {
+    //       // ✅ Navigate for Follow-up
+    //       ScaffoldMessageSnackbar.show(
+    //         context: context,
+    //         message: "Follow-up booked successfully!",
+    //         type: SnackbarType.success,
+    //       );
+    //       scheduleController.selectedSlotIndex.value = -1;
+    //       scheduleController.currentSlots.clear();
+    //       if (Navigator.canPop(context)) {
+    //         Navigator.pop(context); // close the bottom sheet
+    //       }
 
-      // ✅ On success
-      if (statusCode == 200 || statusCode == 201) {
-        // Clear Timer Controller safely
-        if (Get.isRegistered<TimerController>()) {
-          Get.delete<TimerController>();
-        }
+    //       Get.offAll(() => BottomNavController(
+    //             mobileNumber: widget.mobileNumber,
+    //             username: widget.bookingDetails.patient.name,
+    //             index: 1,
+    //           ));
+    //     } else {
+    //       // ✅ Navigate for New Booking
+    //       ScaffoldMessageSnackbar.show(
+    //         context: context,
+    //         message: "Appointment Booked Successfully!",
+    //         type: SnackbarType.success,
+    //       );
 
-        if (widget.postFollowBookingPayload?.bookingId?.isNotEmpty ?? false) {
-          // ✅ Navigate for Follow-up
-          ScaffoldMessageSnackbar.show(
-            context: context,
-            message: "Follow-up booked successfully!",
-            type: SnackbarType.success,
-          );
-          scheduleController.selectedSlotIndex.value = -1;
-          scheduleController.currentSlots.clear();
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context); // close the bottom sheet
-          }
+    //       Navigator.pushAndRemoveUntil(
+    //         context,
+    //         MaterialPageRoute(
+    //           builder: (_) => SuccessScreen(
+    //             serviceDetails: widget.serviceDetails,
+    //             paymentId: paymentId ?? "",
+    //             patient: widget.bookingDetails.patient,
+    //             mobileNumber: widget.mobileNumber,
+    //             paymentType: "online",
+    //             clinicData: widget.serviceDetails,
+    //             branchName: widget.branchName,
+    //           ),
+    //         ),
+    //         (route) => false,
+    //       );
+    //     }
+    //   } else {
+    //     // ❌ On failure
+    //     ScaffoldMessageSnackbar.show(
+    //       context: context,
+    //       message: message,
+    //       type: SnackbarType.error,
+    //     );
+    //   }
+    // } catch (e) {
+    //   if (!mounted) return;
+    //   Navigator.pop(context);
 
-          Get.offAll(() => BottomNavController(
-                mobileNumber: widget.mobileNumber,
-                username: widget.bookingDetails.patient.name,
-                index: 1,
-              ));
-        } else {
-          // ✅ Navigate for New Booking
-          ScaffoldMessageSnackbar.show(
-            context: context,
-            message: "Appointment Booked Successfully!",
-            type: SnackbarType.success,
-          );
-
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SuccessScreen(
-                serviceDetails: widget.serviceDetails,
-                paymentId: paymentId ?? "",
-                patient: widget.bookingDetails.patient,
-                mobileNumber: widget.mobileNumber,
-                paymentType: "online",
-                clinicData: widget.serviceDetails,
-                branchName: widget.branchName,
-              ),
-            ),
-            (route) => false,
-          );
-        }
-      } else {
-        // ❌ On failure
-        ScaffoldMessageSnackbar.show(
-          context: context,
-          message: message,
-          type: SnackbarType.error,
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      Navigator.pop(context);
-
-      ScaffoldMessageSnackbar.show(
-        context: context,
-        message: "Unexpected error occurred: $e",
-        type: SnackbarType.error,
-      );
-    }
+    //   ScaffoldMessageSnackbar.show(
+    //     context: context,
+    //     message: "Unexpected error occurred: $e",
+    //     type: SnackbarType.error,
+    //   );
+    // }
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {

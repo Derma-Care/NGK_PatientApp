@@ -715,25 +715,25 @@ class _ConfirmbookingdetailsState extends State<Confirmbookingdetails> {
               // 💳 GO TO PAYMENT SCREEN
               print('[💳] Navigating to Razorpay...');
 
-              Get.to(() => RazorpaySubscription(
-                    context: context,
-                    amount: isServiceConsultation
-                        ? (subServiceDetails?.finalCost?.toStringAsFixed(0) ??
-                            "0")
-                        : (consultationFee + consultationFee * 0.18)
-                            .toStringAsFixed(0),
-                    onPaymentInitiated: () {
-                      // ScaffoldMessageSnackbar.show(
-                      //       context: context,
-                      //       message: "Payment Initiated",
-                      //       type: SnackbarType.warning,
-                      //     );
-                    },
-                    serviceDetails: widget.doctor,
-                    bookingDetails: postBookingPayload,
-                    mobileNumber: widget.patient.mobileNumber,
-                    branchName: branchName,
-                  ));
+              // Get.to(() => RazorpaySubscription(
+              //       context: context,
+              //       amount: isServiceConsultation
+              //           ? (subServiceDetails?.finalCost?.toStringAsFixed(0) ??
+              //               "0")
+              //           : (consultationFee + consultationFee * 0.18)
+              //               .toStringAsFixed(0),
+              //       onPaymentInitiated: () {
+              //         // ScaffoldMessageSnackbar.show(
+              //         //       context: context,
+              //         //       message: "Payment Initiated",
+              //         //       type: SnackbarType.warning,
+              //         //     );
+              //       },
+              //       serviceDetails: widget.doctor,
+              //       bookingDetails: postBookingPayload,
+              //       mobileNumber: widget.patient.mobileNumber,
+              //       branchName: branchName,
+              //     ));
 
               // }
               // void handleNextScreen(BuildContext context, Map<String, dynamic> payload) async {

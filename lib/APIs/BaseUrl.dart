@@ -1,5 +1,5 @@
-// const String wifiUrl = "http://3.6.119.57:9090";
-const String wifiUrl = "https://api.aesthetech.life";
+const String wifiUrl = "http://3.6.119.57:9090";
+// const String wifiUrl = "https://api.aesthetech.life";
 // const String wifiUrl = "http://43.205.96.147:9090";
 
 // const String serverUrl = "${wifiUrl}:9090/api";

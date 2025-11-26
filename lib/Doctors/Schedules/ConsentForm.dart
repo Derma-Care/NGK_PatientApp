@@ -510,11 +510,11 @@ class _SkinCareConsentFormScreenState extends State<SkinCareConsentFormScreen> {
       // );
 
       // Navigate to dashboard
-      Get.offAll(() => BottomNavController(
-            mobileNumber: mobileNumber,
-            username: username,
-            index: 0,
-          ));
+      // Get.offAll(() => BottomNavController(
+      //       mobileNumber: mobileNumber,
+      //       username: username,
+      //       index: 0,
+      //     ));
     } else {
       if (!mounted) return;
 

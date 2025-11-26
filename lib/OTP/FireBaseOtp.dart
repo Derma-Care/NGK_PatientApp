@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
 import 'package:cutomer_app/Registration/RegisterScreen.dart';
 import 'package:cutomer_app/SigninSignUp/BiometricPermissionScreen.dart';
+import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 import 'package:cutomer_app/Utils/ShowSnackBar%20copy.dart';
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
@@ -158,14 +159,21 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
                 prefs.getBool('isFirstLoginDone') ?? true;
 
             if (isAuthenticated && isFirstTimeAuthenticated) {
-              showSnackbar(
-                  "Success",
-                  "OTP has been sent successfully to $widget.mobileNumber",
-                  "success");
+              ScaffoldMessageSnackbar.show(
+                context: context,
+                message:
+                    "OTP has been sent successfully to ${widget.mobileNumber}",
+                type: SnackbarType.success,
+              );
+              // showSnackbar(
+              //     "Success",
+              //     "OTP has been sent successfully to ${widget.mobileNumber}",
+              //     "success");
 
               Get.offAll(() => BottomNavController(
                     mobileNumber: widget.mobileNumber,
-                    username: widget.fullname ?? '', index: 0,
+                    // username: widget.fullname ?? '',
+                    index: 0,
                   ));
             } else {
               Get.to(() => EnableBiometricScreen(
@@ -174,31 +182,48 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
                   deviceId: token));
             }
           } else {
-            Get.to(() => RegisterScreen(
-                  fullName: widget.fullname!,
+            Get.offAll(() => BottomNavController(
                   mobileNumber: widget.mobileNumber,
+                  // username: widget.fullname ?? '',
+                  index: 0,
                 ));
           }
         } else {
-          Get.to(() => RegisterScreen(
-                fullName: widget.fullname!,
+          Get.offAll(() => BottomNavController(
                 mobileNumber: widget.mobileNumber,
+                // username: widget.fullname ?? '',
+                index: 0,
               ));
         }
+        ScaffoldMessageSnackbar.show(
+          context: context,
+          message: "Login successful",
+          type: SnackbarType.success,
+        );
 
-        showSnackbar("Success", "Login successful", "success");
+        // showSnackbar("Success", "Login successful", "success");
         // ScaffoldMessenger.of(context).showSnackBar(
         //   SnackBar(content: Text("Login successful")),
         // );
       } else {
-        showSnackbar(
-            "Error", "${responseData['message'] ?? 'Invalid OTP'}", "error");
+        ScaffoldMessageSnackbar.show(
+          context: context,
+          message: "${responseData['message'] ?? 'Invalid OTP'}",
+          type: SnackbarType.error,
+        );
+        // showSnackbar(
+        //     "Error", "${responseData['message'] ?? 'Invalid OTP'}", "error");
         // ScaffoldMessenger.of(context).showSnackBar(
         //   SnackBar(content: Text(responseData['message'] ?? 'Invalid OTP')),
         // );
       }
     } catch (e) {
-      showSnackbar("Error", "Something went wrong: $e", "error");
+      ScaffoldMessageSnackbar.show(
+        context: context,
+        message: "Something went wrong: $e",
+        type: SnackbarType.error,
+      );
+      // showSnackbar("Error", "Something went wrong: $e", "error");
       // ScaffoldMessenger.of(context).showSnackBar(
       //   SnackBar(content: Text("Something went wrong: $e")),
       // );
@@ -224,7 +249,7 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
             child: Column(
               children: [
                 SizedBox(height: 20),
-                Image.asset('assets/surecare_launcher.png', width: 120),
+                Image.asset('assets/ic_launcher.png', width: 120),
                 SizedBox(height: 24),
                 Text(
                   "Enter the OTP sent to +91-${widget.mobileNumber}",

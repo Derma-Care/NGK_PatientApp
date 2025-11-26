@@ -173,7 +173,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
     Get.offAll(
       BottomNavController(
         mobileNumber: widget.mobileNumber,
-        username: widget.patient.name,
+        // username: widget.patient.name,
         index: 1,
       ),
     );

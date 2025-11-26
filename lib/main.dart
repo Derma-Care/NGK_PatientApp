@@ -1,6 +1,9 @@
 import 'package:cutomer_app/Clinic/AboutClinicController.dart';
 import 'package:cutomer_app/Dashboard/VisitController.dart';
 import 'package:cutomer_app/Doctors/Schedules/ConsentForm.dart';
+import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
+import 'package:cutomer_app/NGK/Packges/PackageController.dart';
+import 'package:cutomer_app/NGK/Procedures/ProcedureController.dart';
 import 'package:cutomer_app/Notification/NotificationController.dart';
 import 'package:cutomer_app/Notification/Notifications.dart';
 import 'package:cutomer_app/PushNotification/PushNotification.dart';
@@ -40,6 +43,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 final FlutterTts flutterTts = FlutterTts();
+final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,17 +66,17 @@ Future<void> main() async {
     android: androidSettings,
   );
 
-  await flutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
-    // ✅ Updated callback for v12+
-    onDidReceiveNotificationResponse: (NotificationResponse response) async {
-      print('[🔔] Notification tapped: ${response.payload}');
-      // Handle navigation if needed
-      if (Get.currentRoute != '/NotificationScreen') {
-        await Get.to(() => NotificationScreen());
-      }
-    },
-  );
+  // await flutterLocalNotificationsPlugin.initialize(
+  //   initializationSettings,
+  //   // ✅ Updated callback for v12+
+  //   onDidReceiveNotificationResponse: (NotificationResponse response) async {
+  //     print('[🔔] Notification tapped: ${response.payload}');
+  //     // Handle navigation if needed
+  //     if (Get.currentRoute != '/NotificationScreen') {
+  //       await Get.to(() => NotificationScreen());
+  //     }
+  //   },
+  // );
 
   // ✅ Configure TTS
   await flutterTts.setLanguage('en-US');
@@ -95,6 +100,10 @@ Future<void> main() async {
   Get.put(SubServiceController());
   Get.put(SelectedServicesController());
   Get.put(ClinicController());
+  Get.put(PackageController());
+  Get.put(Procedurecontroller());
+  Get.put(CustomerGetController(), permanent: true);
+
   Get.put(TimerController(), permanent: true);
   // ✅ FCM Notification tap handling
   final RemoteMessage? initialMessage =
@@ -106,9 +115,9 @@ Future<void> main() async {
   //   notificationController.handleNotification(message);
   // });
 
-  if (initialMessage != null) {
-    notificationController.handleNotification(initialMessage);
-  }
+  // if (initialMessage != null) {
+  //   notificationController.handleNotification(initialMessage);
+  // }
 
   // ✅ Check login state
   final prefs = await SharedPreferences.getInstance();
@@ -139,17 +148,14 @@ class MyApp extends StatelessWidget {
     // Choose initial screen
     Widget homeScreen;
 
-    if (initialMessage != null) {
-      homeScreen = NotificationScreen();
-    } else {
-      homeScreen = SplashScreen(); // Always start splash
-    }
+    homeScreen = SplashScreen(); // Always start splash
 
     return GetMaterialApp(
       title: 'Derma Care',
       debugShowCheckedModeBanner: false,
       theme: _buildAppTheme(),
       home: homeScreen,
+      scaffoldMessengerKey: rootScaffoldMessengerKey, // ✅ ADD THIS
       // home: SkinCareConsentFormScreen(),
       // SkinCareConsentFormScreen
       onGenerateRoute: onGenerateRoute,

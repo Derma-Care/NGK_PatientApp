@@ -9,6 +9,13 @@ import 'package:cutomer_app/Dashboard/ImagePreview.dart';
 import 'package:cutomer_app/Dashboard/VisitType.dart';
 import 'package:cutomer_app/Inputs/CustomInputField.dart';
 import 'package:cutomer_app/Modals/ServiceModal.dart';
+import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
+import 'package:cutomer_app/NGK/Packges/PackageListScreen.dart';
+import 'package:cutomer_app/NGK/Procedures/ProcedureListScreen.dart';
+import 'package:cutomer_app/NGK/Screens/ClinicListScreen.dart';
+import 'package:cutomer_app/NGK/Service/customer_service.dart'
+    show CustomerService;
+import 'package:cutomer_app/NGK/Widgets/procedures_packages_tab_screen.dart';
 import 'package:cutomer_app/Notification/NotificationController.dart';
 import 'package:cutomer_app/Notification/Notifications.dart';
 import 'package:cutomer_app/Screens/RefferalCode.dart';
@@ -28,12 +35,10 @@ import 'ConsultationController.dart';
 
 class ConsultationsType extends StatefulWidget {
   final String mobileNumber;
-  final String username;
 
   const ConsultationsType({
     super.key,
     required this.mobileNumber,
-    required this.username,
   });
 
   @override
@@ -48,7 +53,8 @@ class ConsultationsTypeState extends State<ConsultationsType> {
   String? cityName;
   double? latitude;
   double? longitude;
-  String? fullname;
+  String? fullName;
+
   String selectedVisitType = "First Time"; // 👈 store visit type here
   final NotificationController notificationController = Get.find();
   final TextEditingController searchController = TextEditingController();
@@ -66,6 +72,11 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     dashboardcontroller.setMobileNumber(widget.mobileNumber);
     _loadConsultations();
     loadSubServices();
+    _fetchCustomerName();
+  }
+
+  Future<CustomerProfileModel?> _loadProfile() {
+    return CustomerService.getCustomer(widget.mobileNumber);
   }
 
   Future<void> loadSubServices() async {
@@ -103,25 +114,25 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     });
   }
 
-  void navigateToHospitalCard(Map<String, dynamic> sub) {
-    consultationcontroller.setConsultation(_consultations.first);
-    final subService = SubServiceAdmin.fromJson(sub);
-    subServiceController.setSelectedSubService(subService);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HospitalCardScreen(
-          categoryName: sub['categoryName'],
-          categoryId: sub['categoryId'],
-          serviceId: sub['serviceId'],
-          serviceName: sub['serviceName'],
-          selectedService: subService, // optional
-          mobileNumber: widget.mobileNumber,
-          username: widget.username,
-        ),
-      ),
-    );
-  }
+  // void navigateToHospitalCard(Map<String, dynamic> sub) {
+  //   consultationcontroller.setConsultation(_consultations.first);
+  //   final subService = SubServiceAdmin.fromJson(sub);
+  //   subServiceController.setSelectedSubService(subService);
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => HospitalCardScreen(
+  //         categoryName: sub['categoryName'],
+  //         categoryId: sub['categoryId'],
+  //         serviceId: sub['serviceId'],
+  //         serviceName: sub['serviceName'],
+  //         selectedService: subService, // optional
+  //         mobileNumber: widget.mobileNumber,
+
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Future<void> _loadConsultations() async {
     setState(() => loading = true);
@@ -138,6 +149,15 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     }
   }
 
+  Future<void> _fetchCustomerName() async {
+    final profile = await CustomerService.getCustomer(widget.mobileNumber);
+    if (profile != null) {
+      setState(() {
+        fullName = profile.fullName;
+      });
+    }
+  }
+
   Future<void> _loadLocation() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -145,7 +165,6 @@ class ConsultationsTypeState extends State<ConsultationsType> {
       cityName = prefs.getString('cityName');
       latitude = prefs.getDouble('latitude');
       longitude = prefs.getDouble('longitude');
-      fullname = prefs.getString('customerName');
     });
 
     print("City loaded: $cityName");
@@ -157,8 +176,8 @@ class ConsultationsTypeState extends State<ConsultationsType> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: _buildAppBar(),
-      backgroundColor: Colors.transparent,
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus();
@@ -181,10 +200,10 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const SizedBox(height: 10),
-                          CommonCarouselAds(
-                            media: dashboardcontroller.carouselImages,
-                            height: 170,
-                          ),
+                          // CommonCarouselAds(
+                          //   media: dashboardcontroller.carouselImages,
+                          //   height: 170,
+                          // ),
                           const SizedBox(height: 10),
 
                           // ✅ Search box stays visible top
@@ -193,19 +212,8 @@ class ConsultationsTypeState extends State<ConsultationsType> {
 
                           // ✅ City banner (only if available)
                           if (cityName != null) _buildLocationBanner(),
-                          const SizedBox(height: 10),
+                          // const SizedBox(height: 10),
 
-                          VisitType(
-                            consulationType:
-                                _consultations.first.consultationType,
-                            mobileNumber: widget.mobileNumber,
-                            username: widget.username,
-                            onVisitTypeChanged: (String value) {
-                              setState(() {
-                                selectedVisitType = value;
-                              });
-                            },
-                          ),
                           const SizedBox(height: 20),
 
                           // ✅ Grid content (no IntrinsicHeight)
@@ -216,20 +224,35 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                             childAspectRatio: 0.9,
                             children: [
                               _mainCard(
-                                "Services & Treatments",
+                                "Procedures",
                                 "assets/treat.jpg",
                                 () {
                                   consultationcontroller
                                       .setConsultation(_consultations.first);
-                                  Get.to(DashboardScreen(
-                                    mobileNumber: widget.mobileNumber,
-                                    username: fullname ?? '',
-                                  ));
+                                  Get.to(SubServiceListScreen());
                                 },
                               ),
                               _mainCard(
-                                "Consultations",
-                                "assets/consult.jpg",
+                                "Packages",
+                                "assets/package.png",
+                                () {
+                                  consultationcontroller
+                                      .setConsultation(_consultations.first);
+                                  Get.to(PackageListScreen());
+                                },
+                              ),
+                              _mainCard(
+                                "Clinics",
+                                "assets/clinic.png",
+                                () {
+                                  consultationcontroller
+                                      .setConsultation(_consultations.first);
+                                  Get.to(ClinicListScreen());
+                                },
+                              ),
+                              _mainCard(
+                                "Offers",
+                                "assets/offer.png",
                                 _showConsultationOptions,
                               ),
                             ],
@@ -378,7 +401,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                           hideDropdownOverlay();
                           searchController.clear();
                           setState(() => filteredSubServices.clear());
-                          navigateToHospitalCard(item);
+                          // navigateToHospitalCard(item);
                         },
                       );
                     },
@@ -454,7 +477,8 @@ class ConsultationsTypeState extends State<ConsultationsType> {
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.5, // max width
               child: Text(
-                capitalizeFirstLetter(widget.username),
+                capitalizeFirstLetter(fullName ?? widget.mobileNumber),
+
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -599,11 +623,11 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                       onTap: () {
                         Navigator.pop(context);
                         consultationcontroller.setConsultation(c);
-                        Get.to(() => SymptomsForm(
-                              mobileNumber: widget.mobileNumber,
-                              username: widget.username,
-                              consulationType: c.consultationType,
-                            ));
+                        // Get.to(() => SymptomsForm(
+                        //       mobileNumber: widget.mobileNumber,
+                        //       // username: widget.username,
+                        //       consulationType: c.consultationType,
+                        //     ));
                       },
                     )),
               if (onlineOptions.isNotEmpty)
@@ -613,11 +637,11 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                       onTap: () {
                         Navigator.pop(context);
                         consultationcontroller.setConsultation(c);
-                        Get.to(() => SymptomsForm(
-                              mobileNumber: widget.mobileNumber,
-                              username: widget.username,
-                              consulationType: c.consultationType,
-                            ));
+                        // Get.to(() => SymptomsForm(
+                        //       mobileNumber: widget.mobileNumber,
+                        //       username: widget.username,
+                        //       consulationType: c.consultationType,
+                        //     ));
                       },
                     )),
             ],

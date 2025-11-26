@@ -137,7 +137,7 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen> {
       // ✅ Navigate to bottom navigation
       Get.offAll(() => BottomNavController(
             mobileNumber: mobileNumber ?? "",
-            username: fullname ?? "",
+            // username: fullname ?? "",
             index: 0,
           ));
     } catch (e) {

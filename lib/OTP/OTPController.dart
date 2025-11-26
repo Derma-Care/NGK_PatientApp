@@ -108,7 +108,7 @@ class OTPController extends GetxController {
                 MaterialPageRoute(
                   builder: (context) => BottomNavController(
                     mobileNumber: PhoneNumberstored,
-                    username: username,
+                    // username: username,
                     index: 0,
                   ),
                 ),

@@ -34,7 +34,7 @@
 
     
     <application
-        android:label="CCMS"
+        android:label="Neha's GlowKart"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"

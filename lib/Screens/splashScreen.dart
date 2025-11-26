@@ -261,6 +261,7 @@
 import 'dart:async';
 import 'package:cutomer_app/SigninSignUp/BiometricAuthScreen.dart';
 import 'package:cutomer_app/SigninSignUp/LoginScreen.dart';
+import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:local_auth/local_auth.dart';
@@ -286,17 +287,20 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 2), // faster
     );
 
+    // Fade out
     _opacityAnimation = Tween<double>(begin: 1, end: 0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
+    // Move up (y-axis) more
     _moveUpAnimation = Tween<double>(begin: 0, end: -200).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
+    // Wait 2 seconds before starting the animation
     Future.delayed(const Duration(seconds: 2), () {
       _controller.forward();
     });
@@ -324,12 +328,12 @@ class _SplashScreenState extends State<SplashScreen>
         biometricAvailable = availableBiometrics.isNotEmpty;
       }
     } catch (e) {
-      debugPrint("Biometric check failed: $e");
+      print("Biometric check failed: $e");
     }
 
     if (!mounted) return;
 
-    if (!isFirstLoginDone) {
+    if (isFirstLoginDone) {
       Get.offAll(() => Loginscreen());
     } else if (biometricAvailable) {
       Get.offAll(() => BiometricAuthScreen());
@@ -346,8 +350,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -364,40 +366,99 @@ class _SplashScreenState extends State<SplashScreen>
           },
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/ic_launcher.png',
-                height: size.height * 0.18,
+              // 🌟 3D Image
+              Stack(
+                children: [
+                  // Bottom shadow (depth)
+                  Transform.translate(
+                    offset: const Offset(2, 2),
+                    child: ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.2),
+                        BlendMode.srcATop,
+                      ),
+                      child: Image.asset(
+                        'assets/ic_launcher.png',
+                        height: 150,
+                      ),
+                    ),
+                  ),
+
+                  // Top highlight (emboss)
+                  Transform.translate(
+                    offset: const Offset(-0, -0),
+                    child: ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        Colors.white.withOpacity(0.7),
+                        BlendMode.srcATop,
+                      ),
+                      child: Image.asset(
+                        'assets/ic_launcher.png',
+                        height: 150,
+                      ),
+                    ),
+                  ),
+
+                  // Main Image
+                  Image.asset(
+                    'assets/ic_launcher.png',
+                    height: 150,
+                  ),
+                ],
               ),
+
               const SizedBox(height: 20),
-              // Text(
-              //   'CCMS',
-              //   style: TextStyle(
-              //     fontSize: 36,
-              //     fontWeight: FontWeight.bold,
-              //     letterSpacing: 2,
-              //     fontFamily: 'Poppins',
-              //     foreground: Paint()
-              //       ..shader = const LinearGradient(
-              //         colors: [
-              //           Color(0xFF2196F3), // Blue
-              //           Color(0xFF43A047), // Parrot Green
-              //         ],
-              //         begin: Alignment.topLeft,
-              //         end: Alignment.bottomRight,
-              //       ).createShader(Rect.fromLTWH(0, 0, 200, 70)),
-              //   ),
-              // ),
-              // const SizedBox(height: 8),
-              // Text(
-              //   "Chiselon Clinic Management Suite",
-              //   style: TextStyle(
-              //     fontSize: 14,
-              //     letterSpacing: 1.2,
-              //     color: Colors.grey.shade600,
-              //     fontStyle: FontStyle.italic,
-              //   ),
-              // ),
+
+              // 🌟 3D Text
+              Stack(
+                children: [
+                  // Bottom shadow (depth)
+                  Text(
+                    "Neha's GlowKart",
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black.withOpacity(0.35),
+                      shadows: [
+                        Shadow(
+                          offset: const Offset(3, 3),
+                          blurRadius: 8,
+                          color: Colors.black.withOpacity(0.4),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Top highlight (emboss)
+                  Text(
+                    "Neha's GlowKart",
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white.withOpacity(0.7),
+                      shadows: [
+                        Shadow(
+                          offset: const Offset(-2, -2),
+                          blurRadius: 6,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Main text
+                  Text(
+                    "Neha's GlowKart",
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: mainColor,
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

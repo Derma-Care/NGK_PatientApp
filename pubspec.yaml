@@ -100,6 +100,8 @@ dependencies:
   signature: ^5.5.0
   device_calendar: ^4.3.3
   flutter_image_compress: ^2.3.0
+  loading_animation_widget: ^1.2.0
+
 
   # upi_india: ^3.0.1
   # flutter_locrl_notifications: ^16.1.0

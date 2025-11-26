@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-// const Color mainColor = Color.fromARGB(255, 230, 52, 21);
-// const Color secondaryColor = Color.fromARGB(255, 180, 86, 42);
-const Color mainColor = Color(0xFF0072CE);
-const Color secondaryColor = Color(0xFF00AEEF);
+const Color mainColor = Color(0xFFFF4F9A);
+const Color secondaryColor = Color(0xFFFF7BBF);
+const Color bgColor = Color(0xFFF5F5F5);
+
 const int platformFee = 20;

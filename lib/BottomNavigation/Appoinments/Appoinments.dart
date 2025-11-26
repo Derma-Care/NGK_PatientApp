@@ -1,164 +1,265 @@
-import 'package:cutomer_app/Dashboard/DashBoardController.dart';
-import 'package:cutomer_app/Help/Numbers.dart';
+import 'package:cutomer_app/NGK/BookingAppointmnet/Bookin_Controller.dart';
+import 'package:cutomer_app/NGK/BookingAppointmnet/Booking_Model.dart';
+import 'package:cutomer_app/NGK/Widgets/CommonPaginationBar.dart';
+import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../Utils/AppointmentCard.dart';
-import '../../Utils/Constant.dart';
-import '../../Utils/Header.dart';
-import 'AppointmentController.dart';
 
-class AppointmentPage extends StatefulWidget {
-  final String mobileNumber;
-
-  AppointmentPage({required this.mobileNumber});
+class BookingListScreen extends StatefulWidget {
+  const BookingListScreen({super.key});
 
   @override
-  State<AppointmentPage> createState() => _AppointmentPageState();
+  State<BookingListScreen> createState() => _BookingListScreenState();
 }
 
-class _AppointmentPageState extends State<AppointmentPage> {
-  final dashboardcontroller = Get.put(Dashboardcontroller());
+class _BookingListScreenState extends State<BookingListScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController tabController;
+  final BookingController controller = Get.put(BookingController());
 
-
-
-  String? customId; // ✅ Not final, can assign later
-
-  final appointmentController = Get.put(AppointmentController());
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    dashboardcontroller.setMobileNumber(widget.mobileNumber);
-
-    _loadCustomerId();
-  }
-
-  Future<void> _loadCustomerId() async {
-    final prefs = await SharedPreferences.getInstance();
-    final id = prefs.getString('customerId') ?? "";
-
-    setState(() {
-      customId = id;
-    });
-
-    dashboardcontroller.setMobileNumber(id);
-    appointmentController.fetchBookings();
+    tabController = TabController(length: 2, vsync: this);
+    controller.loadDummyData();
   }
 
   @override
   Widget build(BuildContext context) {
-    // final controller =
-    //     Get.put(AppointmentController()); // Pass mobileNumber here
-    final controller = Get.find<AppointmentController>();
-
     return Scaffold(
-      appBar: CommonHeader(
-        title: "Appointments",
-        onNotificationPressed: () {},
-        onSettingPressed: () async {
-          // await whatsUpChat();
-        },
-        automaticallyImplyLeading: false,
-      ),
-      body: RefreshIndicator(
-        onRefresh: controller.refreshBookings,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                      child:
-                          _buildTabButton(controller, 'UPCOMING', mainColor)),
-                  const SizedBox(width: 10.0),
-                  Expanded(
-                      child: _buildTabButton(
-                          controller, 'COMPLETED', secondaryColor)),
-                ],
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'MY APPOINTMENTS',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: mainColor,
-                ),
-              ),
-            ),
-
-            /// 👇 Wrap ONLY this section in Obx
-            Expanded(
-              child: Obx(() {
-                print(
-                    "controller.isLoading.value ${controller.isLoading.value}");
-                if (controller.isLoading.value) {
-                  return Center(
-                    child: SpinKitFadingCircle(
-                      color: mainColor,
-                      size: 40.0,
-                    ),
-                  );
-                } else if (controller.filteredBookings.isEmpty) {
-                  return const Center(
-                      child: Text('No bookings found for this tab'));
-                } else {
-                  return ListView.builder(
-                    itemCount: controller.filteredBookings.length,
-                    itemBuilder: (context, index) {
-                      print(
-                          "Item count ${controller.filteredBookings.map((e) => e.age)}");
-                      final booking = controller.filteredBookings[index];
-                      return AppointmentCard(doctorData: booking);
-                    },
-                  );
-                }
-              }),
-            ),
+      appBar: AppBar(
+        title: const Text("My Appointments"),
+        backgroundColor: mainColor,
+        bottom: TabBar(
+          controller: tabController,
+          indicatorColor: Colors.white,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          tabs: const [
+            Tab(text: "Pending"),
+            Tab(text: "Completed"),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: tabController,
+        children: [
+          _buildList("Pending"),
+          _buildList("Completed"),
+        ],
       ),
     );
   }
 
-  Widget _buildTabButton(
-      AppointmentController controller, String tabName, Color activeColor) {
-    return GestureDetector(
-      onTap: () => controller.changeTab(tabName),
-      child: Obx(() {
-        final bool isSelected =
-            controller.selectedTab.value == tabName; // Moved inside Obx
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? activeColor : Colors.white,
-            border: Border.all(
-              color: isSelected ? Colors.transparent : Colors.grey,
-              width: 1,
+  Widget _buildList(String status) {
+    return Obx(() {
+      final paginatedList = controller.getFiltered(status);
+
+      if (paginatedList.isEmpty) {
+        return Center(
+          child: Text(
+            "No $status Appointments",
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        );
+      }
+
+      return Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: paginatedList.length,
+              itemBuilder: (context, index) {
+                final b = paginatedList[index];
+
+                return GestureDetector(
+                  onTap: () => _showBookingDetails(context, b),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.pink.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.calendar_month,
+                              color: mainColor, size: 28),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(b.title,
+                                  style: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.bold)),
+                              Text("Clinic: ${b.clinicName}",
+                                  style:
+                                      TextStyle(color: Colors.grey.shade700)),
+                              Text("Date: ${b.bookingDate}",
+                                  style:
+                                      TextStyle(color: Colors.grey.shade700)),
+                            ],
+                          ),
+                        ),
+                        Chip(
+                          label: Text(b.status),
+                          backgroundColor: b.status == "Pending"
+                              ? Colors.orange.shade100
+                              : Colors.green.shade100,
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-          child: Align(
-            alignment: Alignment.center,
-            child: Text(
-              tabName,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : Colors.black,
-              ),
+
+          // PAGINATION BAR
+          Obx(() {
+            return CommonPaginationBar(
+              showPagination: ValueNotifier<bool>(true),
+              itemsPerPage: ValueNotifier<int>(controller.itemsPerPage.value),
+              currentPage: ValueNotifier<int>(controller.currentPage.value),
+              totalPages: ValueNotifier<int>(controller.totalPages.value),
+              onItemsPerPageChanged: (val) {
+                controller.changeItemsPerPage(val);
+              },
+              onNext: controller.nextPage,
+              onPrev: controller.prevPage,
+              onPageSelected: controller.goToPage,
+            );
+          })
+        ],
+      );
+    });
+  }
+
+  void _showBookingDetails(BuildContext context, BookingModel b) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 50,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: 15),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+
+                Center(
+                  child: Text(
+                    b.title,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ALL DETAILS
+                _detailRow("Booking ID", b.bookingId),
+                _detailRow("Booking Type", b.bookingType),
+                if (b.serviceId != null) _detailRow("Service ID", b.serviceId!),
+                if (b.subServiceId != null)
+                  _detailRow("Subservice ID", b.subServiceId!),
+
+                _detailRow("Customer ID", b.customerId),
+                _detailRow("Mobile", b.mobileNumber),
+
+                _detailRow("Clinic", b.clinicName),
+                _detailRow("Clinic Address", b.clinicAddress),
+                _detailRow("Booking Date", b.bookingDate),
+
+                const Divider(height: 25),
+
+                _detailRow("Price", "₹${b.price}"),
+                _detailRow("Discount", "${b.discountPercentage}%"),
+                _detailRow("Discount Amount", "₹${b.discountAmount}"),
+                _detailRow("Final Amount", "₹${b.finalAmount}"),
+
+                const Divider(height: 25),
+
+                _detailRow("Payment Method", b.paymentMethod),
+                _detailRow("Status", b.status),
+
+                const SizedBox(height: 25),
+
+                // SHOW BOOK AGAIN ONLY FOR PENDING BOOKINGS
+                if (b.status.toLowerCase() == "completed")
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Get.snackbar("Booking", "Rebooking action here");
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.pink,
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                    child: const Text("Book Again",
+                        style: TextStyle(fontSize: 18)),
+                  ),
+
+                const SizedBox(height: 15),
+              ],
             ),
           ),
         );
-      }),
+      },
+    );
+  }
+
+  Widget _detailRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: const TextStyle(fontSize: 15),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

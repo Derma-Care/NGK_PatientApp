@@ -106,7 +106,7 @@ class Registercontroller extends GetxController {
           showSnackbar("Success", "${response['message']}", "success");
           Get.offAll(ConsultationsType(
             mobileNumber: mobileNumber,
-            username: fullName,
+            // username: fullName,
           ));
         } else {
           // Handle cases where the server responds with an error status

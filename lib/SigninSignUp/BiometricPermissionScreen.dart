@@ -62,7 +62,7 @@ class _EnableBiometricScreenState extends State<EnableBiometricScreen> {
         // showSnackbar("Success", "Biometric authentication enabled", "success");
         Get.offAll(BottomNavController(
           mobileNumber: widget.mobileNumber,
-          username: widget.fullname,
+          // username: widget.fullname,
           index: 0,
         ));
 
@@ -126,7 +126,7 @@ class _EnableBiometricScreenState extends State<EnableBiometricScreen> {
                         // ));
                         Get.offAll(BottomNavController(
                           mobileNumber: widget.mobileNumber,
-                          username: widget.fullname,
+                          // username: widget.fullname,
                           index: 0,
                         ));
                       },

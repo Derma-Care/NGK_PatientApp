@@ -1,266 +1,121 @@
-import 'package:cutomer_app/Customers/GetCustomerModel.dart';
-import 'package:cutomer_app/Dashboard/DashBoardController.dart';
-
-import 'package:cutomer_app/Utils/Constant.dart';
-import 'package:cutomer_app/Utils/Header.dart';
-import 'package:cutomer_app/Utils/capitalizeFirstLetter.dart';
+import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+class ProfileModalCard extends StatelessWidget {
+  final CustomerProfileModel profile;
 
-// adjust the import to your model path
+  const ProfileModalCard({super.key, required this.profile});
 
-class ProfileDetailScreen extends StatelessWidget {
-  final GetCustomerModel cusData;
-  const ProfileDetailScreen({
-    super.key,
-    required this.cusData,
-  });
+  String safe(dynamic value) {
+    if (value == null) return "-";
+    if (value is String && value.trim().isEmpty) return "-";
+    return value.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final dashboardcontroller = Get.put(Dashboardcontroller());
-
-    return Scaffold(
-      appBar: CommonHeader(
-        title: 'Customer Profile',
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: SingleChildScrollView(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar and Name Card
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Obx(() {
-                    final image = dashboardcontroller.imageFile.value;
-
-                    return GestureDetector(
-                      onTap: () {
-                        dashboardcontroller.showImagePickerOptions(
-                            context, image);
-                      },
-                      child: CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage: image != null
-                            ? FileImage(image)
-                            : const AssetImage('assets/ic_launcher.png')
-                                as ImageProvider,
-                      ),
-                    );
-                  }),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text("${capitalizeEachWord(cusData.fullName)}",
-                            style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: mainColor)),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Customer ID : ${cusData.customerId}",
-                          style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
-                              color: secondaryColor),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  )
-                ],
+            Center(
+              child: Container(
+                width: 55,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
+
             const SizedBox(height: 20),
-            Divider(
-              height: 1,
+
+            const Text(
+              "Customer Profile",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
-            // Details Card
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Column(
-                children: [
-                  _buildDetailTile(Icons.verified_user, "Patient Id",
-                      "${cusData.patientId}"),
-                  _buildDetailTile(
-                      Icons.call, "Mobile Number", "${cusData.mobileNumber}"),
-                  _buildDetailTile(Icons.email, "Email ID",
-                      "${cusData.emailId.isNotEmpty ? cusData.emailId : "NA"}"),
-                  _buildDetailTile(
-                      Icons.account_circle, "Gender", "${cusData.gender}"),
-                  _buildDetailTile(Icons.cake, "DOB/Age",
-                      "${cusData.dateOfBirth}/${cusData.age}"),
-                  _buildDetailTile(Icons.confirmation_number, "Referral Code",
-                      "${cusData.referralCode.isNotEmpty ? cusData.referralCode : "No Refferial Code Avaiable"}"),
-                  _buildDetailTile(Icons.handshake, "Referred By",
-                      "${cusData.referredBy.isNotEmpty ? cusData.referredBy : "Self"}"),
-                  _buildDetailTile(
-                      Icons.location_on,
-                      "Address",
-                      cusData.address != null
-                          ? "${cusData.address.houseNo}, ${cusData.address.street}, ${cusData.address.city}, ${cusData.address.state}, ${cusData.address.postalCode}"
-                          : "No Available")
-                ],
+            const SizedBox(height: 20),
+
+            _info("Customer ID", safe(profile.customerId)),
+            _info("Full Name", safe(profile.fullName)),
+            _info("Mobile", safe(profile.mobile)),
+            _info("Email", safe(profile.email)),
+            _info("City", safe(profile.city)),
+            _info("DOB", safe(profile.dob)),
+            _info("Clinic Name", safe(profile.clinicName)),
+            _info("Clinic City Area", safe(profile.clinicCityArea)),
+            _info("Last Visit", safe(profile.dateOfLastVisit)),
+            _info("Service Type", profile.serviceType?.join(", ") ?? "-"),
+            _info("Blood Group", safe(profile.blood)),
+            _info("Registration Code", safe(profile.registrationCode)),
+            _info("Referred By", safe(profile.referBy)),
+            _info("Aadhar Number", safe(profile.aadharNumber)),
+            _info("Address", safe(profile.address)),
+
+            _info("Code Verified",
+                profile.registrationCodeVerified ? "Yes" : "No"),
+            _info("Registration Done",
+                profile.registrationCompleted ? "Yes" : "No"),
+            _info("Spin Wheel Completed",
+                profile.spinWheelCompleted ? "Yes" : "No"),
+            _info("Profile Completed",
+                profile.userProfileCompleted ? "Yes" : "No"),
+
+            const SizedBox(height: 15),
+
+            // Prescription image view
+            if (profile.prescription != null)
+              GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => Dialog(
+                      child: Image.memory(
+                        Uri.parse(profile.prescription!).data!.contentAsBytes(),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "View Prescription",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
+
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Close"),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text(
-              'BACK',
-              style: TextStyle(color: mainColor),
-            )),
-      ),
     );
   }
 
-  Widget _buildDetailTile(IconData icon, String title, String subtitle) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        radius: 20,
-        backgroundColor: mainColor,
-        child: Icon(icon, color: Colors.white),
+  Widget _info(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Flexible(
+              child: Text(value,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(color: Colors.black54))),
+        ],
       ),
-      title: Text(title,
-          style: const TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 15, color: mainColor)),
-      subtitle: Text(subtitle,
-          style: const TextStyle(color: secondaryColor, fontSize: 14)),
-      dense: true,
-    );
-  }
-}
-
-class HelpScreen extends StatelessWidget {
-  HelpScreen({
-    super.key,
-  });
-
-  final String phone = "+91 9912758542";
-  final String email = "support@uditcometech.com";
-  final String address =
-      "Pakricorn Technology, Road Number 10, Hyderabad, Telangana 500097";
-  final String website = "https://uditcosmetech.com";
-  String get mapsUrl =>
-      "https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}";
-
-  Future<void> _launchURL(String url) async {
-    if (!await launchUrl(Uri.parse(url),
-        mode: LaunchMode.externalApplication)) {
-      throw Exception("Could not launch $url");
-    }
-  }
-
-  final String chatMessage =
-      "Hello! I need help from Pragna Advanced Skin Care Support";
-
-  String get whatsappUrl =>
-      "https://wa.me/${phone.replaceAll("+", "")}?text=${Uri.encodeComponent(chatMessage)}";
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: CommonHeader(
-          title: "Help & Contact",
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Image.asset(
-                  "assets/ic_launcher.png",
-                  width: 100, // adjust size as needed
-                  height: 100,
-                  fit: BoxFit.contain,
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Text(
-                "Need assistance? Reach out to Pragna Advanced Skin Care for support.",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: mainColor),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(
-                height: 30,
-              ),
-              _buildTile(
-                icon: Icons.phone,
-                title: "Call Us",
-                subtitle: phone,
-                onTap: () => _launchURL("tel:$phone"),
-              ),
-              _buildTile(
-                icon: FontAwesome.whatsapp,
-                title: "WhatsApp Chat",
-                subtitle: phone,
-                onTap: () => _launchURL(whatsappUrl),
-              ),
-              _buildTile(
-                icon: Icons.email,
-                title: "Email",
-                subtitle: email,
-                onTap: () => _launchURL("mailto:$email"),
-              ),
-              _buildTile(
-                icon: Icons.location_on,
-                title: "Address",
-                subtitle: address,
-                onTap: () => _launchURL(mapsUrl),
-              ),
-              _buildTile(
-                icon: Icons.language,
-                title: "Website",
-                subtitle: website,
-                onTap: () => _launchURL(website),
-              ),
-            ],
-          ),
-        ),
-      );
-
-  Widget _buildTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(vertical: 10),
-      leading: Icon(icon, size: 28, color: mainColor),
-      title: Text(title,
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: mainColor)),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(color: mainColor),
-      ),
-      trailing: const Icon(
-        Icons.chevron_right,
-        color: mainColor,
-      ),
-      onTap: onTap,
     );
   }
 }
