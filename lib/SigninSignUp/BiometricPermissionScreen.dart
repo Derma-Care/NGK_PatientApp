@@ -1,22 +1,23 @@
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
-import 'package:cutomer_app/ConfirmBooking/Consultations.dart';
-import 'package:cutomer_app/OTP/FireBaseOtp.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
-import 'package:cutomer_app/Utils/ShowSnackBar%20copy.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // ✅ Needed import
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EnableBiometricScreen extends StatefulWidget {
-  final mobileNumber;
-  final fullname;
+  final String mobileNumber;
+  final String? fullname;
   final String? deviceId;
 
-  const EnableBiometricScreen(
-      {super.key, this.mobileNumber, this.fullname, this.deviceId});
+  const EnableBiometricScreen({
+    super.key,
+    required this.mobileNumber,
+    this.fullname,
+    this.deviceId,
+  });
+
   @override
   _EnableBiometricScreenState createState() => _EnableBiometricScreenState();
 }
@@ -24,22 +25,22 @@ class EnableBiometricScreen extends StatefulWidget {
 class _EnableBiometricScreenState extends State<EnableBiometricScreen> {
   final LocalAuthentication auth = LocalAuthentication();
 
-  // Future<void> enableBiometric() async {
-  //   bool canCheck = await auth.canCheckBiometrics;
-  //   if (canCheck) {
-  //     Get.to(ConsultationsType(
-  //       mobileNumber: widget.mobileNumber,
-  //       username: widget.fullname ?? '',
-  //     ));
-  //   } else {
-  //     Get.snackbar("Error", "Biometric not available");
-  //   }
-  // }
-
+  /// --------------------- ENABLE BIOMETRICS ----------------------
   Future<void> _authenticate() async {
     try {
+      final bool canCheck = await auth.canCheckBiometrics;
+
+      if (!canCheck) {
+        ScaffoldMessageSnackbar.show(
+          context: context,
+          message: "Biometric sensor not available",
+          type: SnackbarType.error,
+        );
+        return;
+      }
+
       bool didAuthenticate = await auth.authenticate(
-        localizedReason: 'Please authenticate to enable biometrics',
+        localizedReason: 'Authenticate to enable biometric login',
         options: const AuthenticationOptions(
           biometricOnly: true,
           stickyAuth: true,
@@ -48,31 +49,43 @@ class _EnableBiometricScreenState extends State<EnableBiometricScreen> {
 
       if (didAuthenticate) {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('isFirstLoginDone', true); // ✅ Store first login
-        await prefs.setBool(
-            'isAuthenticated', true); // ✅ Store biometric enabled
+        await prefs.setBool('isFirstLoginDone', true);
+        await prefs.setBool('isAuthenticated', true);
 
-        // ✅ Show success and navigate or close screen
         ScaffoldMessageSnackbar.show(
           context: context,
-          message: "Biometric authentication enabled",
+          message: "Biometric login enabled",
           type: SnackbarType.success,
         );
 
-        // showSnackbar("Success", "Biometric authentication enabled", "success");
-        Get.offAll(BottomNavController(
-          mobileNumber: widget.mobileNumber,
-          // username: widget.fullname,
-          index: 0,
-        ));
-
-        // Navigator.pop(context); // Or navigate to home/dashboard
+        // Navigate to home
+        Get.offAll(() => BottomNavController(
+              mobileNumber: widget.mobileNumber,
+              index: 0,
+            ));
       }
     } catch (e) {
-      print("Biometric auth error: $e");
+      ScaffoldMessageSnackbar.show(
+        context: context,
+        message: "Biometric authentication failed: $e",
+        type: SnackbarType.error,
+      );
     }
   }
 
+  /// --------------------- SKIP BIOMETRIC ----------------------
+  Future<void> _skipBiometrics() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isFirstLoginDone', true);
+    await prefs.setBool('isAuthenticated', false);
+
+    Get.offAll(() => BottomNavController(
+          mobileNumber: widget.mobileNumber,
+          index: 0,
+        ));
+  }
+
+  /// --------------------- UI ----------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,7 +94,9 @@ class _EnableBiometricScreenState extends State<EnableBiometricScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const SizedBox(height: 40),
+            const SizedBox(height: 30),
+
+            // Header section
             Column(
               children: [
                 Text(
@@ -92,56 +107,47 @@ class _EnableBiometricScreenState extends State<EnableBiometricScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 8),
-                Text(
-                  "Secure your account with biometric access",
+                const SizedBox(height: 6),
+                const Text(
+                  "Secure your account with biometric login",
                   style: TextStyle(color: Colors.grey),
                 ),
-                SizedBox(height: 40),
-                // Icon(Icons.fingerprint, size: 120, color: Colors.blueAccent),
+                const SizedBox(height: 40),
+
+                // Fingerprint GIF
                 Image.asset(
                   'assets/fin.gif',
-                  height: 120,
-                  width: 120,
-                )
+                  height: 130,
+                ),
               ],
             ),
+
+            // Buttons
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
               child: Row(
                 children: [
+                  // Skip Button
                   Expanded(
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: mainColor),
-                        foregroundColor: Colors.limeAccent,
                       ),
-                      onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setBool('isFirstLoginDone', true);
-                        await prefs.setBool('isAuthenticated', false);
-                        // Get.to(ConsultationsType(
-                        //   mobileNumber: widget.mobileNumber,
-                        //   username: widget.fullname ?? '',
-                        // ));
-                        Get.offAll(BottomNavController(
-                          mobileNumber: widget.mobileNumber,
-                          // username: widget.fullname,
-                          index: 0,
-                        ));
-                      },
+                      onPressed: _skipBiometrics,
                       child: Text("Skip", style: TextStyle(color: mainColor)),
                     ),
                   ),
-                  SizedBox(width: 16),
+
+                  const SizedBox(width: 16),
+
+                  // Allow Button
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: mainColor,
-                        foregroundColor: Colors.black,
                       ),
                       onPressed: _authenticate,
-                      child: Text(
+                      child: const Text(
                         "Allow",
                         style: TextStyle(color: Colors.white),
                       ),

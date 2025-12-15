@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:cutomer_app/BottomNavigation/Profile/ProfileScreens.dart';
+import 'package:cutomer_app/Dashboard/DashBoardController.dart';
 import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
@@ -6,6 +10,7 @@ import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,7 +26,7 @@ class CustomerProfilePage extends StatefulWidget {
 class _CustomerProfilePageState extends State<CustomerProfilePage> {
   final customerController = Get.find<CustomerGetController>();
   final LocalAuthentication auth = LocalAuthentication();
-
+  final dashboardcontroller = Get.put(Dashboardcontroller());
   bool _biometricEnabled = false;
   bool _loadingBio = true;
 
@@ -30,6 +35,7 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
     super.initState();
     customerController.fetchCustomer(widget.mobileNumber);
     _loadBiometricSetting();
+    loadSavedImage();
   }
 
   // Load saved biometric setting
@@ -106,6 +112,33 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
     }
   }
 
+  /// Load saved profile image from SharedPreferences
+  Future<void> loadSavedImage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedImagePath = prefs.getString('profile_image');
+
+    if (savedImagePath != null) {
+      final file = File(savedImagePath);
+      if (await file.exists()) {
+        dashboardcontroller.imageFile.value = file;
+      }
+    }
+  }
+
+  Future<void> pickProfileImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+
+    if (picked == null) return;
+
+    final file = File(picked.path);
+
+    dashboardcontroller.imageFile.value = file;
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('profile_image', picked.path);
+  }
+
   // -------------------------------------------------------------------
 
   @override
@@ -149,10 +182,18 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
           const SizedBox(height: 10),
 
           // Avatar
-          CircleAvatar(
-            radius: 45,
-            backgroundColor: Colors.grey[300],
-            child: const Icon(Icons.person, size: 40),
+          GestureDetector(
+            onTap: pickProfileImage,
+            child: Obx(() {
+              final file = dashboardcontroller.imageFile.value;
+
+              return CircleAvatar(
+                radius: 45,
+                backgroundColor: Colors.grey[300],
+                backgroundImage: file != null ? FileImage(file) : null,
+                child: file == null ? const Icon(Icons.person, size: 40) : null,
+              );
+            }),
           ),
 
           const SizedBox(height: 10),

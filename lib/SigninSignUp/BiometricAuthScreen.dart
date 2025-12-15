@@ -1,263 +1,180 @@
 import 'dart:convert';
-import 'package:cutomer_app/APIs/BaseUrl.dart';
-import 'package:cutomer_app/Clinic/AboutClinicController.dart';
-import 'package:cutomer_app/Doctors/ListOfDoctors/DoctorService.dart';
-import 'package:cutomer_app/Firebase/RequestNotificationPermissions.dart';
-import 'package:cutomer_app/SigninSignUp/LoginController.dart';
-import 'package:cutomer_app/SigninSignUp/LoginService.dart';
-import 'package:cutomer_app/Utils/Constant.dart';
+import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
+import 'package:cutomer_app/NGK/Service/customer_service.dart';
 import 'package:cutomer_app/Utils/LocationService.dart';
-import 'package:cutomer_app/Utils/ShowSnackBar%20copy.dart';
-import 'package:cutomer_app/Widget/ControllerInitializer.dart';
-import 'package:firebase_app_installations/firebase_app_installations.dart';
+import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../BottomNavigation/BottomNavigation.dart';
+
 import '../SigninSignUp/LoginScreen.dart';
-import 'package:http/http.dart' as http;
 
 class BiometricAuthScreen extends StatefulWidget {
   @override
-  _BiometricAuthScreenState createState() => _BiometricAuthScreenState();
+  State<BiometricAuthScreen> createState() => _BiometricAuthScreenState();
 }
 
 class _BiometricAuthScreenState extends State<BiometricAuthScreen> {
   final LocalAuthentication auth = LocalAuthentication();
-  final SiginSignUpController siginSignUpController = SiginSignUpController();
-  final LoginApiService _loginApiService = LoginApiService();
-  final DoctorService _doctorService = DoctorService();
-  final clinicController = Get.find<ClinicController>();
-  bool _isLoading = false;
+  bool _loading = false;
 
   @override
   void initState() {
     super.initState();
-    _checkBiometrics();
-    requestFCMPermission();
-    getFCMToken();
+    _checkAndAuthenticate();
   }
 
-  /// ✅ Navigate safely to login screen
-  void _goToLogin() {
-    if (Navigator.canPop(context))
-      Navigator.pop(context); // close dialogs if open
-    Get.offAll(() => Loginscreen());
-  }
+  // -------------------------------------------------------------------
+  // CHECK BIOMETRICS
+  // -------------------------------------------------------------------
+  Future<void> _checkAndAuthenticate() async {
+    setState(() => _loading = true);
 
-  Future<void> _checkBiometrics() async {
-    setState(() => _isLoading = true);
     try {
-      final canCheckBiometrics = await auth.canCheckBiometrics;
-      if (canCheckBiometrics) {
-        await _authenticate();
-      } else {
-        debugPrint("❌ Device doesn't support biometrics.");
+      final canCheck = await auth.canCheckBiometrics;
+      final supported = await auth.isDeviceSupported();
+
+      if (!canCheck || !supported) {
         _goToLogin();
+        return;
       }
+
+      await _authenticateBiometric();
     } catch (e) {
-      debugPrint("❌ Error checking biometrics: $e");
+      debugPrint("Biometric check error: $e");
       _goToLogin();
-    } finally {
-      setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _authenticate() async {
-    setState(() => _isLoading = true);
+  // -------------------------------------------------------------------
+  // AUTHENTICATE USER
+  // -------------------------------------------------------------------
+  Future<void> _authenticateBiometric() async {
     try {
-      final isAuthenticated = await auth.authenticate(
-        localizedReason: 'Please authenticate to proceed',
+      final isAuth = await auth.authenticate(
+        localizedReason: "Authenticate to continue",
         options: const AuthenticationOptions(
-          useErrorDialogs: true,
+          biometricOnly: true,
           stickyAuth: true,
+          useErrorDialogs: true,
         ),
       );
 
-      if (!isAuthenticated) {
-        debugPrint("❌ Authentication failed.");
+      if (!isAuth) {
         _goToLogin();
         return;
       }
 
+      _afterBiometricSuccess();
+    } catch (e) {
+      debugPrint("Biometric error: $e");
+      _goToLogin();
+    }
+  }
+
+  // -------------------------------------------------------------------
+  // AFTER BIOMETRIC SUCCESS → VALIDATE USER
+  // -------------------------------------------------------------------
+  Future<void> _afterBiometricSuccess() async {
+    try {
       final prefs = await SharedPreferences.getInstance();
-      final customerId = prefs.getString('customerId');
-      final username = prefs.getString('userName');
-      final mobileNumber = prefs.getString('mobileNumber');
-      final isAuthenticate = prefs.getBool('isAuthenticated') ?? false;
-      final isFirstLoginDone = prefs.getBool('isFirstLoginDone') ?? false;
-      final fullname = prefs.getString('customerName');
-      debugPrint("🔐 Biometric Authenticated: $isAuthenticated");
-      debugPrint("📦 Username: $username");
-      debugPrint("📦 Mobile Number: $mobileNumber");
-      debugPrint("✅ First Login Completed: $isFirstLoginDone");
+      final mobile = prefs.getString('mobileNumber');
 
-      // ✅ Validate stored data
-      if (!isAuthenticate || !isFirstLoginDone) {
-        debugPrint("❌ Missing user data. Redirecting to login.");
+      if (mobile == null) {
         _goToLogin();
         return;
       }
 
-      final checkCustomerResponse = await http.get(
-        Uri.parse('$clinicUrl/customers/$customerId'),
-      );
-      debugPrint("✅ API Responsed: ${checkCustomerResponse.body}");
-      debugPrint("✅ API Responsed url: ${clinicUrl}/customers/${customerId}");
-      if (checkCustomerResponse.statusCode != 200) {
-        debugPrint("❌ Server Error: ${checkCustomerResponse.statusCode}");
+      // 🔍 FETCH USER DATA
+      final customer = await CustomerService.getCustomer(mobile);
+
+      if (customer == null) {
+        // ❌ No customer exists → Login again
         _goToLogin();
         return;
       }
 
-      final data = json.decode(checkCustomerResponse.body);
-      debugPrint("✅ API Response: $data");
-
-      if (data['success'] != true) {
-        showSnackbar(
-            "Warning", "No user data found. Please log in again.", "warning");
-        _goToLogin();
-        return;
-      }
-
-      // ✅ Show loading dialog and fetch location
-      showFetchingLocationDialog(context);
+      // 🌍 Fetch Location (Optional)
       try {
         await LocationService.fetchAndStoreLocation();
-      } catch (e) {
-        debugPrint("⚠️ Location fetch failed: $e");
-      } finally {
-        Navigator.pop(context); // close dialog safely
-      }
-      initializeControllers();
+      } catch (_) {}
 
-      final hospitalId = prefs.getString('hospitalId');
-      await clinicController.fetchClinic(hospitalId!);
-      // ✅ Navigate to bottom navigation
+      // ✅ SUCCESS → Proceed to Home
       Get.offAll(() => BottomNavController(
-            mobileNumber: mobileNumber ?? "",
-            // username: fullname ?? "",
+            mobileNumber: mobile,
             index: 0,
           ));
     } catch (e) {
-      debugPrint("❌ Biometric authentication error: $e");
+      debugPrint("Error after biometric: $e");
       _goToLogin();
-    } finally {
-      setState(() => _isLoading = false);
     }
   }
 
-  void showFetchingLocationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) {
-        return WillPopScope(
-          onWillPop: () async => false,
-          child: Dialog(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: Image.asset(
-                      'assets/lo_1.gif', // your image path
-                      width: 80,
-                      height: 80,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Fetching your location...",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "Please ensure location services are enabled",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: Colors.black54),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
+  // -------------------------------------------------------------------
+  // GO TO LOGIN SCREEN
+  // -------------------------------------------------------------------
+  void _goToLogin() {
+    Get.offAll(() => const Loginscreen());
   }
 
+  // -------------------------------------------------------------------
+  // UI
+  // -------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [mainColor, secondaryColor],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Center(
-          child: _isLoading
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                    SizedBox(height: 20),
-                    Text("Authenticating...",
-                        style: TextStyle(color: Colors.white, fontSize: 18)),
-                  ],
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.lock_outline_rounded,
-                        size: 80, color: Colors.white),
-                    const SizedBox(height: 20),
-                    const Text("Secure Access",
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white)),
-                    const SizedBox(height: 10),
-                    const Text("Authenticate to continue",
-                        style: TextStyle(fontSize: 16, color: Colors.white70)),
-                    const SizedBox(height: 30),
-                    ElevatedButton.icon(
-                      onPressed: _isLoading ? null : _authenticate,
-                      icon: const Icon(Icons.fingerprint),
-                      label: const Text("Authenticate"),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 14),
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.teal,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+      backgroundColor: mainColor,
+      body: Center(
+        child: _loading
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  SpinKitFadingCircle(
+                    color: Colors.white,
+                    size: 40.0,
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    "Authenticating...",
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.fingerprint, size: 100, color: Colors.white),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Biometric Authentication Required",
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: _authenticateBiometric,
+                    icon: const Icon(Icons.lock_open),
+                    label: const Text("Authenticate"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: mainColor,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
                       ),
                     ),
-                  ],
-                ),
-        ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextButton(
+                    onPressed: _goToLogin,
+                    child: const Text(
+                      "Login with OTP",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
+                ],
+              ),
       ),
     );
   }

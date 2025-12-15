@@ -225,7 +225,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                             children: [
                               _mainCard(
                                 "Procedures",
-                                "assets/treat.jpg",
+                                "assets/treat.png",
                                 () {
                                   consultationcontroller
                                       .setConsultation(_consultations.first);
@@ -475,19 +475,35 @@ class ConsultationsTypeState extends State<ConsultationsType> {
             const SizedBox(height: 5),
             // Username Text
             SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5, // max width
-              child: Text(
-                capitalizeFirstLetter(fullName ?? widget.mobileNumber),
-
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-                maxLines: 2, // limit to 2 lines
-                overflow:
-                    TextOverflow.ellipsis, // add ellipsis if text too long
-              ),
-            ),
+              width: MediaQuery.of(context).size.width * 0.5,
+              child: fullName == null
+                  ? Row(
+                      children: [
+                        SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          "Loading...",
+                          style: TextStyle(color: Colors.white, fontSize: 14),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      capitalizeFirstLetter(fullName!),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+            )
           ],
         ),
         const Spacer(),

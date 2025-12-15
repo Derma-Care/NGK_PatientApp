@@ -258,7 +258,6 @@
 //   }
 // }
 
-import 'dart:async';
 import 'package:cutomer_app/SigninSignUp/BiometricAuthScreen.dart';
 import 'package:cutomer_app/SigninSignUp/LoginScreen.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
@@ -287,59 +286,57 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2), // faster
+      duration: const Duration(seconds: 2),
     );
 
-    // Fade out
     _opacityAnimation = Tween<double>(begin: 1, end: 0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
-    // Move up (y-axis) more
     _moveUpAnimation = Tween<double>(begin: 0, end: -200).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
-    // Wait 2 seconds before starting the animation
-    Future.delayed(const Duration(seconds: 2), () {
-      _controller.forward();
-    });
+    Future.delayed(const Duration(seconds: 2), () => _controller.forward());
 
     _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _navigateNext();
-      }
+      if (status == AnimationStatus.completed) _navigateNext();
     });
   }
 
   Future<void> _navigateNext() async {
     final prefs = await SharedPreferences.getInstance();
-    final isFirstLoginDone = prefs.getBool('isFirstLoginDone') ?? false;
+    final bool isFirstLoginDone = prefs.getBool('isFirstLoginDone') ?? false;
 
-    bool canCheckBiometrics = false;
-    bool isDeviceSupported = false;
     bool biometricAvailable = false;
 
     try {
-      canCheckBiometrics = await auth.canCheckBiometrics;
-      isDeviceSupported = await auth.isDeviceSupported();
-      if (canCheckBiometrics && isDeviceSupported) {
-        final availableBiometrics = await auth.getAvailableBiometrics();
-        biometricAvailable = availableBiometrics.isNotEmpty;
+      final canCheck = await auth.canCheckBiometrics;
+      final supported = await auth.isDeviceSupported();
+
+      if (canCheck && supported) {
+        final biometrics = await auth.getAvailableBiometrics();
+        biometricAvailable = biometrics.isNotEmpty;
       }
     } catch (e) {
-      print("Biometric check failed: $e");
+      print("Biometric check error: $e");
     }
 
     if (!mounted) return;
 
-    if (isFirstLoginDone) {
-      Get.offAll(() => Loginscreen());
-    } else if (biometricAvailable) {
-      Get.offAll(() => BiometricAuthScreen());
-    } else {
-      Get.offAll(() => Loginscreen());
-    }
+    // ---------------- Navigation Logic ---------------- //
+
+    
+      // First time user → Show Biometric permission screen (if available)
+      if (biometricAvailable) {
+        Get.offAll(() => BiometricAuthScreen());
+      } else {
+        Get.offAll(() => const Loginscreen());
+      }
+      return;
+    
+
+ 
   }
 
   @override
@@ -348,6 +345,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
+  // ---------------------- UI ---------------------- //
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -366,61 +364,47 @@ class _SplashScreenState extends State<SplashScreen>
           },
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 🌟 3D Image
+              // ---------- 3D IMAGE ----------
               Stack(
                 children: [
-                  // Bottom shadow (depth)
+                  // Shadow Layer
                   Transform.translate(
-                    offset: const Offset(2, 2),
-                    child: ColorFiltered(
-                      colorFilter: ColorFilter.mode(
-                        Colors.black.withOpacity(0.2),
-                        BlendMode.srcATop,
-                      ),
-                      child: Image.asset(
-                        'assets/ic_launcher.png',
-                        height: 150,
-                      ),
+                    offset: const Offset(3, 3),
+                    child: Image.asset(
+                      'assets/ic_launcher.png',
+                      height: 150,
+                      color: Colors.black.withOpacity(0.25),
+                      colorBlendMode: BlendMode.srcATop,
                     ),
                   ),
-
-                  // Top highlight (emboss)
+                  // Highlight Layer
                   Transform.translate(
-                    offset: const Offset(-0, -0),
-                    child: ColorFiltered(
-                      colorFilter: ColorFilter.mode(
-                        Colors.white.withOpacity(0.7),
-                        BlendMode.srcATop,
-                      ),
-                      child: Image.asset(
-                        'assets/ic_launcher.png',
-                        height: 150,
-                      ),
+                    offset: const Offset(-2, -2),
+                    child: Image.asset(
+                      'assets/ic_launcher.png',
+                      height: 150,
+                      color: Colors.white.withOpacity(0.7),
+                      colorBlendMode: BlendMode.srcATop,
                     ),
                   ),
-
                   // Main Image
-                  Image.asset(
-                    'assets/ic_launcher.png',
-                    height: 150,
-                  ),
+                  Image.asset('assets/ic_launcher.png', height: 150),
                 ],
               ),
 
               const SizedBox(height: 20),
 
-              // 🌟 3D Text
+              // ---------- 3D TEXT ----------
               Stack(
                 children: [
-                  // Bottom shadow (depth)
+                  // Depth Shadow
                   Text(
                     "Neha's GlowKart",
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
-                      color: Colors.black.withOpacity(0.35),
+                      color: Colors.black.withOpacity(0.4),
                       shadows: [
                         Shadow(
                           offset: const Offset(3, 3),
@@ -430,14 +414,13 @@ class _SplashScreenState extends State<SplashScreen>
                       ],
                     ),
                   ),
-
-                  // Top highlight (emboss)
+                  // Highlight Layer
                   Text(
                     "Neha's GlowKart",
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withOpacity(0.8),
                       shadows: [
                         Shadow(
                           offset: const Offset(-2, -2),
@@ -447,8 +430,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ],
                     ),
                   ),
-
-                  // Main text
+                  // Main Text
                   Text(
                     "Neha's GlowKart",
                     style: TextStyle(

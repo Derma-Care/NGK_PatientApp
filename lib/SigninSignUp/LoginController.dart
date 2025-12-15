@@ -97,7 +97,7 @@ class SiginSignUpController extends GetxController {
   }
 
   void submitForm(BuildContext context) async {
-    final fullname = "000101_CR_00005";
+    final fullname = "Prashnath";
     final mobileNumber = mobileController.text.trim();
 
     if (formKey.currentState!.validate() && agreeToTerms) {
@@ -108,16 +108,6 @@ class SiginSignUpController extends GetxController {
 
       try {
         String? token = await FirebaseMessaging.instance.getToken();
-
-        final id = await FirebaseInstallations.instance.getId();
-        final deviceid = await FirebaseInstallations.instance.getToken();
-        print('Installation ID: $id');
-        // FCM Token (used for sending push notifications)
-        final fcmToken = await FirebaseMessaging.instance.getToken();
-
-        print('FCM Token1: $fcmToken');
-        print("FCM Token: $token");
-        print("FCM deviceid: $deviceid");
 
         // Optional: Listen for token refresh
         FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
@@ -132,38 +122,24 @@ class SiginSignUpController extends GetxController {
 
           final prefs = await SharedPreferences.getInstance();
 
-          await prefs.setString('username', fullname);
           await prefs.setString('mobileNumber', mobileNumber);
           await prefs.setString('fcm', token ?? "");
 
-          print("funmnmndhjshdhsa $token");
-          final isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
-          final isFirstTimeAuthenticated =
-              prefs.getBool('isFirstLoginDone') ?? true;
-
-          print("isFirstTimeAuthenticated ${isFirstTimeAuthenticated}");
-
           // ✅ User is registered
-          if (isFirstTimeAuthenticated) {
-            ScaffoldMessageSnackbar.show(
-              context: context,
-              message: "OTP has been sent successfully to $mobileNumber",
-              type: SnackbarType.success,
-            );
-            // showSnackbar("Success",
-            //     "OTP has been sent successfully to $mobileNumber", "success");
 
-            Get.offAll(() => OTPLoginScreen(
-                  mobileNumber: mobileNumber,
-                  fullname: fullname,
-                  deviceId: token,
-                ));
-          } else {
-            Get.to(() => EnableBiometricScreen(
-                  mobileNumber: mobileNumber,
-                  fullname: fullname,
-                ));
-          }
+          ScaffoldMessageSnackbar.show(
+            context: context,
+            message: "OTP has been sent successfully to $mobileNumber",
+            type: SnackbarType.success,
+          );
+          // showSnackbar("Success",
+          //     "OTP has been sent successfully to $mobileNumber", "success");
+
+          Get.offAll(() => OTPLoginScreen(
+                mobileNumber: mobileNumber,
+               
+                deviceId: token,
+              ));
         }
       } catch (e) {
         print("Error during login: $e");
@@ -231,6 +207,5 @@ class SiginSignUpController extends GetxController {
       },
     );
   }
-
-  /// ✅ Request Location Permission & Get Current Location
+ 
 }

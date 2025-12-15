@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
+import 'package:cutomer_app/NGK/Service/customer_service.dart';
 import 'package:cutomer_app/Registration/RegisterScreen.dart';
 import 'package:cutomer_app/SigninSignUp/BiometricPermissionScreen.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
@@ -21,13 +22,12 @@ import '../APIs/BaseUrl.dart'; // where your `registerUrl` is defined
 
 class OTPLoginScreen extends StatefulWidget {
   final String mobileNumber;
-  final String? fullname;
+
   final String? deviceId;
 
   const OTPLoginScreen({
     super.key,
     required this.mobileNumber,
-    this.fullname,
     this.deviceId,
   });
 
@@ -128,6 +128,7 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
     setState(() => isLoading = true);
 
     try {
+      // ------------------- VERIFY OTP -------------------
       final response = await http.post(
         Uri.parse('$registerUrl/verifyOtp'),
         headers: {'Content-Type': 'application/json'},
@@ -137,96 +138,63 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
         }),
       );
 
-      print("otps: ${widget.mobileNumber}, ${otp}");
+      final data = json.decode(response.body);
 
-      final responseData = json.decode(response.body);
-      print("otps: ${responseData}");
-
-      if (response.statusCode == 200 && responseData['success'] == true) {
-        // Now check if user exists in your database
-        final checkUserResponse = await http.get(
-          Uri.parse('$registerUrl/getBasicDetails/${widget.mobileNumber}'),
-        );
-        final prefs = await SharedPreferences.getInstance();
-        final isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
-        await prefs.setBool('isFirstLoginDone', true);
-
-        final token = prefs.getString('fcm');
-        if (checkUserResponse.statusCode == 200) {
-          final data = json.decode(checkUserResponse.body);
-          if (data['success'] == true && data['data'] != null) {
-            final isFirstTimeAuthenticated =
-                prefs.getBool('isFirstLoginDone') ?? true;
-
-            if (isAuthenticated && isFirstTimeAuthenticated) {
-              ScaffoldMessageSnackbar.show(
-                context: context,
-                message:
-                    "OTP has been sent successfully to ${widget.mobileNumber}",
-                type: SnackbarType.success,
-              );
-              // showSnackbar(
-              //     "Success",
-              //     "OTP has been sent successfully to ${widget.mobileNumber}",
-              //     "success");
-
-              Get.offAll(() => BottomNavController(
-                    mobileNumber: widget.mobileNumber,
-                    // username: widget.fullname ?? '',
-                    index: 0,
-                  ));
-            } else {
-              Get.to(() => EnableBiometricScreen(
-                  mobileNumber: widget.mobileNumber,
-                  fullname: widget.fullname ?? '',
-                  deviceId: token));
-            }
-          } else {
-            Get.offAll(() => BottomNavController(
-                  mobileNumber: widget.mobileNumber,
-                  // username: widget.fullname ?? '',
-                  index: 0,
-                ));
-          }
-        } else {
-          Get.offAll(() => BottomNavController(
-                mobileNumber: widget.mobileNumber,
-                // username: widget.fullname ?? '',
-                index: 0,
-              ));
-        }
+      if (response.statusCode != 200 || data['success'] != true) {
         ScaffoldMessageSnackbar.show(
           context: context,
-          message: "Login successful",
-          type: SnackbarType.success,
-        );
-
-        // showSnackbar("Success", "Login successful", "success");
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text("Login successful")),
-        // );
-      } else {
-        ScaffoldMessageSnackbar.show(
-          context: context,
-          message: "${responseData['message'] ?? 'Invalid OTP'}",
+          message: data['message'] ?? "Invalid OTP",
           type: SnackbarType.error,
         );
-        // showSnackbar(
-        //     "Error", "${responseData['message'] ?? 'Invalid OTP'}", "error");
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text(responseData['message'] ?? 'Invalid OTP')),
-        // );
+        return;
       }
+
+      // ------------------- OTP SUCCESS -------------------
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isFirstLoginDone', true);
+
+      final bool biometricEnabled = prefs.getBool('isAuthenticated') ?? false;
+
+      // ------------------- CHECK CUSTOMER EXIST -------------------
+      final customer = await CustomerService.getCustomer(widget.mobileNumber);
+
+      final token = prefs.getString('fcm');
+
+      // If customer exists
+      if (customer != null) {
+        if (biometricEnabled) {
+          // USER ALREADY ENABLED BIOMETRIC → DIRECT LOGIN
+          Get.offAll(() => BottomNavController(
+                mobileNumber: widget.mobileNumber,
+                index: 0,
+              ));
+        } else {
+          // ASK USER TO ENABLE BIOMETRIC
+          Get.to(() => EnableBiometricScreen(
+                mobileNumber: widget.mobileNumber,
+                deviceId: token,
+              ));
+        }
+      } else {
+        // New user → Go to home directly OR registration
+        Get.offAll(() => BottomNavController(
+              mobileNumber: widget.mobileNumber,
+              index: 0,
+            ));
+      }
+
+      // Success message
+      ScaffoldMessageSnackbar.show(
+        context: context,
+        message: "Login successful",
+        type: SnackbarType.success,
+      );
     } catch (e) {
       ScaffoldMessageSnackbar.show(
         context: context,
         message: "Something went wrong: $e",
         type: SnackbarType.error,
       );
-      // showSnackbar("Error", "Something went wrong: $e", "error");
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text("Something went wrong: $e")),
-      // );
     } finally {
       setState(() => isLoading = false);
     }
