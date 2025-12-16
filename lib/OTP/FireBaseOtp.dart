@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
 import 'package:cutomer_app/NGK/Service/customer_service.dart';
-import 'package:cutomer_app/Registration/RegisterScreen.dart';
+ 
 import 'package:cutomer_app/SigninSignUp/BiometricPermissionScreen.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 import 'package:cutomer_app/Utils/ShowSnackBar%20copy.dart';
@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Utils/Constant.dart';
 import '../Utils/CopyRigths.dart';
-import '../ConfirmBooking/Consultations.dart';
+
 import '../SigninSignUp/LoginScreen.dart';
 import '../Utils/Header.dart'; // Your CommonHeader widget
 import '../APIs/BaseUrl.dart'; // where your `registerUrl` is defined
@@ -130,7 +130,7 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
     try {
       // ------------------- VERIFY OTP -------------------
       final response = await http.post(
-        Uri.parse('$registerUrl/verifyOtp'),
+        Uri.parse('http://3.6.119.57:9090/api/customer/verifyOtp'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           "mobileNumber": widget.mobileNumber,

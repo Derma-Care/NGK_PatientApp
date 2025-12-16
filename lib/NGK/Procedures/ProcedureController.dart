@@ -38,14 +38,15 @@ class Procedurecontroller {
   ValueNotifier<bool> loading = ValueNotifier(false);
   ValueNotifier<List<ProcedureListmodel>> serviceList = ValueNotifier([]);
   ValueNotifier<List<Clinic>> clinicList = ValueNotifier([]);
-  final String baseUrl = "${clinicUrl}/subService/getAllSubServies";
+  final String baseUrl =
+      "http://3.6.119.57:9090/clinic-admin/getSubServiceByHospitalId/0001";
 
   Future<void> fetchSubServices() async {
     try {
       loading.value = true;
 
       final response = await http.get(Uri.parse(baseUrl));
-
+      print("responseresponseresponse ${response.body}");
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         final List rawList = jsonData["data"];

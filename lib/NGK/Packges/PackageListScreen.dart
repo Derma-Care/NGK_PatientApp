@@ -54,7 +54,7 @@ class _PackageListScreenState extends State<PackageListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: widget.hideHeader ? null : CommonHeader(title: "Clinic Packages"),
+      appBar: widget.hideHeader ? null : CommonHeader(title: "Packages"),
       body: Column(
         children: [
           SizedBox(height: 10),

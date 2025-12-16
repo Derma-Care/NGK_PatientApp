@@ -1,16 +1,11 @@
 import 'dart:convert';
 import 'package:cutomer_app/APIs/BaseUrl.dart';
-import 'package:cutomer_app/Doctors/ListOfDoctors/DoctorController.dart';
+ 
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'RatingModal.dart'; // Your model
 
-import 'dart:convert';
-import 'package:cutomer_app/APIs/BaseUrl.dart';
-import 'package:cutomer_app/Doctors/ListOfDoctors/DoctorController.dart';
-import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'RatingModal.dart';
+
 
 /// ✅ Safely fetches ratings for a given doctor.
 /// If no ratings exist, returns an empty [RatingSummary] with 0 ratings (no crash).
@@ -19,7 +14,7 @@ Future<RatingSummary> fetchAndSetRatingSummary(
   final url =
       Uri.parse('$wifiUrl/api/customer/getAverageRatingByDoctorId/$doctorId');
 
-  final doctorController = Get.find<DoctorController>();
+  
 
   print("🔎 Fetching ratings for doctor $doctorId from: $url");
 
@@ -51,10 +46,7 @@ Future<RatingSummary> fetchAndSetRatingSummary(
         print(
             "✅ Ratings fetched for doctor: ${ratingSummary.doctorId}, Rating: ${ratingSummary.overallDoctorRating}, Comments: ${ratingSummary.comments.length}");
 
-        doctorController.doctorRatings[doctorId] =
-            ratingSummary.overallDoctorRating;
-        doctorController.doctorCommentCounts[doctorId] =
-            ratingSummary.comments.length;
+
 
         return ratingSummary;
       } else {

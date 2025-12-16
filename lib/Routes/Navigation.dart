@@ -7,7 +7,7 @@ import 'package:cutomer_app/UserManuval/AppointmentManual.dart';
 import 'package:flutter/material.dart';
 
 import '../Help/HelpDesk.dart';
-import '../Registration/RegisterScreen.dart';
+
 
 var onGenerateRoute = (RouteSettings settings) {
   print('my routs: ${settings.name}');
@@ -31,17 +31,7 @@ var onGenerateRoute = (RouteSettings settings) {
     case "/gethelp":
       return MaterialPageRoute(builder: (builder) => HelpDeskScreen());
 
-    case "/registerScreen":
-      final args = settings.arguments as List; // Expecting a List of arguments
-      final fullName = args[0] as String; // Extract username
-      final mobileNumber = args[1] as String; // Extract mobile number
-
-      return MaterialPageRoute(
-        builder: (_) => RegisterScreen(
-          fullName: fullName,
-          mobileNumber: mobileNumber, // Pass mobile number
-        ),
-      ); // Pass the fullName here
+  
 
     default:
   }

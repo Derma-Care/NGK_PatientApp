@@ -26,7 +26,7 @@ class ProcedureListmodel {
   final double discountedCost;
   final double finalCost;
 
-  final String consentFormType;
+  final String? consentFormType;
 
   ProcedureListmodel({
     required this.hospitalId,
@@ -53,7 +53,7 @@ class ProcedureListmodel {
     required this.platformFee,
     required this.discountedCost,
     required this.finalCost,
-    required this.consentFormType,
+      this.consentFormType,
   });
 
   factory ProcedureListmodel.fromJson(Map<String, dynamic> json) {

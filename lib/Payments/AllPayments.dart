@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:cutomer_app/Booings/FollowUpModal.dart';
+ 
 import 'package:cutomer_app/BottomNavigation/Appoinments/PostBooingModel.dart';
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
-import 'package:cutomer_app/Doctors/ListOfDoctors/HospitalAndDoctorModel.dart';
-import 'package:cutomer_app/Doctors/Schedules/ScheduleController.dart';
+ 
+ 
 import 'package:cutomer_app/Loading/FullScreeenLoader.dart';
 import 'package:cutomer_app/Utils/Header.dart';
 import 'package:cutomer_app/Utils/ShowSnackBar%20copy.dart';
@@ -15,9 +15,9 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import '../Booings/BooingService.dart';
+
 import '../PatientsDetails/PatientModel.dart';
-import '../Screens/BookingSuccess.dart';
+
 import '../Utils/ScaffoldMessageSnacber.dart';
 
 class RazorpaySubscription extends StatefulWidget {
@@ -53,7 +53,7 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
   Map<String, dynamic> options = {};
   bool _isLoading = true; // To manage loading state
   late String? paymentId;
-  final scheduleController = Get.find<ScheduleController>();
+ 
   @override
   void initState() {
     super.initState();
@@ -319,7 +319,7 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
 
 // class PhonepePg {
 //   final VoidCallback? onPaymentInitiated;
-//   final HospitalDoctorModel serviceDetails;
+ 
 //   final String amount;
 //   final BuildContext context;
 //   final Patientmodel patient;

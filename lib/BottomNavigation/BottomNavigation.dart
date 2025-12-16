@@ -1,28 +1,22 @@
 import 'package:cutomer_app/BottomNavigation/Profile/Profile.dart';
+import 'package:cutomer_app/ConfirmBooking/Consultations.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../ConfirmBooking/ConsultationServices.dart';
-import '../ConfirmBooking/Consultations.dart';
-import '../Dashboard/Dashboard.dart';
-import '../Doctors/ListOfDoctors/DoctorController.dart';
+
 import 'Appoinments/Appoinments.dart';
-import 'Appoinments/AppointmentController.dart';
+
 import 'Profile/Profiles.dart';
-import 'OnlineCounsultation/OnlineCounsultation.dart';
 
 class BottomNavController extends StatefulWidget {
   final String mobileNumber;
 
   final int index;
 
-
   const BottomNavController({
     Key? key,
     required this.mobileNumber,
-   
     required this.index,
-
   }) : super(key: key);
 
   @override
@@ -31,9 +25,6 @@ class BottomNavController extends StatefulWidget {
 
 class _BottomNavControllerState extends State<BottomNavController> {
   late int _selectedIndex;
-  final doctorController = Get.find<DoctorController>();
-
-  final appointmentcontroller = Get.find<AppointmentController>();
 
   late List<Widget> _pages;
 
@@ -49,8 +40,6 @@ class _BottomNavControllerState extends State<BottomNavController> {
     _pages = [
       ConsultationsType(
         mobileNumber: widget.mobileNumber,
-      
-        
       ),
       BookingListScreen(),
       CustomerProfilePage(
@@ -91,36 +80,7 @@ class _BottomNavControllerState extends State<BottomNavController> {
               label: 'Services',
             ),
             BottomNavigationBarItem(
-              icon: Obx(() => Stack(
-                    children: [
-                      const Icon(Icons.calendar_month),
-                      if (appointmentcontroller.upcomingCountRx.value > 0)
-                        Positioned(
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            constraints: const BoxConstraints(
-                              minWidth: 16,
-                              minHeight: 16,
-                            ),
-                            child: Text(
-                              appointmentcontroller.upcomingCountRx.value > 10
-                                  ? '10+'
-                                  : '${appointmentcontroller.upcomingCountRx.value}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                    ],
-                  )),
+              icon: const Icon(Icons.calendar_today_outlined),
               label: 'Appointment',
             ),
             BottomNavigationBarItem(

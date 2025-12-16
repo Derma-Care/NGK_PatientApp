@@ -1,6 +1,6 @@
-import 'package:cutomer_app/Clinic/AboutClinicController.dart';
-import 'package:cutomer_app/Dashboard/VisitController.dart';
-import 'package:cutomer_app/Doctors/Schedules/ConsentForm.dart';
+ 
+
+ 
 import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Packges/PackageController.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureController.dart';
@@ -9,7 +9,7 @@ import 'package:cutomer_app/Notification/Notifications.dart';
 import 'package:cutomer_app/PushNotification/PushNotification.dart';
 import 'package:cutomer_app/Routes/Navigation.dart';
 import 'package:cutomer_app/Screens/splashScreen.dart';
-import 'package:cutomer_app/SubserviceAndHospital/HospitalCardScreen%20.dart';
+
 import 'package:cutomer_app/TreatmentAndServices/SubserviceController.dart';
 import 'package:cutomer_app/Widget/ControllerInitializer.dart';
 import 'package:cutomer_app/Widget/TimerController.dart';
@@ -21,19 +21,19 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'APIs/FetchServices.dart';
-import 'BottomNavigation/Appoinments/AppointmentController.dart';
-import 'Consultations/SymptomsController.dart';
+
+ 
 import 'Controller/CustomerController.dart';
 import 'Dashboard/DashBoardController.dart';
-import 'Doctors/ListOfDoctors/DoctorController.dart';
-import 'Doctors/Schedules/ScheduleController.dart';
+ 
+ 
 import 'NetworkCheck/NetworkService.dart';
-import 'ConfirmBooking/ConsultationController.dart';
+ 
 import 'SigninSignUp/BiometricAuthScreen.dart';
 import 'SigninSignUp/LoginScreen.dart';
 import 'TreatmentAndServices/ServiceSelectionController.dart';
 import 'Utils/Constant.dart';
-import 'VideoCalling/CallController.dart';
+ 
 
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -86,20 +86,20 @@ Future<void> main() async {
   // ✅ Your service/controller initialization
   NetworkService().initialize();
 
-  Get.put(DoctorController());
+ 
   Get.put(Dashboardcontroller());
   Get.put(Serviceselectioncontroller());
-  Get.put(Consultationcontroller());
-  Get.put(ScheduleController());
-  Get.put(AppointmentController());
+   
+  
+ 
   Get.put(NotificationController());
   Get.put(ServiceFetcher());
-  Get.put(CallController());
-  Get.put(SymptomsController());
-  Get.put(VisitController());
+ 
+ 
+ 
   Get.put(SubServiceController());
   Get.put(SelectedServicesController());
-  Get.put(ClinicController());
+ 
   Get.put(PackageController());
   Get.put(Procedurecontroller());
   Get.put(CustomerGetController(), permanent: true);

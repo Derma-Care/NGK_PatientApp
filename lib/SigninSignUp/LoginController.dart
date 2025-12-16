@@ -1,5 +1,5 @@
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
-import 'package:cutomer_app/Clinic/AboutClinicController.dart';
+ 
 import 'package:cutomer_app/OTP/FireBaseOtp.dart';
 
 import 'package:cutomer_app/SigninSignUp/BiometricPermissionScreen.dart';
@@ -24,7 +24,7 @@ class SiginSignUpController extends GetxController {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController mobileController = TextEditingController();
   final LoginApiService _loginapiService = LoginApiService();
-  final clinicController = Get.find<ClinicController>();
+ 
 
   bool agreeToTerms = true; // Initialize to false to require agreement
   String? phoneNumber;

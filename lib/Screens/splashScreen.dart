@@ -378,69 +378,69 @@ class _SplashScreenState extends State<SplashScreen>
                       colorBlendMode: BlendMode.srcATop,
                     ),
                   ),
-                  // Highlight Layer
-                  Transform.translate(
-                    offset: const Offset(-2, -2),
-                    child: Image.asset(
-                      'assets/ic_launcher.png',
-                      height: 150,
-                      color: Colors.white.withOpacity(0.7),
-                      colorBlendMode: BlendMode.srcATop,
-                    ),
-                  ),
-                  // Main Image
-                  Image.asset('assets/ic_launcher.png', height: 150),
+                  // // Highlight Layer
+                  // Transform.translate(
+                  //   offset: const Offset(-2, -2),
+                  //   child: Image.asset(
+                  //     'assets/ic_launcher.png',
+                  //     height: 150,
+                  //     color: Colors.white.withOpacity(0.7),
+                  //     colorBlendMode: BlendMode.srcATop,
+                  //   ),
+                  // ),
+                  // // Main Image
+                  // Image.asset('assets/ic_launcher.png', height: 150),
                 ],
               ),
 
               const SizedBox(height: 20),
 
               // ---------- 3D TEXT ----------
-              Stack(
-                children: [
-                  // Depth Shadow
-                  Text(
-                    "Neha's GlowKart",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.black.withOpacity(0.4),
-                      shadows: [
-                        Shadow(
-                          offset: const Offset(3, 3),
-                          blurRadius: 8,
-                          color: Colors.black.withOpacity(0.4),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Highlight Layer
-                  Text(
-                    "Neha's GlowKart",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white.withOpacity(0.8),
-                      shadows: [
-                        Shadow(
-                          offset: const Offset(-2, -2),
-                          blurRadius: 6,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Main Text
-                  Text(
-                    "Neha's GlowKart",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: mainColor,
-                    ),
-                  ),
-                ],
-              ),
+              // Stack(
+              //   children: [
+              //     // Depth Shadow
+              //     Text(
+              //       "Neha's GlowKart",
+              //       style: TextStyle(
+              //         fontSize: 32,
+              //         fontWeight: FontWeight.w900,
+              //         color: Colors.black.withOpacity(0.4),
+              //         shadows: [
+              //           Shadow(
+              //             offset: const Offset(3, 3),
+              //             blurRadius: 8,
+              //             color: Colors.black.withOpacity(0.4),
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //     // Highlight Layer
+              //     Text(
+              //       "Neha's GlowKart",
+              //       style: TextStyle(
+              //         fontSize: 32,
+              //         fontWeight: FontWeight.w900,
+              //         color: Colors.white.withOpacity(0.8),
+              //         shadows: [
+              //           Shadow(
+              //             offset: const Offset(-2, -2),
+              //             blurRadius: 6,
+              //             color: Colors.white.withOpacity(0.9),
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //     // Main Text
+              //     Text(
+              //       "Neha's GlowKart",
+              //       style: TextStyle(
+              //         fontSize: 32,
+              //         fontWeight: FontWeight.w900,
+              //         color: mainColor,
+              //       ),
+              //     ),
+              //   ],
+              // ),
             ],
           ),
         ),

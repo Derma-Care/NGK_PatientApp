@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cutomer_app/BottomNavigation/Appoinments/GetAppointmentModel.dart';
-import 'package:cutomer_app/Doctors/ListOfDoctors/HospitalAndDoctorModel.dart';
+ 
 import 'package:cutomer_app/Review/ReviewService.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/Header.dart';
@@ -16,12 +16,12 @@ import '../BottomNavigation/Appoinments/PostBooingModel.dart';
 import '../Utils/ElevatedButtonGredint.dart';
 
 class ReviewScreen extends StatefulWidget {
-  final HospitalDoctorModel? doctorData;
+
   final Getappointmentmodel? doctorBookings;
   final String mobileNUmber;
   const ReviewScreen(
       {super.key,
-      required this.doctorData,
+ 
       required this.doctorBookings,
       required this.mobileNUmber});
 
@@ -91,22 +91,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
-              CircleAvatar(
-                radius: 60,
-                backgroundImage: MemoryImage(
-                  _getDecodedImage(widget.doctorData!.doctor.doctorPicture),
-                ),
-              ),
+              
               SizedBox(height: 10),
-              Text(
-                widget.doctorData!.doctor.doctorName,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+             
               SizedBox(height: 4),
-              Text(
-                widget.doctorData!.doctor.specialization,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
+            
               _buildDoctorRatingSection(),
               SizedBox(height: 16),
             ],

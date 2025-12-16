@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:cutomer_app/Dashboard/ImagePreview.dart';
 import 'package:cutomer_app/Modals/ServiceModal.dart';
-import 'package:cutomer_app/Notification/LocalNotification.dart';
+
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,10 +12,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-import '../APIs/BaseUrl.dart';
-import '../APIs/FetchServices.dart';
+
+
 import '../BottomNavigation/Appoinments/AppointmentService.dart';
-import '../BottomNavigation/Appoinments/BookingModal.dart';
+
 import '../BottomNavigation/Appoinments/GetAppointmentModel.dart';
 import '../Services/CarouselSliderService.dart';
 import '../Services/serviceb.dart';
@@ -49,26 +49,8 @@ class Dashboardcontroller extends GetxController {
   }
 
   File? _imageFile;
-
-  void fetchSubServices(String categoryId) async {
-    print("categoryId ${categoryId}");
-    final result = await ServiceFetcher().fetchServices(categoryId);
-    subServiceList.assignAll(result);
-    print("subServiceList ${subServiceList}");
-  }
-
-  void fetchSubSubServices(String serviceId) async {
-    print("categoryId ${serviceId}");
-    final result = await ServiceFetcher().fetchsubServices(serviceId);
-    subServiceArray.assignAll(result);
-    print("subServiceArray ${subServiceArray}");
-  }
-
-  /// Store user session data
-  void storeUserData(String mobileNumber, String username) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isLoggedIn', true);
-  }
+ 
+  
 
   /// Load saved profile image
   Future<void> loadSavedImage() async {
@@ -79,36 +61,8 @@ class Dashboardcontroller extends GetxController {
     }
   }
 
-  void scheduleAlertsForUpcomingVideoCalls(List appointments) {
-    for (var appt in appointments) {
-      final type = appt.consultationType.toLowerCase();
-      final status = appt.status.toLowerCase();
 
-      if ((type == 'video consultation' || type == 'online consultation') &&
-          !['completed', 'cancelled'].contains(status)) {
-        final callTime =
-            DateTime.parse(appt.scheduledTime); // use your real field
-        if (callTime.difference(DateTime.now()) > Duration(minutes: 6)) {
-          scheduleVideoCallNotification(
-            title: 'Doctor Video Call',
-            body: 'Your video call with the doctor starts in 5 minutes.',
-            videoCallTime: callTime,
-          );
-        }
-      }
-    }
-  }
 
-  void clearAfterAppointment() async {
- 
-
-    selectedService.value = null;
-    selectedSubService.value = null;
-    selectedSubSubService.value = null;
-    subServiceList.clear();
-    subServiceArray.clear();
-  }
- 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
 
@@ -138,7 +92,9 @@ class Dashboardcontroller extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadProfileImage(); // Load the image when the controller is initialized
+    fetchImages();
+    fetchserviceImages();
+    loadProfileImage(); 
   }
 
   /// Show modal to pick image from gallery or camera
@@ -179,12 +135,11 @@ class Dashboardcontroller extends GetxController {
                     );
                   } else {
                     // Handle case where no image is selected
-                       ScaffoldMessageSnackbar.show(
-                  context: context,
-                  message: "No image selected for preview",
-                  type: SnackbarType.warning,
-                );
-                     
+                    ScaffoldMessageSnackbar.show(
+                      context: context,
+                      message: "No image selected for preview",
+                      type: SnackbarType.warning,
+                    );
                   }
                   Navigator.of(context).pop();
                 },
@@ -256,67 +211,11 @@ class Dashboardcontroller extends GetxController {
     }
   }
 
-  /// Fetch services/categories
-  Future<void> fetchUserServices() async {
-    isLoading.value = true;
-    try {
-      print("Starting API call to fetch services...");
-      isLoading.value = true;
-      statusMessage = 'Fetching services...';
 
-      final response = await http
-          .get(Uri.parse(categoryUrl))
-          .timeout(const Duration(seconds: 20), onTimeout: () {
-        isLoading.value = false;
-        statusMessage =
-            'Your network seems to be down! \n Please check your internet connection.';
-        print("Error: Network timeout.");
-        throw TimeoutException('Network timeout');
-      });
-
-      print("response.statusCoderesponse.statusCode ${response}");
-
-      final responseBody = json.decode(response.body);
-      if (response.statusCode == 200) {
-        isLoading.value = false;
-        print("response.statusCoderesponse.statusCode ${response}");
-
-        if (responseBody['data'] != null && responseBody['data'] is List) {
-          final List<dynamic> serviceList = responseBody['data'];
-
-          services.assignAll(serviceList.map((serviceData) {
-            return Serviceb.fromJson({
-              'categoryId': serviceData['categoryId'] ?? '',
-              'categoryName': serviceData['categoryName'] ?? '',
-              'categoryImage': serviceData['categoryImage'] ?? '',
-            });
-          }).toList());
-
-          statusMessage = 'Services fetched successfully!';
-        } else {
-          statusMessage = 'Invalid data format received.';
-        }
-      } else {
-        statusMessage =
-            'Failed to fetch services. Status code: ${response.statusCode}';
-      }
-    } catch (e) {
-      isLoading.value = false;
-      statusMessage = e is TimeoutException
-          ? 'Your network seems to be down! \n Please check your internet connection.'
-          : 'An error occurred while fetching services.';
-      print("Error fetching services: $e");
-    } finally {
-      isLoading.value = false;
-    }
-  }
- 
   Future<void> onRefresh(String mobileNumber) async {
     isLoading.value = true; // start loading
 
     try {
-      // Fetch services
-      await fetchUserServices;
 
       // Fetch bookings or other needed data
       await fetchAppointments(mobileNumber);

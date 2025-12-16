@@ -7,44 +7,32 @@ class CarouselSliderService {
 
   // Method to fetch image URLs from the API and return them
   Future<List<String>> fetchImages() async {
-    final url = Uri.parse(
-        '$serverUrl/admin/categoryAdvertisement/getAll'); // Replace with your API endpoint
-    print("carouselPicture ${url}");
+    final url = Uri.parse('$serverUrl/admin/dashboard-ads');
 
     try {
       final response = await http.get(url);
-      print("carouselPicture ${response.body}");
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print("carouselPicture ${response.statusCode}");
-        print("carouselPicture body ${response}");
-        print("carouselPicture data ${data}");
+        final decoded = json.decode(response.body);
 
-        // Assuming the API returns an array of objects, each containing 'carouselPicture'
-        List<String> imageUrls = [];
+        final List list = decoded['data']; // ✅ correct path
 
-        // Loop through the response data to extract 'carouselPicture' from each object
-        for (var item in data) {
-          if (item.containsKey('mediaUrlOrImage')) {
-            imageUrls.add(item['mediaUrlOrImage']);
-          }
-        }
-
-        return imageUrls;
+        return list
+            .where((item) => item['type'] == 'image') // optional filter
+            .map<String>((item) => item['url'].toString()) // ✅ correct key
+            .toList();
       } else {
-        print("carouselPicture ${response.statusCode}");
         throw Exception('Failed to load images');
       }
     } catch (e) {
       print("Error fetching images: $e");
-      return []; // Return an empty list if an error occurs
+      return [];
     }
   }
 
   Future<List<String>> fetchServiceImages() async {
     final url = Uri.parse(
-        '$serverUrl/admin/ServiceAdvertisement/getAll'); // Replace with your API endpoint
+        '$serverUrl/admin/dashboard-ads'); // Replace with your API endpoint
     try {
       final response = await http.get(url);
       print("carouselPicture ${response.body}");

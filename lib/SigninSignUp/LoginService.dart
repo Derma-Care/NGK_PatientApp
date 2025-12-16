@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:cutomer_app/APIs/BaseUrl.dart';
 import 'package:firebase_app_installations/firebase_app_installations.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -8,9 +9,10 @@ import '../Utils/ShowSnackBar.dart';
 // import 'BaseUrl.dart';
 
 class LoginApiService {
-  final String endpoint = "VerifyUserCredentialsAndGenerateAndSendOtp";
+  final String endpoint =
+      "http://3.6.119.57:9090/api/customer/VerifyUserCredentialsAndGenerateAndSendOtp";
   //  'registerOrLogin'; //VerifyUserCredentialsAndGenerateAndSendOtp
-
+//  final registerUrl ="http://3.6.119.57:9090";
   Future<Map<String, dynamic>> sendUserDataWithFCMToken(
       String fullname, String mobileNumber, String token) async {
     print("response for fullname ${fullname}");
@@ -30,11 +32,11 @@ class LoginApiService {
       };
 
       print("body.toString() : ${body.toString()}");
-      print("loginUrl : $registerUrl/$endpoint");
+      print("loginUrl : $endpoint");
 
       // Send user data and FCM token to backend
       final response = await http.post(
-        Uri.parse('$registerUrl/$endpoint'),
+        Uri.parse('$endpoint'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'userName': fullname,

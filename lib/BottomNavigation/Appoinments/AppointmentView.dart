@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 // import 'package:cutomer_app/Doctors/Schedules/ConsentFormWithSign.dart';
-import 'package:cutomer_app/Reports/DownloadReports.dart';
-import 'package:cutomer_app/Reports/FilePreviewScreen.dart';
+ 
 import 'package:cutomer_app/Utils/SavePdfToDownloads.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 import 'package:cutomer_app/Widget/TreatmentSittingsCard.dart';
@@ -12,10 +11,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../Doctors/ListOfDoctors/HospitalAndDoctorModel.dart';
-import '../../Doctors/Schedules/ConsentForm.dart';
-import '../../Doctors/DoctorDetails/DoctorDetailsScreen.dart';
-import '../../Reports/ReportsDownload.dart';
+ 
 import '../../Utils/Constant.dart';
 
 import '../../Utils/Header.dart';
@@ -23,12 +19,12 @@ import '../../Utils/Header.dart';
 import 'GetAppointmentModel.dart';
 
 class AppointmentPreview extends StatefulWidget {
-  final HospitalDoctorModel doctor;
+ 
   final Getappointmentmodel doctorBookings;
 
   const AppointmentPreview({
     Key? key,
-    required this.doctor,
+
     required this.doctorBookings,
   }) : super(key: key);
 
@@ -42,15 +38,10 @@ class _AppointmentPreviewState extends State<AppointmentPreview>
   Widget build(BuildContext context) {
     super.build(context);
     final patient = widget.doctorBookings;
-    final doctor = widget.doctor;
 
-    String base64String = doctor.doctor.doctorPicture;
-    final regex = RegExp(r'data:image/[^;]+;base64,');
-    base64String = base64String.replaceAll(regex, '');
-    final prefix = 'data:image/jpeg;base64,';
-    if (base64String.startsWith(prefix)) {
-      base64String = base64String.substring(prefix.length);
-    }
+
+
+
 
     Future<bool> requestStoragePermission() async {
       if (Platform.isAndroid) {
@@ -149,23 +140,8 @@ class _AppointmentPreviewState extends State<AppointmentPreview>
                   ),
                 ],
               ),
-              leading: CircleAvatar(
-                radius: 20,
-                backgroundImage: doctor.doctor.doctorPicture.isNotEmpty
-                    ? MemoryImage(base64Decode(base64String))
-                    : const AssetImage('assets/placeholder.png')
-                        as ImageProvider,
-              ),
-              children: [
-                _infoRow("Specialization", doctor.doctor.specialization),
-                _infoRow("Experience", "${doctor.doctor.experience} years"),
-                TextButton(
-                  onPressed: () {
-                    Get.to(DoctorDetailScreen(doctorData: doctor));
-                  },
-                  child: const Text("About Doctor"),
-                ),
-              ],
+       
+             
             ),
 
             const SizedBox(height: 8),
@@ -446,35 +422,7 @@ class _AppointmentPreviewState extends State<AppointmentPreview>
                   ),
                 ],
               ),
-            Column(
-              children: [
-                // Other widgets...
-
-                if (patient.consultationType.toLowerCase() ==
-                        "services & treatments" &&
-                    patient.consentFormPdf == null &&
-                    isSameDate(patient.serviceDate) &&
-                    patient.status.toLowerCase() == "confirmed")
-                  ListTile(
-                    title: const Text("Consent Form"),
-                    trailing: Icon(Icons.picture_as_pdf, color: mainColor),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SkinCareConsentFormScreen(
-                            doctor: doctor,
-                            // patient: null,
-                            bookingId: patient.bookingId,
-                            pID: patient.subServiceId,
-                            doctorBookings: widget.doctorBookings,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-              ],
-            )
+       
           ],
         ),
       ),

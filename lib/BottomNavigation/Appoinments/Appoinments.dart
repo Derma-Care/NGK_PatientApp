@@ -219,17 +219,38 @@ class _BookingListScreenState extends State<BookingListScreen>
 
                 // SHOW BOOK AGAIN ONLY FOR PENDING BOOKINGS
                 if (b.status.toLowerCase() == "completed")
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Get.snackbar("Booking", "Rebooking action here");
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.pink,
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
-                    child: const Text("Book Again",
-                        style: TextStyle(fontSize: 18)),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Get.snackbar("Booking", "Rebooking action here");
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.pink,
+                            minimumSize: const Size(0, 50), // ⬅ IMPORTANT
+                          ),
+                          child: const Text("Book Again",
+                              style: TextStyle(fontSize: 18)),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Get.snackbar("Booking", "Rebooking action here");
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.pink,
+                            minimumSize: const Size(0, 50), // ⬅ IMPORTANT
+                          ),
+                          child: const Text("Rate",
+                              style: TextStyle(fontSize: 18)),
+                        ),
+                      ),
+                    ],
                   ),
 
                 const SizedBox(height: 15),
