@@ -230,7 +230,13 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
           _menuItem(
             icon: Icons.logout,
             title: "Logout",
-            onTap: () {
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+
+              await prefs.remove('mobileNumber');
+              await prefs.remove('isAuthenticated'); // biometric disabled
+              await prefs.remove('isFirstLoginDone');
+
               Get.offAllNamed('/login');
             },
           ),

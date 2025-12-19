@@ -258,7 +258,9 @@
 //   }
 // }
 
+import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
 import 'package:cutomer_app/SigninSignUp/BiometricAuthScreen.dart';
+import 'package:cutomer_app/SigninSignUp/BiometricPermissionScreen.dart';
 import 'package:cutomer_app/SigninSignUp/LoginScreen.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
@@ -306,7 +308,12 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _navigateNext() async {
     final prefs = await SharedPreferences.getInstance();
+
     final bool isFirstLoginDone = prefs.getBool('isFirstLoginDone') ?? false;
+
+    final bool isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
+
+    final String? mobileNumber = prefs.getString('mobileNumber');
 
     bool biometricAvailable = false;
 
@@ -324,19 +331,30 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
-    // ---------------- Navigation Logic ---------------- //
+    // ---------------- FINAL NAVIGATION LOGIC ---------------- //
 
-    
-      // First time user → Show Biometric permission screen (if available)
-      if (biometricAvailable) {
-        Get.offAll(() => BiometricAuthScreen());
-      } else {
-        Get.offAll(() => const Loginscreen());
-      }
+    // 🔴 USER LOGGED OUT → LOGIN SCREEN
+    if (mobileNumber == null) {
+      Get.offAll(() => const Loginscreen());
       return;
-    
+    }
 
- 
+    // 🟡 FIRST LOGIN → ASK BIOMETRIC PERMISSION
+    if (!isFirstLoginDone && biometricAvailable) {
+      Get.offAll(() => EnableBiometricScreen(
+            mobileNumber: mobileNumber,
+          ));
+      return;
+    }
+
+    // 🟢 BIOMETRIC ENABLED → AUTH SCREEN
+    if (isAuthenticated && biometricAvailable) {
+      Get.offAll(() => BiometricAuthScreen());
+      return;
+    }
+
+    // 🔵 BIOMETRIC DISABLED → DIRECT HOME
+    Get.offAll(() => Loginscreen());
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cutomer_app/APIs/FetchServices.dart';
 import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureController.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureModel.dart';
@@ -15,7 +16,9 @@ import 'package:get/get.dart';
 class SubServiceListScreen extends StatefulWidget {
   final bool hideHeader;
   final bool isClinic;
-  SubServiceListScreen({this.hideHeader = false, this.isClinic = false});
+  final ProcedureNameModel? mainProcedures;
+  SubServiceListScreen(
+      {this.hideHeader = false, this.isClinic = false, this.mainProcedures});
   @override
   State<SubServiceListScreen> createState() => _SubServiceListScreenState();
 }
@@ -53,7 +56,9 @@ class _SubServiceListScreenState extends State<SubServiceListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: widget.hideHeader ? null : CommonHeader(title: "Procedures"),
+      appBar: widget.hideHeader
+          ? null
+          : CommonHeader(title: widget.mainProcedures?.procedureName),
       body: Column(
         children: [
           SizedBox(height: 10),

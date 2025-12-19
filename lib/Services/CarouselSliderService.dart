@@ -7,7 +7,7 @@ class CarouselSliderService {
 
   // Method to fetch image URLs from the API and return them
   Future<List<String>> fetchImages() async {
-    final url = Uri.parse('$serverUrl/admin/dashboard-ads');
+    final url = Uri.parse('$serverUrl/api/login/dashboard-ads');
 
     try {
       final response = await http.get(url);

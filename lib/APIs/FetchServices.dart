@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+
 import '../Modals/ServiceModal.dart';
 import 'BaseUrl.dart';
 import 'package:http/http.dart' as http;
@@ -101,46 +102,89 @@ class ServiceFetcher {
 
   // 🛜 Fetch and flatten data
 
-  static Future<List<Map<String, dynamic>>> fetchAllSubServices() async {
-    final url = Uri.parse("${wifiUrl}/admin/getAllSubServices");
-    print("🔄 Fetching: $url");
+  static Future<List<ProcedureNameModel>> fetchAllProcedures() async {
+    final url = Uri.parse("${wifiUrl}/api/customer/procedures");
 
     try {
       final response = await http.get(url);
 
-      print("📦 Response Status: ${response.statusCode}");
-      print("📦 Response Body: ${response.body}");
-
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
-        final List<dynamic> data = decoded['data'] ?? [];
+        final List data = decoded['data'] ?? [];
 
-        // ✅ Flatten nested subServices
-        final flattened = data.expand<Map<String, dynamic>>((category) {
-          final subServices = category['subServices'] ?? [];
-          return subServices.map<Map<String, dynamic>>((sub) => {
-                'categoryId': category['categoryId'],
-                'categoryName': category['categoryName'],
-                'serviceId': sub['serviceId'],
-                'serviceName': sub['serviceName'],
-                'subServiceId': sub['subServiceId'],
-                'subServiceName': sub['subServiceName'],
-              });
-        }).toList();
-
-        print("✅ Loaded ${flattened.length} subservices");
-        for (var item in flattened) {
-          print("➡️ $item");
-        }
-
-        return flattened;
-      } else {
-        print("❌ HTTP Error: ${response.statusCode}");
-        return [];
+        return data
+            .map<ProcedureNameModel>((e) => ProcedureNameModel.fromJson(e))
+            .toList();
       }
     } catch (e) {
-      print("⚠️ Exception: $e");
-      return [];
+      print("Error: $e");
     }
+
+    return [];
+  }
+
+  static Future<List<ProcedureOffer>> fetchAllProceduresOffers() async {
+    final response =
+        await http.get(Uri.parse("$wifiUrl/api/customer/procedures/offers"));
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+      final List data = decoded['data'];
+      print("sadjahdsahjkdk${data}");
+      return data
+          .map<ProcedureOffer>((e) => ProcedureOffer.fromJson(e))
+          .toList();
+    }
+
+    return [];
+  }
+}
+
+class ProcedureNameModel {
+  final String procedureId;
+  final String procedureName;
+
+  ProcedureNameModel({
+    required this.procedureId,
+    required this.procedureName,
+  });
+
+  /// 🔹 From API JSON
+  factory ProcedureNameModel.fromJson(Map<String, dynamic> json) {
+    return ProcedureNameModel(
+      procedureId: json['procedureId']?.toString() ?? '',
+      procedureName: json['procedureName']?.toString() ?? '',
+    );
+  }
+
+  /// 🔹 To JSON (if needed later)
+  Map<String, dynamic> toJson() {
+    return {
+      'procedureId': procedureId,
+      'procedureName': procedureName,
+    };
+  }
+}
+
+class ProcedureOffer {
+  final String procedureId;
+  final String name;
+  final int minOffer;
+  final int maxOffer;
+
+  ProcedureOffer({
+    required this.procedureId,
+    required this.name,
+    required this.minOffer,
+    required this.maxOffer,
+  });
+
+  factory ProcedureOffer.fromJson(Map<String, dynamic> json) {
+    return ProcedureOffer(
+      procedureId: json['procedureId'],
+      name: json['procedureName'],
+      minOffer: json['minOffer'],
+      maxOffer: json['maxOffer'],
+    );
   }
 }

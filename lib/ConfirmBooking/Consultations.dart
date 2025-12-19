@@ -7,6 +7,7 @@ import 'package:cutomer_app/Dashboard/ImagePreview.dart';
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
 import 'package:cutomer_app/NGK/Packges/PackageListScreen.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureListScreen.dart';
+import 'package:cutomer_app/NGK/Procedures/ProcedureScreenName.dart';
 import 'package:cutomer_app/NGK/Screens/ClinicListScreen.dart';
 import 'package:cutomer_app/NGK/Service/customer_service.dart'
     show CustomerService;
@@ -44,8 +45,9 @@ class ConsultationsTypeState extends State<ConsultationsType> {
   final NotificationController notificationController = Get.find();
   final TextEditingController searchController = TextEditingController();
   final subServiceController = Get.put(SubServiceController());
-  List<Map<String, dynamic>> allSubServices = [];
-  List<Map<String, dynamic>> filteredSubServices = [];
+  List<ProcedureNameModel> allProcedures = [];
+  List<ProcedureNameModel> filteredProcedures = [];
+
   Timer? _debounce;
   final FocusNode _focusNode = FocusNode();
 
@@ -56,7 +58,12 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     _loadLocation();
     dashboardcontroller.setMobileNumber(widget.mobileNumber);
     _loadCustomerNameFromPrefs();
-    loadSubServices();
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        hideDropdownOverlay(); // 🔥
+      }
+    });
+    loadProcedures();
     _fetchCustomerName();
   }
 
@@ -64,10 +71,9 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     return CustomerService.getCustomer(widget.mobileNumber);
   }
 
-  Future<void> loadSubServices() async {
+  Future<void> loadProcedures() async {
     setState(() => isLoading = true);
-    allSubServices = await ServiceFetcher.fetchAllSubServices();
-    print("🟢 Subservices loaded: ${allSubServices.length}");
+    allProcedures = await ServiceFetcher.fetchAllProcedures();
     setState(() => isLoading = false);
   }
 
@@ -75,6 +81,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
 
   @override
   void dispose() {
+    hideDropdownOverlay();
     _debounce?.cancel();
     searchController.dispose();
     _focusNode.dispose();
@@ -83,18 +90,14 @@ class ConsultationsTypeState extends State<ConsultationsType> {
 
   void filterSearch(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
+
     _debounce = Timer(const Duration(milliseconds: 300), () {
-      final lowerQuery = query.toLowerCase();
+      final q = query.toLowerCase();
+
       setState(() {
-        filteredSubServices = allSubServices.where((item) {
-          final subName = item['subServiceName']?.toLowerCase() ?? '';
-          final serviceName = item['serviceName']?.toLowerCase() ?? '';
-          final categoryName = item['categoryName']?.toLowerCase() ?? '';
-          return subName.contains(lowerQuery) ||
-              serviceName.contains(lowerQuery) ||
-              categoryName.contains(lowerQuery);
-        }).toList();
-        print("🔍 Filtered ${filteredSubServices.length} results for '$query'");
+        filteredProcedures = allProcedures
+            .where((p) => p.procedureName.toLowerCase().contains(q))
+            .toList();
       });
     });
   }
@@ -198,7 +201,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                       "Procedures",
                       "assets/treat.png",
                       () {
-                        Get.to(SubServiceListScreen());
+                        Get.to(ProcedureGridScreen());
                       },
                     ),
                     _mainCard(
@@ -290,7 +293,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                 icon: const Icon(Icons.clear),
                 onPressed: () {
                   searchController.clear();
-                  filteredSubServices.clear();
+                  filteredProcedures.clear();
                   hideDropdownOverlay();
                   setState(() {});
                 },
@@ -332,7 +335,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
         child: Material(
           elevation: 6,
           borderRadius: BorderRadius.circular(12),
-          child: filteredSubServices.isEmpty
+          child: filteredProcedures.isEmpty
               ? const Padding(
                   padding: EdgeInsets.all(12),
                   child: Text(
@@ -342,33 +345,32 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                 )
               : ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxHeight: min(50.0 * filteredSubServices.length, 250),
+                    maxHeight: min(50.0 * filteredProcedures.length, 250),
                   ),
                   child: ListView.builder(
                     padding: EdgeInsets.zero,
-                    itemCount: filteredSubServices.length,
+                    itemCount: filteredProcedures.length,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
-                      if (index >= filteredSubServices.length)
+                      if (index >= filteredProcedures.length)
                         return const SizedBox.shrink();
-                      final item = filteredSubServices[index];
+                      final ProcedureNameModel item = filteredProcedures[index];
 
                       return ListTile(
                         dense: true,
-                        title: Text(item['subServiceName'] ?? ''),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(bottom: 10.0),
-                          child: Text(
-                            "${item['serviceName']} • ${item['categoryName']}",
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.grey),
-                          ),
+                        title: Text(
+                          item.procedureName,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         onTap: () {
                           hideDropdownOverlay();
                           searchController.clear();
-                          setState(() => filteredSubServices.clear());
-                          // navigateToHospitalCard(item);
+                          setState(() => filteredProcedures.clear());
+
+                          // 🚀 Navigate to next screen with ID & NAME
+                          Get.to(() => SubServiceListScreen(mainProcedures: item,
+                             
+                              ));
                         },
                       );
                     },
@@ -395,8 +397,10 @@ class ConsultationsTypeState extends State<ConsultationsType> {
   }
 
   void hideDropdownOverlay() {
-    overlayEntry?.remove();
-    overlayEntry = null;
+    if (overlayEntry != null) {
+      overlayEntry!.remove();
+      overlayEntry = null;
+    }
   }
 
   PreferredSizeWidget _buildAppBar() {

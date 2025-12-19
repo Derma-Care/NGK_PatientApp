@@ -49,8 +49,10 @@ class _ServicesTabScreenState extends State<ServicesTabScreen>
               children: [
                 SubServiceListScreen(
                   hideHeader: true,
-                  isClinic: widget.isClinic,
+                  isClinic: widget.isClinic, mainProcedures: null,
                 ),
+
+                
                 PackageListScreen(
                   hideHeader: true,
                   isClinic: widget.isClinic,
