@@ -117,7 +117,7 @@ class SiginSignUpController extends GetxController {
         final response = await _loginapiService.sendUserDataWithFCMToken(
             fullname, mobileNumber, token ?? "");
 
-        if (response['status'] == 200) {
+        if (response['statusCode'] == 200) {
           getOTPButton.value = "GET OTP";
 
           final prefs = await SharedPreferences.getInstance();

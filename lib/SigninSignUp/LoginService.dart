@@ -9,8 +9,7 @@ import '../Utils/ShowSnackBar.dart';
 // import 'BaseUrl.dart';
 
 class LoginApiService {
-  final String endpoint =
-      "http://3.6.119.57:9090/api/customer/VerifyUserCredentialsAndGenerateAndSendOtp";
+  final String endpoint =   "${wifiUrl}/api/auth/send-otp";
   //  'registerOrLogin'; //VerifyUserCredentialsAndGenerateAndSendOtp
 //  final registerUrl ="http://3.6.119.57:9090";
   Future<Map<String, dynamic>> sendUserDataWithFCMToken(
@@ -39,9 +38,9 @@ class LoginApiService {
         Uri.parse('$endpoint'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'userName': fullname,
-          'mobileNumber': mobileNumber,
-          'deviceId': token,
+    
+          'mobile': mobileNumber,
+          'deviceToken': token,
         }),
       );
 

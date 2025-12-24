@@ -16,7 +16,7 @@ import 'package:get/get.dart';
 class SubServiceListScreen extends StatefulWidget {
   final bool hideHeader;
   final bool isClinic;
-  final ProcedureNameModel? mainProcedures;
+  final ProcedureOffer? mainProcedures;
   SubServiceListScreen(
       {this.hideHeader = false, this.isClinic = false, this.mainProcedures});
   @override
@@ -58,7 +58,7 @@ class _SubServiceListScreenState extends State<SubServiceListScreen> {
       backgroundColor: Colors.grey[100],
       appBar: widget.hideHeader
           ? null
-          : CommonHeader(title: widget.mainProcedures?.procedureName),
+          : CommonHeader(title: widget.mainProcedures?.name),
       body: Column(
         children: [
           SizedBox(height: 10),

@@ -1,3 +1,4 @@
+import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
 
 class ProcedureFilterBar extends StatelessWidget {
@@ -42,9 +43,11 @@ class ProcedureFilterBar extends StatelessWidget {
             children: [
               Text(
                 "Offer Range: ${offerRange.start.toInt()}% - ${offerRange.end.toInt()}%",
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, color: mainColor),
               ),
               RangeSlider(
+                activeColor: mainColor,
                 values: offerRange,
                 min: 0,
                 max: 100,

@@ -392,7 +392,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: Image.asset(
                       'assets/ic_launcher.png',
                       height: 150,
-                      color: Colors.black.withOpacity(0.25),
+                      
                       colorBlendMode: BlendMode.srcATop,
                     ),
                   ),

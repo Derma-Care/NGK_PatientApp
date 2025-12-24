@@ -1,7 +1,5 @@
- 
-
- 
 import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
+import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Packges/PackageController.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureController.dart';
 import 'package:cutomer_app/Notification/NotificationController.dart';
@@ -22,18 +20,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'APIs/FetchServices.dart';
 
- 
 import 'Controller/CustomerController.dart';
 import 'Dashboard/DashBoardController.dart';
- 
- 
+
 import 'NetworkCheck/NetworkService.dart';
- 
+
 import 'SigninSignUp/BiometricAuthScreen.dart';
 import 'SigninSignUp/LoginScreen.dart';
 import 'TreatmentAndServices/ServiceSelectionController.dart';
 import 'Utils/Constant.dart';
- 
 
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -86,24 +81,19 @@ Future<void> main() async {
   // ✅ Your service/controller initialization
   NetworkService().initialize();
 
- 
   Get.put(Dashboardcontroller());
   Get.put(Serviceselectioncontroller());
-   
-  
- 
+
   Get.put(NotificationController());
   Get.put(ServiceFetcher());
- 
- 
- 
+
   Get.put(SubServiceController());
   Get.put(SelectedServicesController());
- 
+
   Get.put(PackageController());
   Get.put(Procedurecontroller());
   Get.put(CustomerGetController(), permanent: true);
-
+  Get.put(ReferralWalletController(), permanent: true);
   Get.put(TimerController(), permanent: true);
   // ✅ FCM Notification tap handling
   final RemoteMessage? initialMessage =

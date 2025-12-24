@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
 import 'package:cutomer_app/NGK/Service/customer_service.dart';
- 
+
 import 'package:cutomer_app/SigninSignUp/BiometricPermissionScreen.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 import 'package:cutomer_app/Utils/ShowSnackBar%20copy.dart';
@@ -130,16 +130,17 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
     try {
       // ------------------- VERIFY OTP -------------------
       final response = await http.post(
-        Uri.parse('http://3.6.119.57:9090/api/customer/verifyOtp'),
+        Uri.parse('${wifiUrl}/api/auth/verify-otp'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          "mobileNumber": widget.mobileNumber,
+          "mobile": widget.mobileNumber,
           "otp": otp,
+          "deviceToken":widget.deviceId
         }),
       );
 
       final data = json.decode(response.body);
-
+      print("veryfy data : ${data}");
       if (response.statusCode != 200 || data['success'] != true) {
         ScaffoldMessageSnackbar.show(
           context: context,

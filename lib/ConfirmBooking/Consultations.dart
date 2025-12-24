@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:cutomer_app/APIs/FetchServices.dart';
 import 'package:cutomer_app/Dashboard/DashBoardController.dart';
 import 'package:cutomer_app/Dashboard/ImagePreview.dart';
+import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
 import 'package:cutomer_app/NGK/Packges/PackageListScreen.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureListScreen.dart';
@@ -45,9 +46,9 @@ class ConsultationsTypeState extends State<ConsultationsType> {
   final NotificationController notificationController = Get.find();
   final TextEditingController searchController = TextEditingController();
   final subServiceController = Get.put(SubServiceController());
-  List<ProcedureNameModel> allProcedures = [];
-  List<ProcedureNameModel> filteredProcedures = [];
-
+  List<ProcedureOffer> allProcedures = [];
+  List<ProcedureOffer> filteredProcedures = [];
+  final walletController = Get.find<ReferralWalletController>();
   Timer? _debounce;
   final FocusNode _focusNode = FocusNode();
 
@@ -73,7 +74,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
 
   Future<void> loadProcedures() async {
     setState(() => isLoading = true);
-    allProcedures = await ServiceFetcher.fetchAllProcedures();
+    allProcedures = await ServiceFetcher.fetchAllProceduresOffers();
     setState(() => isLoading = false);
   }
 
@@ -96,7 +97,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
 
       setState(() {
         filteredProcedures = allProcedures
-            .where((p) => p.procedureName.toLowerCase().contains(q))
+            .where((p) => p.name.toLowerCase().contains(q))
             .toList();
       });
     });
@@ -354,12 +355,12 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                     itemBuilder: (context, index) {
                       if (index >= filteredProcedures.length)
                         return const SizedBox.shrink();
-                      final ProcedureNameModel item = filteredProcedures[index];
+                      final ProcedureOffer item = filteredProcedures[index];
 
                       return ListTile(
                         dense: true,
                         title: Text(
-                          item.procedureName,
+                          item.name,
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         onTap: () {
@@ -368,8 +369,8 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                           setState(() => filteredProcedures.clear());
 
                           // 🚀 Navigate to next screen with ID & NAME
-                          Get.to(() => SubServiceListScreen(mainProcedures: item,
-                             
+                          Get.to(() => SubServiceListScreen(
+                                mainProcedures: item,
                               ));
                         },
                       );
@@ -516,16 +517,26 @@ class ConsultationsTypeState extends State<ConsultationsType> {
             children: [
               IconButton(
                 icon: const Icon(Icons.wallet, color: Colors.white),
-                onPressed: () {},
+                onPressed: () {
+                  Get.to(() => ReferralWalletPage());
+                },
               ),
-              const Positioned(
+              Positioned(
                 right: 0,
                 top: -2,
-                child: Text('💰 2000',
-                    style: TextStyle(
+                child: Obx(() => Text(
+                      "💰 ${walletController.walletBalance}",
+                      style: const TextStyle(
                         color: Colors.white,
+                        fontWeight: FontWeight.bold,
                         fontSize: 12,
-                        fontWeight: FontWeight.bold)),
+                      ),
+                    )),
+                // child: Text('💰 2000',
+                //     style: TextStyle(
+                //         color: Colors.white,
+                //         fontSize: 12,
+                //         fontWeight: FontWeight.bold)),
               ),
             ],
           ),

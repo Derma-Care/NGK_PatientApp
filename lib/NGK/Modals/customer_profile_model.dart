@@ -2,17 +2,22 @@ class CustomerProfileModel {
   final String customerId;
   final String fullName;
   final String mobile;
-  final String? email;
-  final String? city;
-  final String? dob;
+  final String gender;
+  final String city;
+  final String dob;
   final String? clinicName;
   final String? clinicCityArea;
   final String? dateOfLastVisit;
   final List<String>? serviceType;
-  final String? blood;
+
+  final String? category;
+  final List<String>? concern;
+  final String? skinTone;
+  final String? photo;
+
   final String? registrationCode;
   final String? referBy;
-  final String? aadharNumber;
+  final String aadharNumber;
   final String? prescription;
   final String? spinRewardId;
   final String? spinRewardValue;
@@ -24,22 +29,26 @@ class CustomerProfileModel {
   final bool registrationCompleted;
   final bool spinWheelCompleted;
   final bool userProfileCompleted;
+  final String? referId;
 
   CustomerProfileModel({
     required this.customerId,
     required this.fullName,
     required this.mobile,
-    this.email,
-    this.city,
-    this.dob,
+    required this.gender,
+    required this.city,
+    required this.dob,
     this.clinicName,
     this.clinicCityArea,
     this.dateOfLastVisit,
     this.serviceType,
-    this.blood,
+    this.category,
+    this.concern,
+    this.skinTone,
+    this.photo,
     this.registrationCode,
     this.referBy,
-    this.aadharNumber,
+    required this.aadharNumber,
     this.prescription,
     this.spinRewardId,
     this.spinRewardValue,
@@ -47,6 +56,7 @@ class CustomerProfileModel {
     this.prizePostScreenshot,
     this.followScreenshot,
     this.address,
+    this.referId,
     required this.registrationCodeVerified,
     required this.registrationCompleted,
     required this.spinWheelCompleted,
@@ -58,7 +68,7 @@ class CustomerProfileModel {
       customerId: json["customerId"],
       fullName: json["fullName"],
       mobile: json["mobile"],
-      email: json["email"],
+      gender: json["gender"],
       city: json["city"],
       dob: json["dob"],
       clinicName: json["clinicName"],
@@ -67,7 +77,11 @@ class CustomerProfileModel {
       serviceType: json["serviceType"] != null
           ? List<String>.from(json["serviceType"])
           : null,
-      blood: json["blood"],
+      category: json["category"],
+      skinTone: json["skinTone"],
+      photo: json["photo"],
+      concern:
+          json["concern"] != null ? List<String>.from(json["concern"]) : null,
       registrationCode: json["registrationCode"],
       referBy: json["referBy"],
       aadharNumber: json["aadharNumber"],
@@ -82,6 +96,7 @@ class CustomerProfileModel {
       registrationCompleted: json["registrationCompleted"] ?? false,
       spinWheelCompleted: json["spinWheelCompleted"] ?? false,
       userProfileCompleted: json["userProfileCompleted"] ?? false,
+      referId: json["referId"],
     );
   }
 }

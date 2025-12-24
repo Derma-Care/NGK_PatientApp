@@ -1,3 +1,4 @@
+import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,7 +23,8 @@ void showSnackbar(String title, String message, String type) {
     title,
     message,
     snackPosition: SnackPosition.TOP,
-    backgroundColor: backgroundColor,
+    // backgroundColor: backgroundColor,
+    backgroundColor: mainColor,
     colorText: Colors.white, // Ensure text is visible
     borderRadius: 8,
     margin: const EdgeInsets.all(10),

@@ -1,3 +1,4 @@
+import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
 import 'package:cutomer_app/NGK/Packges/PackageModel.dart';
 import 'package:cutomer_app/Payments/AllPayments.dart';
@@ -5,6 +6,7 @@ import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 import 'package:cutomer_app/main.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class PackageBookingSheet extends StatefulWidget {
   final PaymentModal payment;
@@ -21,7 +23,10 @@ class PackageBookingSheet extends StatefulWidget {
 class _PackageBookingSheetState extends State<PackageBookingSheet> {
   int? selectedIndex;
   bool useCoins = false;
-  double coinValue = 250; // Value of coins
+  final ReferralWalletController walletController =
+      Get.find<ReferralWalletController>();
+  double get coinValue => walletController.walletBalance.toDouble();
+// Value of coins
   List<DateTime> next15days = List.generate(
     15,
     (index) => DateTime.now().add(Duration(days: index)),
@@ -56,7 +61,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                 height: 6,
                 margin: const EdgeInsets.only(bottom: 15),
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -83,7 +88,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                       margin: const EdgeInsets.only(right: 12),
                       decoration: BoxDecoration(
                         color: selectedIndex == i
-                            ? Colors.pink
+                            ? mainColor
                             : Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -152,7 +157,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                           TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                     ),
                     Transform.scale(
-                      scale: 0.60, // 🔥 make switch smaller
+                      scale: 0.60,
                       child: Switch(
                         activeColor: mainColor,
                         value: useCoins,
@@ -165,10 +170,24 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                     ),
                   ],
                 ),
-                const Text(
-                  "₹250",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
+
+                /// ✅ SHOW ONLY IF BALANCE > 0
+                Obx(() {
+                  final balance = walletController.walletBalance;
+
+                  if (balance <= 0) {
+                    return const SizedBox(); // 🔥 hide text
+                  }
+
+                  return Text(
+                    "-₹ $balance",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black, // ⚠️ don't use white unless dark bg
+                    ),
+                  );
+                }),
               ],
             ),
 

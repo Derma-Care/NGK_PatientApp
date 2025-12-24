@@ -1,8 +1,10 @@
 import 'package:cutomer_app/APIs/FetchServices.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureCardName.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureFilterBar.dart';
+import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/Header.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ProcedureGridScreen extends StatefulWidget {
   const ProcedureGridScreen({super.key});
@@ -126,41 +128,56 @@ class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonHeader(title: "Procedures"),
-      body: Column(
-        children: [
-          ProcedureFilterBar(
-            searchController: _searchController,
-            offerRange: _offerRange,
-            onRangeChanged: (value) {
-              setState(() => _offerRange = value);
-            },
-            onClear: _clearFilters,
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: RefreshIndicator(
-              color: Colors.pink, // optional
-              onRefresh: _onRefresh,
-              child: GridView.builder(
-                physics: const AlwaysScrollableScrollPhysics(), // 🔥 important
-                padding: const EdgeInsets.all(12),
-                itemCount: _filteredProcedures.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 5,
-                  mainAxisSpacing: 5,
-                  childAspectRatio: 0.9,
-                ),
-                itemBuilder: (context, index) {
-                  return ProcedureCard(
-                    procedure: _filteredProcedures[index],
-                  );
-                },
+      body: isLoading
+          ? const Center(
+              child: SpinKitFadingCircle(
+                color: mainColor,
+                size: 40,
               ),
-            ),
-          ),
-        ],
-      ),
+            )
+          : _filteredProcedures.isEmpty
+              ? const Center(
+                  child: Text(
+                    "No procedures found",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                )
+              : Column(
+                  children: [
+                    ProcedureFilterBar(
+                      searchController: _searchController,
+                      offerRange: _offerRange,
+                      onRangeChanged: (value) {
+                        setState(() => _offerRange = value);
+                      },
+                      onClear: _clearFilters,
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: RefreshIndicator(
+                        color: Colors.pink,
+                        onRefresh: _onRefresh,
+                        child: GridView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.all(12),
+                          itemCount: _filteredProcedures.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 5,
+                            mainAxisSpacing: 5,
+                            childAspectRatio: 0.9,
+                          ),
+                          itemBuilder: (context, index) {
+                            return ProcedureCard(
+                              procedure: _filteredProcedures[index],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
     );
   }
 }

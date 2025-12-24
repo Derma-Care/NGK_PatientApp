@@ -59,7 +59,7 @@ class _LoginscreenState extends State<Loginscreen> {
             Align(
               alignment: Alignment.center,
               child: Text(
-                "Neha's Glow Kart",
+                "Neeha's Glow Kart",
                 style: TextStyle(
                   fontSize: 24.0,
                   fontWeight: FontWeight.bold,

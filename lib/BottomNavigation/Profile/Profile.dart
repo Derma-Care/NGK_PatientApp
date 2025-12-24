@@ -188,10 +188,16 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
               final file = dashboardcontroller.imageFile.value;
 
               return CircleAvatar(
-                radius: 45,
-                backgroundColor: Colors.grey[300],
-                backgroundImage: file != null ? FileImage(file) : null,
-                child: file == null ? const Icon(Icons.person, size: 40) : null,
+                radius: 47,
+                backgroundColor: mainColor,
+                child: CircleAvatar(
+                  radius: 45,
+                  backgroundColor: Colors.grey[300],
+                  backgroundImage: file != null ? FileImage(file) : null,
+                  child: file == null
+                      ? const Icon(Icons.person, size: 40, color: mainColor)
+                      : null,
+                ),
               );
             }),
           ),
@@ -230,14 +236,8 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
           _menuItem(
             icon: Icons.logout,
             title: "Logout",
-            onTap: () async {
-              final prefs = await SharedPreferences.getInstance();
-
-              await prefs.remove('mobileNumber');
-              await prefs.remove('isAuthenticated'); // biometric disabled
-              await prefs.remove('isFirstLoginDone');
-
-              Get.offAllNamed('/login');
+            onTap: () {
+              _showLogoutConfirmation(context);
             },
           ),
 
@@ -274,6 +274,88 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                 )
         ],
       ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    showModalBottomSheet(
+      backgroundColor: Colors.white,
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.logout,
+                size: 40,
+                color: mainColor,
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Logout",
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: mainColor),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Are you sure you want to logout?",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15, color: mainColor),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        side: const BorderSide(
+                          color: mainColor, // border color
+                          width: 1.2,
+                        ),
+                      ),
+                      onPressed: () {
+                        Get.back(); // close bottom sheet
+                      },
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: mainColor),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: mainColor,
+                      ),
+                      onPressed: () async {
+                        final prefs = await SharedPreferences.getInstance();
+
+                        await prefs.remove('mobileNumber');
+                        await prefs.remove('isAuthenticated');
+                        await prefs.remove('isFirstLoginDone');
+
+                        Get.offAllNamed('/login');
+                      },
+                      child: const Text("Logout"),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

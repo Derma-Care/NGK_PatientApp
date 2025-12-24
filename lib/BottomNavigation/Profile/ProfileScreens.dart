@@ -1,5 +1,6 @@
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 
 class ProfileModalCard extends StatelessWidget {
   final CustomerProfileModel profile;
@@ -44,14 +45,52 @@ class ProfileModalCard extends StatelessWidget {
             _info("Customer ID", safe(profile.customerId)),
             _info("Full Name", safe(profile.fullName)),
             _info("Mobile", safe(profile.mobile)),
-            _info("Email", safe(profile.email)),
+            _info("Gender", safe(profile.gender)),
             _info("City", safe(profile.city)),
             _info("DOB", safe(profile.dob)),
-            _info("Clinic Name", safe(profile.clinicName)),
-            _info("Clinic City Area", safe(profile.clinicCityArea)),
-            _info("Last Visit", safe(profile.dateOfLastVisit)),
-            _info("Service Type", profile.serviceType?.join(", ") ?? "-"),
-            _info("Blood Group", safe(profile.blood)),
+            if (profile.clinicName != null &&
+                profile.clinicName!.trim().isNotEmpty)
+              _info("Clinic Name", profile.clinicName!),
+
+            if (profile.clinicCityArea != null &&
+                profile.clinicCityArea!.trim().isNotEmpty)
+              _info("Clinic City Area", profile.clinicCityArea!),
+
+            if (profile.dateOfLastVisit != null &&
+                profile.dateOfLastVisit!.trim().isNotEmpty)
+              _info("Last Visit", profile.dateOfLastVisit!),
+
+            if (profile.serviceType != null && profile.serviceType!.isNotEmpty)
+              _info("Service Type", profile.serviceType!.join(", ")),
+
+            if (profile.category != null && profile.category!.trim().isNotEmpty)
+              _info("Category", profile.category!),
+
+            if (profile.concern != null && profile.concern!.isNotEmpty)
+              _info("Concern", profile.concern!.join(", ")),
+
+            if (profile.skinTone != null && profile.skinTone!.trim().isNotEmpty)
+              _info("Skin Tone", profile.skinTone!),
+
+            if (profile.photo != null && profile.photo!.trim().isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  const Text(
+                    "Photo",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  Image.memory(
+                    Uri.parse(profile.photo!).data!.contentAsBytes(),
+                    height: 120,
+                    fit: BoxFit.cover,
+                  ),
+                ],
+              ),
+
+            // _info("Blood Group", safe(profile.blood)),
             _info("Registration Code", safe(profile.registrationCode)),
             _info("Referred By", safe(profile.referBy)),
             _info("Aadhar Number", safe(profile.aadharNumber)),

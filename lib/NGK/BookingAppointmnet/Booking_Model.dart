@@ -22,7 +22,8 @@ class BookingModel {
 
   final String paymentMethod;
   final String status;
-
+  final bool? isRated;
+final List<ProcedureSittingModel>? procedures; // ✅ nullable
   BookingModel({
     required this.bookingId,
     required this.customerId,
@@ -41,6 +42,8 @@ class BookingModel {
     required this.finalAmount,
     required this.paymentMethod,
     required this.status,
+    this.isRated,
+    this.procedures,
   });
 
   Map<String, dynamic> toJson() {
@@ -61,13 +64,15 @@ class BookingModel {
       "discountAmount": discountAmount,
       "finalAmount": finalAmount,
       "paymentMethod": paymentMethod,
-      "status": status
+      "status": status,
+      "isRated": isRated
     };
   }
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
     return BookingModel(
       bookingId: json['bookingId'],
+      isRated: json['isRated'],
       customerId: json['customerId'],
       mobileNumber: json['mobileNumber'],
       bookingType: json['bookingType'],
@@ -86,4 +91,13 @@ class BookingModel {
       status: json['status'],
     );
   }
+}
+class ProcedureSittingModel {
+  final String procedureName;
+  final int sittings;
+
+  ProcedureSittingModel({
+    required this.procedureName,
+    required this.sittings,
+  });
 }

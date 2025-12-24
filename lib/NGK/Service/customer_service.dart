@@ -6,8 +6,7 @@ import 'package:http/http.dart' as http;
 class CustomerService {
   static Future<CustomerProfileModel?> getCustomer(String mobile) async {
     print("calling getCustomer ${mobile}");
-    final url =
-        Uri.parse("https://glowkartapi.ashokfruit.shop/api/customer/$mobile");
+    final url = Uri.parse("${wifiUrl}/api/customer/$mobile");
 
     final response = await http.get(url);
     print("calling response ${response.body}");

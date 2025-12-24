@@ -35,9 +35,9 @@ class ProcedureCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       onTap: () {
         // ✅ CREATE MODEL CORRECTLY
-        final ProcedureNameModel procedureModel = ProcedureNameModel(
+        final ProcedureOffer procedureModel = ProcedureOffer(
           procedureId: procedure.procedureId,
-          procedureName: procedure.name,
+          name: procedure.name, minOffer: 0, maxOffer: 0,
         );
 
         // ✅ NAVIGATE WITH MODEL
