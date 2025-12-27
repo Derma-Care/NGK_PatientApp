@@ -1,3 +1,4 @@
+import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/Header.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 
@@ -105,9 +106,9 @@ class _HospitalRatingScreenState extends State<HospitalRatingScreen> {
                   widget.hospitalName,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: mainColor),
                 ),
 
                 const SizedBox(height: 6),
@@ -123,9 +124,9 @@ class _HospitalRatingScreenState extends State<HospitalRatingScreen> {
                 const Text(
                   "Rate your experience",
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: mainColor),
                 ),
 
                 const SizedBox(height: 12),
@@ -140,9 +141,8 @@ class _HospitalRatingScreenState extends State<HospitalRatingScreen> {
                       },
                       icon: Icon(
                         Icons.star_rounded,
-                        color: index < _rating
-                            ? Colors.amber
-                            : Colors.grey.shade300,
+                        color:
+                            index < _rating ? mainColor : Colors.grey.shade300,
                       ),
                     );
                   }),
@@ -174,7 +174,7 @@ class _HospitalRatingScreenState extends State<HospitalRatingScreen> {
                   height: 48,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.pink,
+                      backgroundColor: mainColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),

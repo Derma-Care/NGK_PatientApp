@@ -40,3 +40,27 @@ String formatTime(String time24h) {
   final parsedTime = DateFormat("HH:mm").parse(time24h); // e.g., "14:30"
   return DateFormat("h:mm a").format(parsedTime); // e.g., "2:30 PM"
 }
+ 
+
+ 
+
+String formatDateOnly(String? date) {
+  if (date == null || date.trim().isEmpty) return "";
+
+  DateTime parsedDate;
+
+  try {
+    // ISO format: 2025-12-31T00:00:00.000Z
+    if (date.contains('T')) {
+      parsedDate = DateTime.parse(date).toLocal();
+    }
+    // Text format: 03 Dec 2025
+    else {
+      parsedDate = DateFormat('dd MMM yyyy').parse(date);
+    }
+  } catch (e) {
+    return "";
+  }
+
+  return DateFormat('dd MMM yyyy').format(parsedDate);
+}

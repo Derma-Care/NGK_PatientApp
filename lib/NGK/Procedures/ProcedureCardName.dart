@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cutomer_app/APIs/FetchServices.dart';
+import 'package:cutomer_app/NGK/ClinicManagement/ClinicLactionScreen.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureListScreen.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureScreenName.dart';
 import 'package:flutter/material.dart';
@@ -37,13 +38,23 @@ class ProcedureCard extends StatelessWidget {
         // ✅ CREATE MODEL CORRECTLY
         final ProcedureOffer procedureModel = ProcedureOffer(
           procedureId: procedure.procedureId,
-          name: procedure.name, minOffer: 0, maxOffer: 0,
+          name: procedure.name,
+          minOffer: 0,
+          maxOffer: 0,
         );
 
         // ✅ NAVIGATE WITH MODEL
-        Get.to(() => SubServiceListScreen(
-              mainProcedures: procedureModel,
-            ));
+        // Get.to(() => SubServiceListScreen(
+        //       mainProcedures: procedureModel,
+        //     ));
+
+        Get.to(
+          () => const ClinicListLocationScreen(),
+          arguments: {
+            "procedureId": procedureModel.procedureId,
+            "procedureName": procedureModel.name
+          },
+        );
       },
       child: Container(
         decoration: BoxDecoration(

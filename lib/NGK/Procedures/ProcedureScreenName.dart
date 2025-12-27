@@ -169,7 +169,9 @@ class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
                             childAspectRatio: 0.9,
                           ),
                           itemBuilder: (context, index) {
-                            return ProcedureCard(
+                            return 
+                            
+                            ProcedureCard(
                               procedure: _filteredProcedures[index],
                             );
                           },

@@ -209,7 +209,7 @@ class _SubServiceListScreenState extends State<SubServiceListScreen> {
                                             SizedBox(width: 10),
                                             Expanded(
                                               child: Text(
-                                                service.subServiceName,
+                                                service.procedureName,
                                                 style: TextStyle(
                                                   fontSize: 18,
                                                   color: Colors.black,

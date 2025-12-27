@@ -1,3 +1,5 @@
+import 'package:cutomer_app/NGK/ClinicManagement/ClinicControllerLocation.dart';
+import 'package:cutomer_app/NGK/ClinicManagement/clinic_slot_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Packges/PackageController.dart';
@@ -95,6 +97,10 @@ Future<void> main() async {
   Get.put(CustomerGetController(), permanent: true);
   Get.put(ReferralWalletController(), permanent: true);
   Get.put(TimerController(), permanent: true);
+  Get.put(ClinicControllerLocation(), permanent: true);
+  Get.put(ClinicSlotController(), permanent: true);
+
+  
   // ✅ FCM Notification tap handling
   final RemoteMessage? initialMessage =
       await FirebaseMessaging.instance.getInitialMessage();

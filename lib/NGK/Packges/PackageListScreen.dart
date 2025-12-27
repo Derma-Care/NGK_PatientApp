@@ -437,7 +437,8 @@ class _PackageListScreenState extends State<PackageListScreen> {
                                             final paymentModal = PaymentModal(
                                                 price: pkg.price.toDouble(),
                                                 discountPercentage:
-                                                    pkg.discountPercentage);
+                                                    pkg.discountPercentage,
+                                                clinicId: pkg.clinicId);
 
                                             showModalBottomSheet(
                                                 context: context,

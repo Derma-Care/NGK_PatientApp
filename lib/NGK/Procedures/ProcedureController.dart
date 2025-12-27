@@ -36,7 +36,7 @@ class Procedurecontroller {
 
   // -------------------- API STATE --------------------
   ValueNotifier<bool> loading = ValueNotifier(false);
-  ValueNotifier<List<ProcedureListmodel>> serviceList = ValueNotifier([]);
+  ValueNotifier<List<ProcedureListModal>> serviceList = ValueNotifier([]);
   ValueNotifier<List<Clinic>> clinicList = ValueNotifier([]);
   final String baseUrl =
       "http://3.6.119.57:9090/clinic-admin/getSubServiceByHospitalId/0001";
@@ -51,8 +51,8 @@ class Procedurecontroller {
         final jsonData = json.decode(response.body);
         final List rawList = jsonData["data"];
 
-        final List<ProcedureListmodel> parsed =
-            rawList.map((e) => ProcedureListmodel.fromJson(e)).toList();
+        final List<ProcedureListModal> parsed =
+            rawList.map((e) => ProcedureListModal.fromJson(e)).toList();
 
         // update service list
         serviceList.value = parsed;
@@ -68,14 +68,14 @@ class Procedurecontroller {
   }
 
   // -------------------- CONTROLLER STATE --------------------
-  ValueNotifier<List<ProcedureListmodel>> procedureList = ValueNotifier([]);
+  ValueNotifier<List<ProcedureListModal>> procedureList = ValueNotifier([]);
   ValueNotifier<String> selectedFilter = ValueNotifier("None");
   ValueNotifier<String> searchQuery = ValueNotifier("");
   ValueNotifier<int> itemsPerPage = ValueNotifier(5);
   ValueNotifier<int> currentPage = ValueNotifier(1);
   ValueNotifier<int> totalPages = ValueNotifier(1);
 
-  List<ProcedureListmodel> _filteredList = [];
+  List<ProcedureListModal> _filteredList = [];
 
   Procedurecontroller() {
     // Do NOT initialize with empty list
@@ -98,9 +98,9 @@ class Procedurecontroller {
     final q = query.toLowerCase();
 
     _filteredList = serviceList.value.where((svc) {
-      return svc.subServiceName.toLowerCase().contains(q) ||
-          svc.serviceName.toLowerCase().contains(q) ||
-          svc.categoryName.toLowerCase().contains(q);
+      return svc.procedureName.toLowerCase().contains(q);
+
+      // svc.categoryName.toLowerCase().contains(q);
       // ||
       // svc.clinicName.toLowerCase().contains(q) ||
       // svc.clinicAddress.toLowerCase().contains(q);
@@ -116,7 +116,7 @@ class Procedurecontroller {
   void applyFilter(String filter) {
     selectedFilter.value = filter;
 
-    List<ProcedureListmodel> list = List.from(_filteredList);
+    List<ProcedureListModal> list = List.from(_filteredList);
 
     switch (filter) {
       case "High Discount":
@@ -203,7 +203,7 @@ class Procedurecontroller {
   // ============================================================
   // When API finishes, update controller data
   // ============================================================
-  void setProcedureData(List<ProcedureListmodel> apiData) {
+  void setProcedureData(List<ProcedureListModal> apiData) {
     _filteredList = List.from(apiData);
     currentPage.value = 1;
     _updatePagination();

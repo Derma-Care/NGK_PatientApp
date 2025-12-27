@@ -1,11 +1,15 @@
+import 'package:cutomer_app/NGK/ClinicManagement/clinic_slot_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
 import 'package:cutomer_app/NGK/Packges/PackageModel.dart';
 import 'package:cutomer_app/Payments/AllPayments.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
+import 'package:cutomer_app/Utils/ShowSnackBar%20copy.dart';
 import 'package:cutomer_app/main.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 
 class PackageBookingSheet extends StatefulWidget {
@@ -25,12 +29,16 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
   bool useCoins = false;
   final ReferralWalletController walletController =
       Get.find<ReferralWalletController>();
+  final ClinicSlotController slotController = Get.put(ClinicSlotController());
   double get coinValue => walletController.walletBalance.toDouble();
+  final ScrollController _scrollController = ScrollController();
+
 // Value of coins
-  List<DateTime> next15days = List.generate(
-    15,
-    (index) => DateTime.now().add(Duration(days: index)),
-  );
+  @override
+  void initState() {
+    super.initState();
+    slotController.fetchSlots(widget.payment.clinicId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,67 +75,109 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
               ),
             ),
 
-            const Text("Select a Date",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Text(
+                  "Select a Date",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Icon(
+                  CupertinoIcons.chevron_right,
+                  size: 20,
+                  color: Colors.grey,
+                ),
+              ],
+            ),
 
             const SizedBox(height: 12),
 
             // -------------------- DATE SELECTOR --------------------
             SizedBox(
-              height: 70,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: next15days.length,
-                itemBuilder: (_, i) {
-                  DateTime date = next15days[i];
-                  return GestureDetector(
-                    onTap: () => setState(() => selectedIndex = i),
-                    child: Container(
-                      width: 70,
-                      padding: const EdgeInsets.all(10),
-                      margin: const EdgeInsets.only(right: 12),
-                      decoration: BoxDecoration(
-                        color: selectedIndex == i
-                            ? mainColor
-                            : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "${date.day}",
-                            style: TextStyle(
-                              color: selectedIndex == i
-                                  ? Colors.white
-                                  : Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          Text(
-                            [
-                              "Sun",
-                              "Mon",
-                              "Tue",
-                              "Wed",
-                              "Thu",
-                              "Fri",
-                              "Sat"
-                            ][date.weekday % 7],
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: selectedIndex == i
-                                  ? Colors.white
-                                  : Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
+              height: 85,
+              child: Obx(() {
+                if (slotController.isLoading.value) {
+                  return const Center(
+                    child: SpinKitFadingCircle(
+                      color: mainColor,
+                      size: 40,
                     ),
                   );
-                },
-              ),
+                }
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: slotController.slots.length,
+                  itemBuilder: (_, i) {
+                    final slot = slotController.slots[i];
+                    final date = DateTime.parse(slot.date);
+                    final isDisabled = !slot.workingHours;
+
+                    return Obx(() {
+                      final isSelected =
+                          slotController.selectedIndex.value == i;
+
+                      return GestureDetector(
+                        onTap: isDisabled
+                            ? null
+                            : () => slotController.selectSlot(i),
+                        child: Container(
+                          width: 85,
+                          margin: const EdgeInsets.only(right: 12),
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: isDisabled
+                                ? Colors.grey.shade300
+                                : isSelected
+                                    ? mainColor
+                                    : Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(12),
+                            border: isDisabled
+                                ? Border.all(color: Colors.redAccent)
+                                : null,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "${date.day}",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      isSelected ? Colors.white : Colors.black,
+                                ),
+                              ),
+                              Text(
+                                slot.dayOfWeek.substring(0, 3),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color:
+                                      isSelected ? Colors.white : Colors.black,
+                                ),
+                              ),
+                              if (isDisabled)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    slot.reason ?? "Unavailable",
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    });
+                  },
+                );
+              }),
             ),
 
             const SizedBox(height: 25),
@@ -200,22 +250,22 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
             // PAY BUTTON
             ElevatedButton(
               onPressed: () {
-                if (selectedIndex == null) {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        title: const Text(
-                          "Alert",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        content: const Text("Please select a date"),
-                      );
-                    },
-                  );
+                if (slotController.selectedIndex.value == -1) {
+                  //            ScaffoldMessageSnackbar.show(
+                  //   context: context,
+                  //   message: "Please select an available date",
+                  //   type: SnackbarType.warning,po
+                  // );
+                  showSnackbar(
+                      "Warning", "Please select an available date", "warning");
+
+                  // showDialog(
+                  //   context: context,
+                  //   builder: (_) => AlertDialog(
+                  //     title: const Text("Alert"),
+                  //     content: const Text("Please select an available date"),
+                  //   ),
+                  // );
                   return;
                 }
 

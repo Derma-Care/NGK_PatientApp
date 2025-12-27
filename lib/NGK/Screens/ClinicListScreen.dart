@@ -1,4 +1,3 @@
-import 'package:cutomer_app/NGK/ClinicManagement/ClinicControllerLocation.dart';
 import 'package:cutomer_app/NGK/Contoller/CliniContoller.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureController.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureModel.dart';
@@ -42,18 +41,6 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
   final TextEditingController searchController = TextEditingController();
 
   ValueNotifier<bool> showPagination = ValueNotifier(true);
-  final ClinicControllerLocation clinicControllerLocation =
-      Get.put(ClinicControllerLocation());
-
-  @override
-  void initState() {
-    super.initState();
-    clinicControllerLocation.loadClinics(
-      latitude: 16.5779606,
-      longitude: 81.961815,
-      procedureId: "6934116cdd91466b841b3209",
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +60,7 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
               decoration: InputDecoration(
                 hintText: "Search Clinics...",
                 prefixIcon: const Icon(Icons.search),
+
                 suffixIcon: searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.close),
@@ -82,11 +70,41 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
                         },
                       )
                     : null,
+
                 filled: true,
                 fillColor: Colors.white,
+
+                // 🔹 NORMAL BORDER
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Colors.grey,
+                    width: 1,
+                  ),
+                ),
+
+                // 🔹 FOCUSED BORDER
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Colors.pink,
+                    width: 1.5,
+                  ),
+                ),
+
+                // 🔹 ERROR BORDER (optional)
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Colors.red,
+                    width: 1,
+                  ),
+                ),
+
+                // 🔹 DEFAULT BORDER (fallback)
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),

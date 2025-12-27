@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:cutomer_app/APIs/BaseUrl.dart';
 import 'package:cutomer_app/NGK/ClinicManagement/ClinicModelWithLocation.dart';
 import 'package:http/http.dart' as http;
- 
 
 class ClinicServiceLocation {
   static Future<List<ClinicModelWithLocation>> fetchClinics({
@@ -16,7 +15,7 @@ class ClinicServiceLocation {
     );
 
     final response = await http.get(url);
-
+    print("response clinic ${response.body}");
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
       final List list = body['data'];

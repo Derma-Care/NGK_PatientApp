@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureModel.dart';
 import 'package:cutomer_app/NGK/Widgets/PackageBookingSheet.dart';
+import 'package:cutomer_app/Utils/DateConverter.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProcedureDetailsPage extends StatefulWidget {
-  final ProcedureListmodel service;
+  final ProcedureListModal service;
 
   const ProcedureDetailsPage({super.key, required this.service});
 
@@ -20,7 +22,7 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(service.subServiceName),
+        title: Text(service.procedureName),
         backgroundColor: Colors.pink,
       ),
       body: _buildDetailsView(service),
@@ -28,7 +30,7 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
   }
 
   // ---------- MAIN VIEW ----------
-  Widget _buildDetailsView(ProcedureListmodel service) {
+  Widget _buildDetailsView(ProcedureListModal service) {
     final tabs = <Tab>[];
     final views = <Widget>[];
 
@@ -58,7 +60,7 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.memory(
-                base64Decode(service.subServiceImage),
+                base64Decode(service.procedureImage),
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
@@ -74,8 +76,69 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
             ),
             const SizedBox(height: 6),
             Text(
-              service.viewDescription,
+              service.description,
               style: const TextStyle(fontSize: 14, height: 1.4),
+            ),
+            const SizedBox(height: 25),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// 🔗 Procedure Link
+                if (service.procedureLink != null &&
+                    service.procedureLink!.isNotEmpty)
+                  infoItem(
+                    label: "Procedure Process",
+                    icon: Icons.open_in_new,
+                    value: InkWell(
+                      onTap: () async {
+                        final uri = Uri.parse(service.procedureLink!);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri,
+                              mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      child: const Text(
+                        "View Procedure Process",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                /// 🧪 Sittings
+                infoItem(
+                  label: "Sittings",
+                  icon: Icons.repeat,
+                  value: Text(
+                    "${service.sittings}",
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+
+                /// ⏱ Minimum Time
+                infoItem(
+                  label: "Minimum Time",
+                  icon: Icons.timer,
+                  value: Text(
+                    service.minTime,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+
+                /// 🏷 Offer End Date
+                if (service.offerValidDate != null &&
+                    service.offerValidDate!.isNotEmpty)
+                  infoItem(
+                    label: "Offer End Date",
+                    icon: Icons.calendar_today,
+                    value: Text(
+                      formatDateOnly(service.offerValidDate),
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+              ],
             ),
 
             // ---------- TABS ----------
@@ -99,9 +162,9 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
             ElevatedButton(
               onPressed: () {
                 final paymentModal = PaymentModal(
-                  price: service.price.toDouble(),
-                  discountPercentage: service.discountPercentage,
-                );
+                    price: service.price.toDouble(),
+                    discountPercentage: service.discountPercentage.toInt(),
+                    clinicId: service.clinicId);
 
                 showModalBottomSheet(
                   context: context,
@@ -122,6 +185,38 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget infoItem({
+    required String label,
+    required Widget value,
+    IconData? icon,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 18, color: Colors.pinkAccent),
+                const SizedBox(width: 6),
+              ],
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          value,
+        ],
       ),
     );
   }
