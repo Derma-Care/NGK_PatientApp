@@ -1,5 +1,5 @@
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
- 
+
 import 'package:cutomer_app/OTP/FireBaseOtp.dart';
 
 import 'package:cutomer_app/SigninSignUp/BiometricPermissionScreen.dart';
@@ -24,7 +24,6 @@ class SiginSignUpController extends GetxController {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController mobileController = TextEditingController();
   final LoginApiService _loginapiService = LoginApiService();
- 
 
   bool agreeToTerms = true; // Initialize to false to require agreement
   String? phoneNumber;
@@ -134,10 +133,10 @@ class SiginSignUpController extends GetxController {
           );
           // showSnackbar("Success",
           //     "OTP has been sent successfully to $mobileNumber", "success");
-
+          showFetchingLocationDialog(context);
+          await LocationService.fetchAndStoreLocation();
           Get.offAll(() => OTPLoginScreen(
                 mobileNumber: mobileNumber,
-               
                 deviceId: token,
               ));
         }
@@ -207,5 +206,4 @@ class SiginSignUpController extends GetxController {
       },
     );
   }
- 
 }

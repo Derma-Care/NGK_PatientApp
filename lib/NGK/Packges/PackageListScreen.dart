@@ -434,25 +434,29 @@ class _PackageListScreenState extends State<PackageListScreen> {
                                             ),
                                           ),
                                           onPressed: () {
-                                            final paymentModal = PaymentModal(
-                                                price: pkg.price.toDouble(),
-                                                discountPercentage:
-                                                    pkg.discountPercentage,
-                                                clinicId: pkg.clinicId);
+                                            
+                                            // final paymentModal = PaymentModal(
+                                            //     price: pkg.price.toDouble(),
+                                            //     discountPercentage:
+                                            //         pkg.discountPercentage,
+                                            //     clinicId: pkg.clinicId
+                                                
+                                            //     );
 
-                                            showModalBottomSheet(
-                                                context: context,
-                                                isScrollControlled: true,
-                                                shape:
-                                                    const RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.vertical(
-                                                          top: Radius.circular(
-                                                              20)),
-                                                ),
-                                                builder: (_) =>
-                                                    PackageBookingSheet(
-                                                        payment: paymentModal));
+                                            // showModalBottomSheet(
+                                            //     context: context,
+                                            //     isScrollControlled: true,
+                                            //     shape:
+                                            //         const RoundedRectangleBorder(
+                                            //       borderRadius:
+                                            //           BorderRadius.vertical(
+                                            //               top: Radius.circular(
+                                            //                   20)),
+                                            //     ),
+                                            //     builder: (_) =>
+                                            //         PackageBookingSheet( payment: paymentModal)
+
+                                            //         );
                                           },
                                           child: const Text(
                                             "Book Package",

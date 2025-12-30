@@ -18,6 +18,7 @@ import 'package:cutomer_app/Screens/RefferalCode.dart';
 import 'package:cutomer_app/TreatmentAndServices/SubserviceController.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/GradintColor.dart';
+import 'package:cutomer_app/Utils/LocationService.dart';
 import 'package:cutomer_app/Utils/capitalizeFirstLetter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -58,7 +59,6 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     super.initState();
     _loadLocation();
     dashboardcontroller.setMobileNumber(widget.mobileNumber);
-    _loadCustomerNameFromPrefs();
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
         hideDropdownOverlay(); // 🔥
@@ -66,6 +66,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     });
     loadProcedures();
     _fetchCustomerName();
+    _loadCustomerNameFromPrefs();
   }
 
   Future<CustomerProfileModel?> _loadProfile() {
@@ -87,6 +88,34 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     searchController.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _reloadLocation() async {
+    try {
+      setState(() {
+        cityName = "Updating...";
+      });
+
+      await LocationService.fetchAndStoreLocation();
+
+      final prefs = await SharedPreferences.getInstance();
+
+      setState(() {
+        cityName = prefs.getString('cityName');
+        latitude = prefs.getDouble('latitude');
+        longitude = prefs.getDouble('longitude');
+      });
+
+      debugPrint("📍 Location refreshed: $cityName");
+    } catch (e) {
+      debugPrint("❌ Location refresh failed: $e");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Failed to refresh location"),
+        ),
+      );
+    }
   }
 
   void filterSearch(String query) {
@@ -128,6 +157,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     if (profile != null) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('customer_full_name', profile.fullName);
+      await prefs.setString('customer_Id', profile.customerId);
     }
   }
 
@@ -262,8 +292,10 @@ class ConsultationsTypeState extends State<ConsultationsType> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.location_on, color: Colors.white, size: 18),
-          const SizedBox(width: 8),
-          Flexible(
+          const SizedBox(width: 6),
+
+          /// 📍 CITY NAME
+          Expanded(
             child: Text(
               "You're in : $cityName",
               style: const TextStyle(
@@ -272,8 +304,20 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.5,
               ),
-              textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
+            ),
+          ),
+
+          /// 🔄 REFRESH LOCATION ICON
+          InkWell(
+            onTap: _reloadLocation,
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(
+                Icons.refresh,
+                color: Colors.white,
+                size: 18,
+              ),
             ),
           ),
         ],

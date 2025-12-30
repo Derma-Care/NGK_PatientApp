@@ -68,7 +68,7 @@ class _AppointmentPreviewState extends State<AppointmentPreview>
     if (patient.consultationType.toLowerCase() == "services & treatments" &&
         patient.consentFormPdf == null &&
         isToday &&
-        patient.status.toLowerCase() == "confirmed") {
+        patient.status  == "Pending") {
       print("✅ Condition matched — service is today!");
     }
 

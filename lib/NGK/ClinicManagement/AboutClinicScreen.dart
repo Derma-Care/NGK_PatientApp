@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:cutomer_app/Review/HospitalRatingScreen.dart';
+import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -42,17 +43,26 @@ class AboutClinicScreen extends StatelessWidget {
 
             /// 🔹 RATING + DISTANCE
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Icon(Icons.star, size: 16, color: Colors.amber),
-                const SizedBox(width: 4),
-                Text(
-                  clinic.hospitalOverallRating.toStringAsFixed(1),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                Row(
+                  children: [
+                    const Icon(Icons.star, size: 16, color: mainColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      clinic.hospitalOverallRating.toStringAsFixed(1),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(clinic.distanceInKm),
+                Row(
+                  children: [
+                    const Icon(Icons.location_on, size: 16, color: mainColor),
+                    const SizedBox(width: 4),
+                    Text(clinic.distanceInKm),
+                  ],
+                ),
               ],
             ),
 

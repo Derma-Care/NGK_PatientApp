@@ -51,47 +51,9 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
     );
   }
 
-  // Widget offerValidBadge(DateTime? offerDate) {
-  //   if (offerDate == null) return const SizedBox.shrink();
-
-  //   final DateTime today =
-  //       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-
-  //   final DateTime validDate =
-  //       DateTime(offerDate.year, offerDate.month, offerDate.day);
-
-  //   final int remainingDays = validDate.difference(today).inDays;
-
-  //   Color bgColor;
-  //   Color textColor;
-
-  //   if (remainingDays < 0) {
-  //     bgColor = Colors.red.withOpacity(0.1);
-  //     textColor = Colors.red;
-  //   } else if (remainingDays <= 2) {
-  //     bgColor = Colors.orange.withOpacity(0.15);
-  //     textColor = Colors.orange;
-  //   } else {
-  //     bgColor = Colors.green.withOpacity(0.15);
-  //     textColor = Colors.green;
-  //   }
-
-  //   return Container(
-  //     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-  //     decoration: BoxDecoration(
-  //       color: bgColor,
-  //       borderRadius: BorderRadius.circular(6),
-  //     ),
-  //     child: Text(
-  //       formatOfferDate(offerDate),
-  //       style: TextStyle(
-  //         fontSize: 12,
-  //         fontWeight: FontWeight.w600,
-  //         color: textColor,
-  //       ),
-  //     ),
-  //   );
-  // }
+  Future<void> _onRefreshClinics() async {
+    await _loadClinics();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,6 +100,9 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
             ),
           ),
           Expanded(
+              child: RefreshIndicator(
+            color: mainColor,
+            onRefresh: _onRefreshClinics,
             child: Obx(() {
               if (controller.isLoading.value) {
                 return const Center(
@@ -384,7 +349,7 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
                 },
               );
             }),
-          ),
+          )),
         ],
       ),
       bottomNavigationBar: CommonPaginationBar(

@@ -98,6 +98,7 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen> {
 
       // 🌍 Fetch Location (Optional)
       try {
+        LocationService.showFetchingLocationDialog(context);
         await LocationService.fetchAndStoreLocation();
       } catch (_) {}
 

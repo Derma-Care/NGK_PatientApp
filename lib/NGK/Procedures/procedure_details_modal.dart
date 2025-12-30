@@ -161,10 +161,25 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
             // ---------- BOOK NOW BUTTON ----------
             ElevatedButton(
               onPressed: () {
-                final paymentModal = PaymentModal(
-                    price: service.price.toDouble(),
-                    discountPercentage: service.discountPercentage.toInt(),
-                    clinicId: service.clinicId);
+                // PaymentModal fromProcedure(ProcedureListModal p) {
+                //     return PaymentModal(
+                //       clinicId: p.clinicId,
+                //       serviceId: p.procedureId,
+                //       serviceType: "PROCEDURE",
+                //       price: p.price,
+                //       consultationFee: p.consultationFee,
+                //       gst: p.gst,
+                //       gstAmount: p.gstAmount,
+                //       taxPercentage: p.taxPercentage,
+                //       taxAmount: p.taxAmount,
+                //       discountPercentage: p.totalDiscountPercentage,
+                //       discountAmount: p.totalDiscountAmount,
+                //       platformFee: 10,
+                //       finalCost: p.finalCost,
+                //     );
+                //   }
+
+                final payment = PaymentModal.fromProcedure(service);
 
                 showModalBottomSheet(
                   context: context,
@@ -174,7 +189,7 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
                     borderRadius:
                         BorderRadius.vertical(top: Radius.circular(20)),
                   ),
-                  builder: (_) => PackageBookingSheet(payment: paymentModal),
+                  builder: (_) => PackageBookingSheet(payment: payment),
                 );
               },
               style: ElevatedButton.styleFrom(

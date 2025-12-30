@@ -1,45 +1,120 @@
+import 'package:cutomer_app/NGK/Procedures/ProcedureModel.dart';
+import 'package:cutomer_app/NGK/Packges/PackageModel.dart';
+
 class PaymentModal {
   final String clinicId;
+
+  final String serviceId; // procedureId / packageId / cardId
+  final String serviceType; // PROCEDURE / PACKAGE / CARD
+
   final double price;
-  final int discountPercentage;
-  final double? discountAmount;
-  final double? gst;
-  final double? gstAmount;
-  final double? consultationFee;
-  final double? taxPercentage;
-  final double? taxAmount;
-  final double? platformFee;
-  final double? discountedCost;
-  final double? finalCost;
+  final double consultationFee;
 
-  PaymentModal(
-      {required this.price,
-      required this.discountPercentage,
-      this.discountAmount,
-      this.gst,
-      this.gstAmount,
-      this.consultationFee,
-      this.taxPercentage,
-      this.taxAmount,
-      this.platformFee,
-      this.discountedCost,
-      this.finalCost,
-      required this.clinicId});
+  final double gst;
+  final double gstAmount;
 
+  final double taxPercentage;
+  final double taxAmount;
+
+  final double discountPercentage;
+  final double discountAmount;
+
+  final double platformFee;
+  final double finalCost;
+
+  PaymentModal({
+    required this.clinicId,
+    required this.serviceId,
+    required this.serviceType,
+    required this.price,
+    required this.consultationFee,
+    required this.gst,
+    required this.gstAmount,
+    required this.taxPercentage,
+    required this.taxAmount,
+    required this.discountPercentage,
+    required this.discountAmount,
+    required this.platformFee,
+    required this.finalCost,
+  });
+
+  // ================= FACTORY HELPERS =================
+
+  /// 🔹 From Procedure
+  factory PaymentModal.fromProcedure(ProcedureListModal p) {
+    return PaymentModal(
+      clinicId: p.clinicId,
+      serviceId: p.procedureId,
+      serviceType: "PROCEDURE",
+      price: p.price,
+      consultationFee: p.consultationFee,
+      gst: p.gst,
+      gstAmount: p.gstAmount,
+      taxPercentage: p.taxPercentage,
+      taxAmount: p.taxAmount,
+      discountPercentage: p.totalDiscountPercentage,
+      discountAmount: p.totalDiscountAmount,
+      platformFee: 10,
+      finalCost: p.finalCost,
+    );
+  }
+
+  // /// 🔹 From Package
+  // factory PaymentModal.fromPackage(PackageModel p) {
+  //   return PaymentModal(
+  //     clinicId: p.clinicId,
+  //     serviceId: p.packageId,
+  //     serviceType: "PACKAGE",
+  //     price: p.price,
+  //     consultationFee: 0,
+  //     gst: p.gst,
+  //     gstAmount: p.gstAmount,
+  //     taxPercentage: p.taxPercentage,
+  //     taxAmount: p.taxAmount,
+  //     discountPercentage: p.discountPercentage,
+  //     discountAmount: p.discountAmount,
+  //     platformFee: 10,
+  //     finalCost: p.finalCost,
+  //   );
+  // }
+
+  // ================= JSON SUPPORT =================
+
+  /// 🔹 From API / JSON
   factory PaymentModal.fromJson(Map<String, dynamic> json) {
     return PaymentModal(
-      price: (json["price"] ?? 0).toDouble(),
-      clinicId: json["clinicId"] ?? "",
-      discountPercentage: json["discountPercentage"],
-      discountAmount: (json["discountAmount"] ?? 0).toDouble(),
-      gst: (json["gst"] ?? 0).toDouble(),
-      gstAmount: (json["gstAmount"] ?? 0).toDouble(),
-      consultationFee: (json["consultationFee"] ?? 0).toDouble(),
-      taxPercentage: (json["taxPercentage"] ?? 0).toDouble(),
-      taxAmount: (json["taxAmount"] ?? 0).toDouble(),
-      platformFee: (json["platformFee"] ?? 0).toDouble(),
-      discountedCost: (json["discountedCost"] ?? 0).toDouble(),
-      finalCost: (json["finalCost"] ?? 0).toDouble(),
+      clinicId: json['clinicId'],
+      serviceId: json['serviceId'],
+      serviceType: json['serviceType'],
+      price: (json['price'] as num).toDouble(),
+      consultationFee: (json['consultationFee'] as num).toDouble(),
+      gst: (json['gst'] as num).toDouble(),
+      gstAmount: (json['gstAmount'] as num).toDouble(),
+      taxPercentage: (json['taxPercentage'] as num).toDouble(),
+      taxAmount: (json['taxAmount'] as num).toDouble(),
+      discountPercentage: (json['discountPercentage'] as num).toDouble(),
+      discountAmount: (json['discountAmount'] as num).toDouble(),
+      platformFee: (json['platformFee'] as num).toDouble(),
+      finalCost: (json['finalCost'] as num).toDouble(),
     );
+  }
+
+  /// 🔹 Convert to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      "clinicId": clinicId,
+      "serviceId": serviceId,
+      "serviceType": serviceType,
+      "price": price,
+      "consultationFee": consultationFee,
+      "gst": gst,
+      "gstAmount": gstAmount,
+      "taxPercentage": taxPercentage,
+      "taxAmount": taxAmount,
+      "discountPercentage": discountPercentage,
+      "discountAmount": discountAmount,
+      "platformFee": platformFee,
+      "finalCost": finalCost,
+    };
   }
 }

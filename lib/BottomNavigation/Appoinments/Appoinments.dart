@@ -32,7 +32,8 @@ class _BookingListScreenState extends State<BookingListScreen>
       }
     });
 
-    controller.loadDummyData();
+    controller.fetchBookings();
+    ;
   }
 
   @override
@@ -121,14 +122,14 @@ class _BookingListScreenState extends State<BookingListScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(b.title,
+                                Text(b.serviceName ?? '',
                                     style: const TextStyle(
                                         fontSize: 17,
                                         fontWeight: FontWeight.bold)),
                                 Text("Clinic: ${b.clinicName}",
                                     style:
                                         TextStyle(color: Colors.grey.shade700)),
-                                Text("Date: ${b.bookingDate}",
+                                Text("Date: ${b.appointmentDate}",
                                     style:
                                         TextStyle(color: Colors.grey.shade700)),
                               ],
@@ -136,7 +137,7 @@ class _BookingListScreenState extends State<BookingListScreen>
                           ),
                           Chip(
                             label: Text(b.status),
-                            backgroundColor: b.status == "Pending"
+                            backgroundColor: b.status == "CONFIRMED"
                                 ? Colors.orange.shade100
                                 : Colors.green.shade100,
                           )
@@ -208,7 +209,7 @@ class _BookingListScreenState extends State<BookingListScreen>
                     children: [
                       Center(
                         child: Text(
-                          b.title,
+                          b.serviceName ?? "",
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -219,35 +220,46 @@ class _BookingListScreenState extends State<BookingListScreen>
                       const SizedBox(height: 20),
 
                       _detailRow("Booking ID", b.bookingId),
-                      _detailRow("Booking Type", b.bookingType),
+                      _detailRow("Booking Type", b.serviceType),
                       if (b.serviceId != null)
                         _detailRow("Service ID", b.serviceId!),
-                      if (b.subServiceId != null)
-                        _detailRow("Subservice ID", b.subServiceId!),
 
-                      _detailRow("Customer ID", b.customerId),
+                      // _detailRow("Customer ID", b.customerId),
                       _detailRow("Mobile", b.mobileNumber),
 
                       _detailRow("Clinic", b.clinicName),
                       _detailRow("Clinic Address", b.clinicAddress),
-                      _detailRow("Booking Date", b.bookingDate),
+                      _detailRow("Booking Date", b.appointmentDate),
 
                       const Divider(height: 25),
 
                       _detailRow("Price", "₹${b.price}"),
-                      _detailRow("Discount", "${b.discountPercentage}%"),
-                      _detailRow("Discount Amount", "₹${b.discountAmount}"),
-                      _detailRow("Final Amount", "₹${b.finalAmount}"),
+
+                      _detailRow("consultation Fee", "₹ ${b.consultationFee}"),
+                      _detailRow("Gst(${b.gst}%)", "₹ ${b.gstAmount}"),
+                      if ((b.taxAmount ?? 0) > 0)
+                        _detailRow(
+                          "Tax (${b.taxPercentage}%)",
+                          "₹ ${b.taxAmount}",
+                        ),
+
+                      if ((b.discountAmount ?? 0) > 0)
+                        _detailRow(
+                          "Discount (${b.discount}%)",
+                          "₹ ${b.discountAmount}",
+                        ),
+
+                      _detailRow("Final Amount", "₹ ${b.finalAmount}"),
 
                       const Divider(height: 25),
 
-                      _detailRow("Payment Method", b.paymentMethod),
+                      _detailRow("Payment Method", b.paymentType),
                       _detailRow("Status", b.status),
 
                       const Divider(height: 25),
 
                       // 🔹 Package Procedures Accordion
-                      if (b.bookingType == "package" && b.procedures != null)
+                      if (b.serviceType == "package" && b.procedures != null)
                         ExpansionTile(
                           title: const Text(
                             "Package Procedures",
@@ -295,7 +307,7 @@ class _BookingListScreenState extends State<BookingListScreen>
               ),
 
               // 🔹 FIXED BOTTOM BUTTONS
-              if (b.status.toLowerCase() == "completed")
+              if (b.status == "COMPLETED")
                 Container(
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
                   decoration: BoxDecoration(

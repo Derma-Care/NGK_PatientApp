@@ -1,7 +1,11 @@
+import 'package:cutomer_app/NGK/BookingAppointmnet/BookingRequestModel.dart';
 import 'package:cutomer_app/NGK/ClinicManagement/clinic_slot_controller.dart';
+import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
 import 'package:cutomer_app/NGK/Packges/PackageModel.dart';
+import 'package:cutomer_app/NGK/Procedures/ProcedureModel.dart';
+import 'package:cutomer_app/NGK/Screens/BookingSuccessScreen.dart';
 import 'package:cutomer_app/Payments/AllPayments.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
@@ -11,6 +15,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PackageBookingSheet extends StatefulWidget {
   final PaymentModal payment;
@@ -32,12 +37,27 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
   final ClinicSlotController slotController = Get.put(ClinicSlotController());
   double get coinValue => walletController.walletBalance.toDouble();
   final ScrollController _scrollController = ScrollController();
+  final customerController = Get.find<CustomerGetController>();
+  String? mobile;
 
 // Value of coins
   @override
   void initState() {
     super.initState();
     slotController.fetchSlots(widget.payment.clinicId);
+
+    _loadCustomer();
+  }
+
+  Future<void> _loadCustomer() async {
+    final prefs = await SharedPreferences.getInstance();
+    mobile = prefs.getString('mobileNumber');
+
+    if (mobile != null && mobile!.isNotEmpty) {
+      customerController.fetchCustomer(mobile!);
+    } else {
+      showSnackbar("Error", "Mobile number not found", "error");
+    }
   }
 
   @override
@@ -47,11 +67,17 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
     double discountedPrice = widget.payment.price - discountAmount;
 
     double tax = 18;
-    double platformFee = 25;
+    double platformFee = 10;
 
     double taxAmount = discountedPrice * tax / 100;
 
     double total = discountedPrice + taxAmount + platformFee;
+
+    double coinsUsed = 0;
+
+    if (useCoins && coinValue > 0) {
+      coinsUsed = coinValue > total ? total : coinValue;
+    }
 
     // apply coins
     double finalPayable = useCoins ? (total - coinValue) : total;
@@ -189,12 +215,14 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
             const SizedBox(height: 12),
 
             priceRow("Original Price", widget.payment.price),
+            priceRow("Consultation", widget.payment.consultationFee),
+            priceRow("GST (${widget.payment.gst.toStringAsFixed(0)}%)",
+                widget.payment.gstAmount),
             priceRow(
-                "Discount (${widget.payment.discountPercentage.toInt()}%)",
-                -widget.payment.price *
-                    widget.payment.discountPercentage /
-                    100),
-            priceRow("Tax (18%)", taxAmount),
+                "Tax (${widget.payment.taxPercentage.toStringAsFixed(0)}%)",
+                widget.payment.taxAmount),
+            priceRow("Discount (${widget.payment.discountPercentage.toInt()}%)",
+                -widget.payment.discountAmount),
             priceRow("Platform Fee", platformFee),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -243,7 +271,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
 
             const Divider(thickness: 1.2),
 
-            priceRow("Total Payable", finalPayable, isBold: true),
+            priceRow("Total Payable", widget.payment.finalCost, isBold: true),
 
             const SizedBox(height: 20),
 
@@ -268,17 +296,45 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                   // );
                   return;
                 }
+                final customer = customerController.customer.value;
 
+                if (customer == null) {
+                  showSnackbar("Error", "Customer data not loaded", "error");
+                  return;
+                }
+
+                final payload = BookingRequestModel(
+                  clinicId: widget.payment.clinicId,
+                  customerId: customer.customerId, // from login
+                  serviceId: widget.payment.serviceId, // package/procedure
+                  serviceType: widget.payment.serviceType, // or PROCEDURE
+                  paymentType: "ONLINE",
+                  coinsUsed: coinsUsed, // ✅ ACTUAL COINS USED
+                  appointmentDate: slotController
+                      .slots[slotController.selectedIndex.value].date,
+                );
+                print("Booing payload final ${payload.toJson()}");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (_) => RazorpaySubscription(
-                            amount: finalPayable.toString(),
-                            onPaymentInitiated: () {},
-                            context: context,
-                            mobileNumber: '',
-                          )),
+                          amount: finalPayable.toString(),
+                          onPaymentInitiated: () {},
+                          context: context,
+                          mobileNumber: mobile!,
+                          bookingData: payload)),
                 );
+                // Navigator.of(context).pushReplacement(
+                //   MaterialPageRoute(
+                //     builder: (_) => BookingSuccessScreen(
+                //       clinicName: "Pragna Skin Care",
+                //       serviceName: "Chemical Peel",
+                //       appointmentDate: payload.appointmentDate,
+                //       clinicAddress: "Hyderabad, Telangana",
+                //       mobile: mobile!,
+                //     ),
+                //   ),
+                // );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.pink,

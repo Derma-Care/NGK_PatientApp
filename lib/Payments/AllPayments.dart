@@ -1,11 +1,13 @@
 import 'dart:convert';
 
- 
 import 'package:cutomer_app/BottomNavigation/Appoinments/PostBooingModel.dart';
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
- 
- 
+
 import 'package:cutomer_app/Loading/FullScreeenLoader.dart';
+import 'package:cutomer_app/NGK/BookingAppointmnet/BookingRequestModel.dart';
+import 'package:cutomer_app/NGK/BookingAppointmnet/BookingService.dart';
+import 'package:cutomer_app/NGK/BookingAppointmnet/Booking_Model.dart';
+import 'package:cutomer_app/NGK/Screens/BookingSuccessScreen.dart';
 import 'package:cutomer_app/Utils/Header.dart';
 import 'package:cutomer_app/Utils/ShowSnackBar%20copy.dart';
 import 'package:cutomer_app/Widget/GobelTimer.dart';
@@ -22,26 +24,19 @@ import '../Utils/ScaffoldMessageSnacber.dart';
 
 class RazorpaySubscription extends StatefulWidget {
   final VoidCallback? onPaymentInitiated;
-  // final HospitalDoctorModel serviceDetails;
+  final BookingRequestModel bookingData;
   final String amount;
   final String mobileNumber;
-  // final String branchName;
+
   final BuildContext context;
-  // final String? bookingId;
-  // final PostBookingModel bookingDetails;
-  // final FollowUpModal? postFollowBookingPayload;
 
   const RazorpaySubscription({
     super.key,
     required this.onPaymentInitiated,
-    // required this.serviceDetails,
+    required this.bookingData,
     required this.amount,
     required this.context,
-    // required this.bookingDetails,
     required this.mobileNumber,
-    // required this.branchName,
-    // this.bookingId,
-    // this.postFollowBookingPayload,
   });
 
   @override
@@ -53,7 +48,7 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
   Map<String, dynamic> options = {};
   bool _isLoading = true; // To manage loading state
   late String? paymentId;
- 
+
   @override
   void initState() {
     super.initState();
@@ -64,7 +59,7 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
       'key': 'rzp_test_sor33NEn9vHr3Q',
       'amount': (double.parse(widget.amount) * 100).toInt(), // Amount in paise
 
-      'name': 'Derma Care',
+      'name': "Neeha's GlowKart",
       'description': 'Service Charges',
       'prefill': {
         'contact': '7842259803',
@@ -93,16 +88,6 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
         }
       }
     });
-
-    // final timerController = Get.put(TimerController(), permanent: true);
-    // timerController.startTimer(
-    //   doctorId: widget.serviceDetails.doctor.doctorId,
-    //   slot: widget.bookingDetails.patient.servicetime,
-    //   context: context,
-    // );
-    // final timerController = Get.find<TimerController>();
-    // timerController.stopTimer(widget.serviceDetails.doctor.doctorId,
-    //     widget.bookingDetails.patient.servicetime);
 
     // Razorpay event listeners
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
@@ -135,122 +120,60 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
                     style: TextStyle(fontSize: 18),
                   ),
                 ),
-
-                // Timer FAB
-                // GlobalTimerFAB(
-                //   doctorId: widget.serviceDetails.doctor.doctorId,
-                //   slot: widget.bookingDetails.patient.servicetime,
-                // ),
               ],
             ),
-       
     );
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     if (!mounted) return;
 
+    // 1️⃣ Show loader
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => FullscreenLoader(
+      builder: (_) => const FullscreenLoader(
         message: "Processing Booking...",
         logoPath: "assets/ic_launcher.png",
       ),
     );
 
-    paymentId = response.paymentId;
-    dynamic responseData;
+    try {
+      // 2️⃣ Create booking after payment success
+      final BookingModel bookingResponse =
+          await BookingService.createBooking(widget.bookingData);
 
-    // try {
-    //   // ✅ Case 1: Follow-up appointment
-      
-    //   // ✅ Case 2: New appointment
-     
-    //     responseData = await postBookings(widget.bookingDetails);
-       
-    //   if (!mounted) return;
-    //   Navigator.pop(context); // close loader
+      if (!mounted) return;
 
-    //   if (responseData == null) {
-    //     ScaffoldMessageSnackbar.show(
-    //       context: context,
-    //       message: "No response received. Please try again.",
-    //       type: SnackbarType.error,
-    //     );
-    //     return;
-    //   }
+      // 3️⃣ Close loader
+      Navigator.of(context).pop();
 
-    //   final statusCode = responseData['statusCode'] ?? 0;
-    //   final message = responseData['message'] ?? "Booking failed. Try again";
+      // 4️⃣ Navigate to success screen with REAL DATA
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => BookingSuccessScreen(
+            clinicName: bookingResponse.clinicName,
+            serviceName: bookingResponse.serviceName ?? "",
+            appointmentDate: bookingResponse.appointmentDate,
+            clinicAddress: bookingResponse.clinicAddress,
+            mobile: bookingResponse.mobileNumber,
+            bookingId: bookingResponse.bookingId,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
 
-    //   // ✅ On success
-    //   if (statusCode == 200 || statusCode == 201) {
-    //     // Clear Timer Controller safely
-    //     if (Get.isRegistered<TimerController>()) {
-    //       Get.delete<TimerController>();
-    //     }
+      // 5️⃣ Close loader
+      Navigator.of(context).pop();
 
-    //     if (widget.postFollowBookingPayload?.bookingId?.isNotEmpty ?? false) {
-    //       // ✅ Navigate for Follow-up
-    //       ScaffoldMessageSnackbar.show(
-    //         context: context,
-    //         message: "Follow-up booked successfully!",
-    //         type: SnackbarType.success,
-    //       );
-    //       scheduleController.selectedSlotIndex.value = -1;
-    //       scheduleController.currentSlots.clear();
-    //       if (Navigator.canPop(context)) {
-    //         Navigator.pop(context); // close the bottom sheet
-    //       }
-
-    //       Get.offAll(() => BottomNavController(
-    //             mobileNumber: widget.mobileNumber,
-    //             username: widget.bookingDetails.patient.name,
-    //             index: 1,
-    //           ));
-    //     } else {
-    //       // ✅ Navigate for New Booking
-    //       ScaffoldMessageSnackbar.show(
-    //         context: context,
-    //         message: "Appointment Booked Successfully!",
-    //         type: SnackbarType.success,
-    //       );
-
-    //       Navigator.pushAndRemoveUntil(
-    //         context,
-    //         MaterialPageRoute(
-    //           builder: (_) => SuccessScreen(
-    //             serviceDetails: widget.serviceDetails,
-    //             paymentId: paymentId ?? "",
-    //             patient: widget.bookingDetails.patient,
-    //             mobileNumber: widget.mobileNumber,
-    //             paymentType: "online",
-    //             clinicData: widget.serviceDetails,
-    //             branchName: widget.branchName,
-    //           ),
-    //         ),
-    //         (route) => false,
-    //       );
-    //     }
-    //   } else {
-    //     // ❌ On failure
-    //     ScaffoldMessageSnackbar.show(
-    //       context: context,
-    //       message: message,
-    //       type: SnackbarType.error,
-    //     );
-    //   }
-    // } catch (e) {
-    //   if (!mounted) return;
-    //   Navigator.pop(context);
-
-    //   ScaffoldMessageSnackbar.show(
-    //     context: context,
-    //     message: "Unexpected error occurred: $e",
-    //     type: SnackbarType.error,
-    //   );
-    // }
+      // 6️⃣ Show error
+      showSnackbar(
+        "Booking Failed",
+        e.toString(),
+        "error",
+      );
+    }
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
@@ -303,99 +226,3 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
     super.dispose();
   }
 }
-
-// =================PhonePay==============
-
-// import 'dart:convert' show base64Encode, jsonEncode, utf8;
-// import 'dart:developer';
-
-// import 'package:crypto/crypto.dart';
-// import 'package:flutter/material.dart';
-
-// import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
-
-// import '../Doctors/ListOfDoctors/DoctorModel.dart';
-// import '../PatientsDetails/PatientModel.dart';
-
-// class PhonepePg {
-//   final VoidCallback? onPaymentInitiated;
- 
-//   final String amount;
-//   final BuildContext context;
-//   final Patientmodel patient;
-
-//   PhonepePg({
-//     required this.context,
-//     required this.amount,
-//     required this.onPaymentInitiated,
-//     required this.serviceDetails,
-//     required this.patient,
-//   });
-
-//   final String merchantId = "PGTESTPAYUAT";
-//   final String salt = "099eb0cd-02cf-4e2a-8aca-3e6c6aff0399";
-//   final int saltIndex = 1;
-//   final String callbackURL = "https://www.webhook.site/callback-url";
-//   final String apiEndPoint = "/pg/v1/pay";
-
-//   Future<void> initSDK() async {
-//     try {
-//       bool? result =
-//           await PhonePePaymentSdk.init("SANDBOX", null, merchantId, true);
-//       startTransaction();
-//       log("📲 PhonePe SDK Initialized: $result");
-//     } catch (e) {
-//       log("❌ SDK Init Failed: $e");
-//     }
-//   }
-
-//   Future<void> startTransaction() async {
-//     final transactionId = "TXN${DateTime.now().millisecondsSinceEpoch}";
-
-//     Map<String, dynamic> body = {
-//       "merchantId": merchantId,
-//       "merchantTransactionId": transactionId,
-//       "merchantUserId": "user123", // Dynamic user
-//       "amount": amount * 100, // in paise
-//       "callbackUrl": callbackURL,
-//       "mobileNumber": "7842259803", // Dynamic user
-//       "paymentInstrument": {"type": "PAY_PAGE"},
-//     };
-
-//     log("🔄 Request Body: $body");
-
-//     String bodyEncoded = base64Encode(utf8.encode(jsonEncode(body)));
-//     var byteCodes = utf8.encode(bodyEncoded + apiEndPoint + salt);
-//     String checksum = "${sha256.convert(byteCodes)}###$saltIndex";
-
-//     try {
-//       var response = await PhonePePaymentSdk.startTransaction(
-//         bodyEncoded,
-//         callbackURL,
-//         checksum,
-//         "",
-//       );
-
-//       log("✅ SDK Response: $response");
-
-//       if (response is Map && response.containsKey("status")) {
-//         final status = response["status"];
-//         if (status == "SUCCESS") {
-//           ScaffoldMessenger.of(context).showSnackBar(
-//             SnackBar(content: Text("Payment successful")),
-//           );
-//         } else {
-//           ScaffoldMessenger.of(context).showSnackBar(
-//             SnackBar(content: Text("Payment failed: ${response["error"]}")),
-//           );
-//           print("Payment failed: ${response["error"]}");
-//         }
-//       }
-//     } catch (e) {
-//       log("❌ Payment Error: $e");
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text("Transaction failed: $e")),
-//       );
-//     }
-//   }
-// }

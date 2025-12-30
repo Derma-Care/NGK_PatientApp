@@ -1,46 +1,56 @@
 class BookingModel {
   final String bookingId;
-  final String customerId;
+  final String? customerId;
   final String mobileNumber;
 
-  final String bookingType; // procedure / package
+  final String serviceType; // procedure / package
   final String? serviceId;
-  final String? subServiceId;
+  final String? serviceName;
 
-  final String title;
+  final String? clinicId;
 
-  final String clinicId;
+  final double? consultationFee;
+  final double? gstAmount;
+  final double? gst;
+
+  final double? taxAmount;
+  final double? taxPercentage;
+
   final String clinicName;
   final String clinicAddress;
 
-  final String bookingDate;
+  final String appointmentDate;
 
   final double price;
-  final int discountPercentage;
+  final double discount;
   final double discountAmount;
   final double finalAmount;
 
-  final String paymentMethod;
+  final String paymentType;
   final String status;
   final bool? isRated;
-final List<ProcedureSittingModel>? procedures; // ✅ nullable
+  final List<ProcedureSittingModel>? procedures; // ✅ nullable
   BookingModel({
     required this.bookingId,
-    required this.customerId,
+    this.customerId,
+    this.consultationFee,
+    this.gstAmount,
+    this.gst,
+    this.taxAmount,
+    this.taxPercentage,
     required this.mobileNumber,
-    required this.bookingType,
+    required this.serviceType,
+    this.serviceName,
     this.serviceId,
-    this.subServiceId,
-    required this.title,
-    required this.clinicId,
+    this.clinicId,
     required this.clinicName,
     required this.clinicAddress,
-    required this.bookingDate,
+    required this.appointmentDate,
     required this.price,
-    required this.discountPercentage,
+    required this.discount,
     required this.discountAmount,
     required this.finalAmount,
-    required this.paymentMethod,
+    required this.paymentType,
     required this.status,
     this.isRated,
     this.procedures,
@@ -51,21 +61,25 @@ final List<ProcedureSittingModel>? procedures; // ✅ nullable
       "bookingId": bookingId,
       "customerId": customerId,
       "mobileNumber": mobileNumber,
-      "bookingType": bookingType,
+      "serviceType": serviceType,
       "serviceId": serviceId,
-      "subServiceId": subServiceId,
-      "title": title,
+      "serviceName": serviceName,
       "clinicId": clinicId,
       "clinicName": clinicName,
       "clinicAddress": clinicAddress,
-      "bookingDate": bookingDate,
+      "appointmentDate": appointmentDate,
       "price": price,
-      "discountPercentage": discountPercentage,
+      "discount": discount,
       "discountAmount": discountAmount,
       "finalAmount": finalAmount,
-      "paymentMethod": paymentMethod,
+      "paymentMethod": paymentType,
       "status": status,
-      "isRated": isRated
+      "isRated": isRated,
+      "consultationFee": consultationFee,
+      "gstAmount": gstAmount,
+      "gst": gst,
+      "taxAmount": taxAmount,
+      "taxPercentage": taxPercentage
     };
   }
 
@@ -73,25 +87,30 @@ final List<ProcedureSittingModel>? procedures; // ✅ nullable
     return BookingModel(
       bookingId: json['bookingId'],
       isRated: json['isRated'],
+      consultationFee: (json['consultationFee'] ?? 0).toDouble(),
+      gstAmount: (json['gstAmount'] ?? 0).toDouble(),
+      gst: (json['gst'] ?? 0).toDouble(),
       customerId: json['customerId'],
       mobileNumber: json['mobileNumber'],
-      bookingType: json['bookingType'],
+      serviceType: json['serviceType'],
+      serviceName: json['serviceName'],
       serviceId: json['serviceId'],
-      subServiceId: json['subServiceId'],
-      title: json['title'],
       clinicId: json['clinicId'],
       clinicName: json['clinicName'],
       clinicAddress: json['clinicAddress'],
-      bookingDate: json['bookingDate'],
+      appointmentDate: json['appointmentDate'],
       price: (json['price'] ?? 0).toDouble(),
-      discountPercentage: json['discountPercentage'],
+      discount: json['discount'],
       discountAmount: (json['discountAmount'] ?? 0).toDouble(),
       finalAmount: (json['finalAmount'] ?? 0).toDouble(),
-      paymentMethod: json['paymentMethod'],
+      taxAmount: (json['taxAmount'] ?? 0).toDouble(),
+      taxPercentage: (json['taxPercentage'] ?? 0).toDouble(),
+      paymentType: json['paymentType'],
       status: json['status'],
     );
   }
 }
+
 class ProcedureSittingModel {
   final String procedureName;
   final int sittings;
@@ -101,5 +120,3 @@ class ProcedureSittingModel {
     required this.sittings,
   });
 }
-
-
