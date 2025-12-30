@@ -125,6 +125,7 @@ class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonHeader(title: "Procedures"),
@@ -135,51 +136,56 @@ class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
                 size: 40,
               ),
             )
-          : _filteredProcedures.isEmpty
-              ? const Center(
-                  child: Text(
-                    "No procedures found",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                )
-              : Column(
-                  children: [
-                    ProcedureFilterBar(
-                      searchController: _searchController,
-                      offerRange: _offerRange,
-                      onRangeChanged: (value) {
-                        setState(() => _offerRange = value);
-                      },
-                      onClear: _clearFilters,
-                    ),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: RefreshIndicator(
-                        color: Colors.pink,
-                        onRefresh: _onRefresh,
-                        child: GridView.builder(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.all(12),
-                          itemCount: _filteredProcedures.length,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 5,
-                            mainAxisSpacing: 5,
-                            childAspectRatio: 0.9,
-                          ),
-                          itemBuilder: (context, index) {
-                            return 
-                            
-                            ProcedureCard(
-                              procedure: _filteredProcedures[index],
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+          : Column(
+              children: [
+                /// 🔹 FILTER BAR (ALWAYS VISIBLE)
+                ProcedureFilterBar(
+                  searchController: _searchController,
+                  offerRange: _offerRange,
+                  onRangeChanged: (value) {
+                    setState(() => _offerRange = value);
+                  },
+                  onClear: _clearFilters,
                 ),
+
+                const SizedBox(height: 10),
+
+                /// 🔹 CONTENT AREA
+                Expanded(
+                  child: _filteredProcedures.isEmpty
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(Icons.search_off,
+                                size: 48, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text("No procedures match your filters"),
+                          ],
+                        )
+                      : RefreshIndicator(
+                          color: Colors.pink,
+                          onRefresh: _onRefresh,
+                          child: GridView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.all(12),
+                            itemCount: _filteredProcedures.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 5,
+                              mainAxisSpacing: 5,
+                              childAspectRatio: 0.9,
+                            ),
+                            itemBuilder: (context, index) {
+                              return ProcedureCard(
+                                procedure: _filteredProcedures[index],
+                              );
+                            },
+                          ),
+                        ),
+                ),
+              ],
+            ),
     );
   }
 }

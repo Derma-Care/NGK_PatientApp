@@ -13,6 +13,7 @@ class ClinicServiceLocation {
       "${registerUrl}/procedures/clinics"
       "?latitude=$latitude&longitude=$longitude&procedureId=$procedureId",
     );
+    print("response clinic url ${url}");
 
     final response = await http.get(url);
     print("response clinic ${response.body}");

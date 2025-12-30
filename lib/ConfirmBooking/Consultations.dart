@@ -67,6 +67,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     loadProcedures();
     _fetchCustomerName();
     _loadCustomerNameFromPrefs();
+    walletController.loadWallet();
   }
 
   Future<CustomerProfileModel?> _loadProfile() {
@@ -556,20 +557,23 @@ class ConsultationsTypeState extends State<ConsultationsType> {
               ));
         }),
         GestureDetector(
-          onTap: () => Get.to(() => ReferralWalletPage()),
+          onTap: () =>
+              Get.to(() => ReferralWalletPage(mobile: widget.mobileNumber)),
           child: Stack(
             children: [
               IconButton(
                 icon: const Icon(Icons.wallet, color: Colors.white),
                 onPressed: () {
-                  Get.to(() => ReferralWalletPage());
+                  Get.to(
+                    () => ReferralWalletPage(mobile: widget.mobileNumber),
+                  );
                 },
               ),
               Positioned(
                 right: 0,
                 top: -2,
                 child: Obx(() => Text(
-                      "💰 ${walletController.walletBalance}",
+                      "💰${walletController.walletSummary.value?.balance.toDouble().toStringAsFixed(0)}",
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

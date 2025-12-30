@@ -100,7 +100,6 @@ Future<void> main() async {
   Get.put(ClinicControllerLocation(), permanent: true);
   Get.put(ClinicSlotController(), permanent: true);
 
-  
   // ✅ FCM Notification tap handling
   final RemoteMessage? initialMessage =
       await FirebaseMessaging.instance.getInitialMessage();

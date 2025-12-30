@@ -44,16 +44,30 @@ String formatOfferDate(String? offerDate) {
       "${validDate.day} ${months[validDate.month - 1]} ${validDate.year}";
 
   if (remainingDays < 0) {
-    return "$formattedDate (Expired)";
+    return "$formattedDate";
   }
 
   if (remainingDays == 0) {
-    return "$formattedDate (Today)";
+    return "$formattedDate";
   }
 
   if (remainingDays == 1) {
-    return "$formattedDate (Ends Tomorrow)";
+    return "$formattedDate";
   }
 
   return "$remainingDays days left";
+
+  // if (remainingDays < 0) {
+  //   return "$formattedDate \n (Expired)";
+  // }
+
+  // if (remainingDays == 0) {
+  //   return "$formattedDate \n(Today)";
+  // }
+
+  // if (remainingDays == 1) {
+  //   return "$formattedDate \n(Ends Tomorrow)";
+  // }
+
+  // return "$remainingDays days left";
 }

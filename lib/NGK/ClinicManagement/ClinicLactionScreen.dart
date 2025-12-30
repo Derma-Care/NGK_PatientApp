@@ -1,4 +1,11 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:cutomer_app/NGK/ClinicManagement/AboutClinicScreen.dart';
 import 'package:cutomer_app/NGK/Procedures/procedure_details_modal.dart';
 import 'package:cutomer_app/NGK/Widgets/CommonPaginationBar.dart';
@@ -7,14 +14,14 @@ import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/FormatOfferDate.dart';
 import 'package:cutomer_app/Utils/Header.dart';
 import 'package:cutomer_app/Utils/NOClinicAvailableUi.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'ClinicControllerLocation.dart';
 
 class ClinicListLocationScreen extends StatefulWidget {
-  const ClinicListLocationScreen({super.key});
+  // final bool hideHeader;
+  const ClinicListLocationScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<ClinicListLocationScreen> createState() =>
@@ -242,7 +249,7 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
                                           const SizedBox(width: 12),
                                           const SizedBox(width: 2),
                                           Text(
-                                            "₹ ${procedure?.finalCost.toStringAsFixed(0)}",
+                                            "₹ ${procedure?.discountedCost.toStringAsFixed(0)}",
                                             style: const TextStyle(
                                               fontSize: 12,
                                               color: Colors.black87,
@@ -337,7 +344,8 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
                           ),
 
                           /// 🎯 OFFER STRIP (RIGHT)
-                          if (offerText.isNotEmpty)
+                          if (procedure != null &&
+                              procedure.discountedCost < procedure.price)
                             SizedBox(
                               width: 36,
                               child: discountStrip(offerText, procedure),
@@ -388,6 +396,14 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
                   letterSpacing: 1,
                 ),
               ),
+              // Text(
+              //   formatOfferDate(procedure?.offerValidDate),
+              //   style: const TextStyle(
+              //     fontSize: 12,
+              //     fontWeight: FontWeight.w600,
+              //     color: Colors.white,
+              //   ),
+              // ),
               Text(
                 formatOfferDate(procedure?.offerValidDate),
                 style: const TextStyle(

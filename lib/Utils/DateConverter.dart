@@ -64,3 +64,6 @@ String formatDateOnly(String? date) {
 
   return DateFormat('dd MMM yyyy').format(parsedDate);
 }
+String formatCreateDate(DateTime date) {
+  return DateFormat('dd MMM yyyy').format(date);
+}

@@ -6,6 +6,7 @@ const String wifiUrl = "https://glowkartapi.ashokfruit.shop";
 const String serverUrl = "${wifiUrl}";
 const String clinicUrl = "${wifiUrl}/clinic-admin";
 const String baseUrl = '$serverUrl/customers';
+const String booking_Url = '$serverUrl/booking/customer';
 const String consultationUrl = "${wifiUrl}/api/customer/getAllConsultations";
 const String registerUrl = '${wifiUrl}/api/customer';
 const String categoryUrl = '${wifiUrl}/admin/getCategories';

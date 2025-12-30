@@ -1,71 +1,40 @@
-import 'package:cutomer_app/Customers/GetCustomerModel.dart';
-import 'package:cutomer_app/Dashboard/GetCustomerData.dart';
 import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
-import 'package:cutomer_app/NGK/Service/customer_service.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
+import 'package:cutomer_app/Utils/DateConverter.dart';
 import 'package:cutomer_app/Utils/capitalizeFirstLetter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 class ReferralWalletPage extends StatefulWidget {
-  const ReferralWalletPage({super.key});
+  final String mobile;
+  const ReferralWalletPage({super.key, required this.mobile});
 
   @override
   State<ReferralWalletPage> createState() => _ReferralWalletPageState();
 }
 
 class _ReferralWalletPageState extends State<ReferralWalletPage> {
-  final ReferralWalletController walletController =
-      Get.find<ReferralWalletController>();
-
-  final CustomerGetController customerController =
-      Get.find<CustomerGetController>();
-
-  // ✅ Rewards list
-  final List<Map<String, dynamic>> rewards = [
-    {"type": "earned", "amount": 500, "date": "10 July 2025"},
-    {"type": "used", "amount": 300, "date": "12 July 2025"},
-    {"type": "earned", "amount": 500, "date": "15 July 2025"},
-  ];
-
-  // ✅ Auto-calculated wallet balance
-  int get walletBalance {
-    return rewards.fold(0, (total, item) {
-      if (item["type"] == "earned") {
-        return total + item["amount"] as int;
-      } else if (item["type"] == "used") {
-        return total - item["amount"] as int;
-      }
-      return total;
-    });
-  }
+  late ReferralWalletController walletController;
+  late CustomerGetController customerController;
 
   late Future<CustomerProfileModel?> _futureUserData;
   String? customerId;
   CustomerProfileModel? userData;
   @override
+  @override
   void initState() {
     super.initState();
-    // _loadCustomerData();
+
+    walletController = Get.put(ReferralWalletController());
+    customerController = Get.find<CustomerGetController>();
+
+    walletController.loadWallet();
   }
-
-  // Future<void> _loadCustomerData() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   // final savedName = prefs.getString('customer_full_name');
-
-  //   // customerId = prefs.getString('customerId');
-  //   final mobileNumber = await prefs.getString('mobileNumber');
-  //   setState(() {
-  //     _futureUserData = CustomerService.getCustomer(mobileNumber ?? "");
-  //     //  = fetchUserData(customerId ?? "");
-  //   });
-  // }
 
   void _shareOnWhatsApp(BuildContext context) async {
     final customer = customerController.customer.value;
@@ -105,91 +74,114 @@ $appLink
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Referral Wallet'),
-        backgroundColor: mainColor,
-      ),
-      body: DefaultTabController(
-        length: 3,
-        initialIndex: 0, // 🔥 All is default
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              _walletCard(),
-              const SizedBox(height: 20),
-              _referralCodeCard(context),
-              const SizedBox(height: 20),
-
-              // 🔹 TABS
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const TabBar(
-                  indicatorColor: mainColor,
-                  labelColor: mainColor,
-                  unselectedLabelColor: Colors.grey,
-                  tabs: [
-                    Tab(text: "All"),
-                    Tab(text: "Earned"),
-                    Tab(text: "Used"),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              // 🔹 TAB CONTENT
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    _rewardList(type: "all"),
-                    _rewardList(type: "earned"),
-                    _rewardList(type: "used"),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        appBar: AppBar(
+          title: const Text('Referral Wallet'),
+          backgroundColor: mainColor,
         ),
-      ),
-    );
+        body: Obx(() {
+          if (walletController.isLoading.value) {
+            return const Center(
+              child: CircularProgressIndicator(color: mainColor),
+            );
+          }
+
+          return DefaultTabController(
+            length: 3,
+            initialIndex: 0, // 🔥 All is default
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _walletCard(),
+                  const SizedBox(height: 20),
+                  _referralCodeCard(context),
+                  const SizedBox(height: 20),
+
+                  // 🔹 TABS
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const TabBar(
+                      indicatorColor: mainColor,
+                      labelColor: mainColor,
+                      unselectedLabelColor: Colors.grey,
+                      tabs: [
+                        Tab(text: "All"),
+                        Tab(text: "Earned"),
+                        Tab(text: "Used"),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // 🔹 TAB CONTENT
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _rewardList(type: "all"),
+                        _rewardList(type: "earned"),
+                        _rewardList(type: "used"),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }));
   }
 
   // ✅ Rewards List
   Widget _rewardList({required String type}) {
     return Obx(() {
-      final rewards = walletController.rewards;
+      final all = walletController.transactions;
 
       final filtered = type == "all"
-          ? rewards
-          : rewards.where((r) => r["type"] == type).toList();
+          ? all
+          : all
+              .where((t) =>
+                  type == "earned" ? t.type == "CREDIT" : t.type == "DEBIT")
+              .toList();
 
       if (filtered.isEmpty) {
-        return const Center(child: Text("No rewards available"));
+        return const Center(child: Text("No transactions"));
       }
 
       return ListView.builder(
         itemCount: filtered.length,
-        itemBuilder: (context, index) {
-          final r = filtered[index];
-          final isEarned = r["type"] == "earned";
+        itemBuilder: (_, index) {
+          final t = filtered[index];
+          final isCredit = t.type == "CREDIT";
 
           return Card(
+            color: Colors.white,
             child: ListTile(
               leading: Icon(
-                isEarned ? Icons.arrow_downward : Icons.arrow_upward,
-                color: isEarned ? Colors.green : Colors.red,
+                isCredit ? Icons.arrow_downward : Icons.arrow_upward,
+                color: isCredit ? Colors.green : Colors.red,
               ),
-              title: Text(isEarned ? "Reward Earned" : "Reward Used"),
-              trailing: Text(
-                "${isEarned ? '+' : '-'} ₹${r["amount"]}",
-                style: TextStyle(
-                  color: isEarned ? Colors.green : Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
+              title: Text(
+                isCredit ? "Reward Earned" : "Reward Used",
+              ),
+              subtitle: Text(t.reason.replaceAll("_", " ")),
+              trailing: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    "${isCredit ? '+' : '-'} ₹${t.points}",
+                    style: TextStyle(
+                      color: isCredit ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    formatCreateDate(t.createdAt.toLocal()),
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
               ),
             ),
           );
@@ -199,41 +191,54 @@ $appLink
   }
 
   Widget _walletCard() {
-    return Obx(() => Container(
+    return Obx(() {
+      final summary = walletController.walletSummary.value;
+      if (summary == null) {
+        return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [mainColor, secondaryColor],
-            ),
+            color: Colors.grey.shade200,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Wallet Balance",
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-              Text(
-                "💰 ${walletController.walletBalance}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          child: const Text("Loading wallet..."),
+        );
+      }
+
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [mainColor, secondaryColor],
           ),
-        ));
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Wallet Balance",
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            Text(
+              "💰 ${summary.balance}",
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _referralCodeCard(BuildContext context) {
     return Obx(() {
-      if (customerController.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
-
       final customer = customerController.customer.value;
+      if (customer == null) {
+        return const Text("Customer data not available");
+      }
 
       if (customer == null) {
         return const Text("No customer data");

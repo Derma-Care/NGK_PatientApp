@@ -60,7 +60,7 @@ class BookingService {
 
   static Future<List<BookingModel>> getBookingsByCustomer(
       String customerId) async {
-    final url = Uri.parse("$wifiUrl/booking/bookings/customer/$customerId");
+    final url = Uri.parse("$wifiUrl/booking/customer/$customerId");
 
     print("📤 [GET BOOKINGS] URL: $url");
 

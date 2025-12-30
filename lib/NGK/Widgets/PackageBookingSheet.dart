@@ -35,7 +35,9 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
   final ReferralWalletController walletController =
       Get.find<ReferralWalletController>();
   final ClinicSlotController slotController = Get.put(ClinicSlotController());
-  double get coinValue => walletController.walletBalance.toDouble();
+
+  double get coinValue =>
+      walletController.walletSummary.value?.totalCredits.toDouble() ??0.0;
   final ScrollController _scrollController = ScrollController();
   final customerController = Get.find<CustomerGetController>();
   String? mobile;
@@ -251,7 +253,9 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
 
                 /// ✅ SHOW ONLY IF BALANCE > 0
                 Obx(() {
-                  final balance = walletController.walletBalance;
+                  final balance = walletController
+                      .walletSummary.value!.totalCredits
+                      .toDouble();
 
                   if (balance <= 0) {
                     return const SizedBox(); // 🔥 hide text
@@ -268,7 +272,14 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                 }),
               ],
             ),
-
+            Text(
+              "⚠️ Use up to half of your coins for this booking. The usable amount is shown above.",
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey, // ⚠️ don't use white unless dark bg
+              ),
+            ),
             const Divider(thickness: 1.2),
 
             priceRow("Total Payable", widget.payment.finalCost, isBold: true),
