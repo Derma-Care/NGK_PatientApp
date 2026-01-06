@@ -150,6 +150,7 @@ class SiginSignUpController extends GetxController {
     }
   }
 
+
   void showFetchingLocationDialog(BuildContext context) {
     showDialog(
       context: context,

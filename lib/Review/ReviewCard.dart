@@ -1,4 +1,5 @@
 import 'package:cutomer_app/Review/HospitalRatingModel.dart';
+import 'package:cutomer_app/Utils/time_ago.dart';
 import 'package:flutter/material.dart';
 
 Widget reviewCard(CommentModel review) {
@@ -27,7 +28,7 @@ Widget reviewCard(CommentModel review) {
                     const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
               Text(
-                review.time,
+                timeAgo(review.time),
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ],

@@ -6,8 +6,8 @@ class BookingRequestModel {
   final String serviceType; // PROCEDURE / PACKAGE
 
   final String paymentType; // ONLINE / CASH
-  final double coinsUsed;
-  final String appointmentDate; // yyyy-MM-dd
+  final int pointsToRedeem;
+  final String? appointmentDate; // yyyy-MM-dd
 
   BookingRequestModel({
     required this.clinicId,
@@ -15,11 +15,9 @@ class BookingRequestModel {
     required this.serviceId,
     required this.serviceType,
     required this.paymentType,
-    required this.coinsUsed,
+    required this.pointsToRedeem,
     required this.appointmentDate,
   });
-
-  
 
   Map<String, dynamic> toJson() {
     return {
@@ -28,7 +26,7 @@ class BookingRequestModel {
       "serviceId": serviceId,
       "serviceType": serviceType,
       "paymentType": paymentType,
-      "coinsUsed": coinsUsed,
+      "pointsToRedeem": pointsToRedeem,
       "appointmentDate": appointmentDate,
     };
   }

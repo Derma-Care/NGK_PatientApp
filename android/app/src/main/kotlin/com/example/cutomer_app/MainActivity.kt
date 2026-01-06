@@ -1,4 +1,4 @@
-package com.example.DermaCare_app
+package com.example.NGK_APP
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

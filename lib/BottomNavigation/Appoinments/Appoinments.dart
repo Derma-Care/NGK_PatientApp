@@ -5,9 +5,14 @@ import 'package:cutomer_app/Review/hospital_rating_screen.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingListScreen extends StatefulWidget {
-  const BookingListScreen({super.key});
+  final int initialTabIndex; // ✅ NEW
+  const BookingListScreen({
+    super.key,
+    this.initialTabIndex = 0,
+  });
 
   @override
   State<BookingListScreen> createState() => _BookingListScreenState();
@@ -17,11 +22,17 @@ class _BookingListScreenState extends State<BookingListScreen>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
   final BookingController controller = Get.put(BookingController());
+  // late String fullname;
 
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: 2, vsync: this);
+    // _loadCustomerNameFromPrefs();
+    tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
     tabController.addListener(() {
       if (tabController.indexIsChanging) {
         if (tabController.index == 0) {
@@ -35,6 +46,17 @@ class _BookingListScreenState extends State<BookingListScreen>
     controller.fetchBookings();
     ;
   }
+
+  // Future<void> _loadCustomerNameFromPrefs() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final savedName = prefs.getString('customer_full_name');
+
+  //   if (savedName != null) {
+  //     setState(() {
+  //       fullname = savedName;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -81,66 +103,153 @@ class _BookingListScreenState extends State<BookingListScreen>
           Expanded(
             child: RefreshIndicator(
               color: mainColor,
-              onRefresh: () async =>
-                  controller.refreshData(status), // 👈 key line
+              onRefresh: () async => controller.refreshData(status),
               child: ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(), // REQUIRED
-                padding: const EdgeInsets.all(12),
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 itemCount: paginatedList.length,
                 itemBuilder: (context, index) {
                   final b = paginatedList[index];
 
-                  return GestureDetector(
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(18),
                     onTap: () => _showBookingDetails(context, b),
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 14),
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: _getStatusBorderColor(b.status),
+                          width: 1.3,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black12,
+                            color: _getStatusBorderColor(b.status)
+                                .withOpacity(0.12),
                             blurRadius: 10,
-                            offset: const Offset(0, 4),
+                            offset: const Offset(0, 5),
                           ),
                         ],
                       ),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.pink.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(Icons.calendar_month,
-                                color: mainColor, size: 28),
-                          ),
-                          const SizedBox(width: 12),
+                          /// ICON
+                          // Container(
+                          //   padding: const EdgeInsets.all(12),
+                          //   decoration: BoxDecoration(
+                          //     color: Colors.pink.shade50,
+                          //     borderRadius: BorderRadius.circular(14),
+                          //   ),
+                          //   child: Icon(
+                          //     Icons.calendar_month,
+                          //     color: mainColor,
+                          //     size: 26,
+                          //   ),
+                          // ),
+                          // const SizedBox(width: 12),
+
+                          /// DETAILS
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(b.serviceName ?? '',
-                                    style: const TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.bold)),
-                                Text("Clinic: ${b.clinicName}",
-                                    style:
-                                        TextStyle(color: Colors.grey.shade700)),
-                                Text("Date: ${b.appointmentDate}",
-                                    style:
-                                        TextStyle(color: Colors.grey.shade700)),
+                                Text(
+                                  b.fullName ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 16.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.healing,
+                                      size: 16,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        b.serviceName ?? '',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Icon(Icons.local_hospital,
+                                        size: 14, color: Colors.grey.shade600),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        b.clinicName ?? '',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey.shade700,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(Icons.event,
+                                        size: 14, color: Colors.grey.shade600),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      b.appointmentDate ?? '',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
-                          Chip(
-                            label: Text(b.status),
-                            backgroundColor: b.status == "CONFIRMED"
-                                ? Colors.orange.shade100
-                                : Colors.green.shade100,
-                          )
+
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 12),
+                            width: 1,
+                            height: 90, // 👈 adjust if needed
+                            color: Colors.grey.shade300,
+                          ),
+
+                          /// PRICE + STATUS
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                "₹${(b.finalAmount.toStringAsFixed(0)) ?? 0}",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: mainColor,
+                                ),
+                              ),
+                              Text(
+                                "${b.serviceType.toLowerCase()}",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              _statusChip(b.status),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -150,7 +259,7 @@ class _BookingListScreenState extends State<BookingListScreen>
             ),
           ),
 
-          // PAGINATION BAR
+          /// PAGINATION BAR
           Obx(() {
             return CommonPaginationBar(
               showPagination: ValueNotifier<bool>(true),
@@ -168,10 +277,64 @@ class _BookingListScreenState extends State<BookingListScreen>
                 controller.changeItemsPerPage(val);
               },
             );
-          })
+          }),
         ],
       );
     });
+  }
+
+  Widget _statusChip(String status) {
+    Color bgColor;
+    Color textColor;
+
+    switch (status) {
+      case "CONFIRMED":
+        bgColor = Colors.orange.shade100;
+        textColor = Colors.orange.shade800;
+        break;
+      case "COMPLETED":
+        bgColor = Colors.green.shade100;
+        textColor = Colors.green.shade800;
+        break;
+      case "CANCELLED":
+        bgColor = Colors.red.shade100;
+        textColor = Colors.red.shade800;
+        break;
+      default:
+        bgColor = Colors.grey.shade200;
+        textColor = Colors.grey.shade800;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+
+  Color _getStatusBorderColor(String status) {
+    switch (status) {
+      case "CONFIRMED":
+        return Colors.orange;
+      case "COMPLETED":
+        return Colors.green;
+      case "CANCELLED":
+        return Colors.red;
+      case "PENDING":
+        return Colors.blue;
+      default:
+        return Colors.grey;
+    }
   }
 
   void _showBookingDetails(BuildContext context, BookingModel b) {
@@ -347,12 +510,10 @@ class _BookingListScreenState extends State<BookingListScreen>
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          const HospitalRatingScreen(
-                                        hospitalName:
-                                            "Neeha Skin & Hair Clinic",
-                                        hospitalLogo:
-                                            "https://marketplace.canva.com/EAGFJn_CyD4/2/0/1600w/canva-green-and-white-modern-medical-logo-Tl9mfMCsEVQ.jpg",
+                                      builder: (_) => HospitalRatingScreen(
+                                        hospitalName: b.clinicName,
+                                        bookingId: b.bookingId,
+                                        hospitalLogo: b.hospitalLogo ?? "",
                                       ),
                                     ),
                                   );

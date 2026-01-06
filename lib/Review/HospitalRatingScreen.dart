@@ -1,114 +1,84 @@
 import 'package:cutomer_app/Review/AllReviewsScreen.dart';
 import 'package:cutomer_app/Review/HospitalRatingModel.dart';
 import 'package:cutomer_app/Review/ReviewCard.dart';
+import 'package:cutomer_app/Review/hospital_rating_service.dart';
 import 'package:cutomer_app/Utils/Header.dart';
 import 'package:flutter/material.dart';
 
 class HospitalRatingScreen extends StatelessWidget {
-  HospitalRatingScreen({super.key});
+  final String clinicId;
 
-  final Map<String, dynamic> dummyPayload = {
-    "hospitalOverallRating": "5.0",
-    "clinicName": "Souji Clinic",
-    "comments": [
-      {
-        "userName": "Anusha R",
-        "comment": "Very good doctor and friendly staff.",
-        "rating": 4.5,
-        "time": "2 days ago"
-      },
-      {
-        "userName": "Rahul K",
-        "comment": "Clean clinic and professional service.",
-        "rating": 4.0,
-        "time": "5 days ago"
-      },
-      {
-        "userName": "Rahul K",
-        "comment": "Clean clinic and professional service.",
-        "rating": 4.0,
-        "time": "5 days ago"
-      },
-      {
-        "userName": "Rahul K",
-        "comment": "Clean clinic and professional service.",
-        "rating": 4.0,
-        "time": "5 days ago"
-      },
-      {
-        "userName": "Rahul K",
-        "comment": "Clean clinic and professional service.",
-        "rating": 4.0,
-        "time": "5 days ago"
-      },
-      {
-        "userName": "Rahul K",
-        "comment": "Clean clinic and professional service.",
-        "rating": 4.0,
-        "time": "5 days ago"
-      }
-    ]
-  };
+  const HospitalRatingScreen({super.key, required this.clinicId});
 
   @override
   Widget build(BuildContext context) {
-    final hospitalRating = HospitalRatingModel.fromJson(dummyPayload);
-
     return Scaffold(
-      appBar: CommonHeader(
-        title: "${hospitalRating.clinicName} Reviews",
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _overallRatingCard(hospitalRating),
-            const SizedBox(height: 16),
-            const Text(
-              "Patient Reviews",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: ListView.builder(
-                itemCount: hospitalRating.comments.length > 5
-                    ? 5
-                    : hospitalRating.comments.length,
-                itemBuilder: (_, i) => reviewCard(hospitalRating.comments[i]),
-              ),
-            ),
-            if (hospitalRating.comments.length > 5)
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            AllReviewsScreen(hospitalRating: hospitalRating),
-                      ),
-                    );
-                  },
-                  child: const Text("View All"),
+      appBar: const CommonHeader(title: "Clinic Reviews"),
+      body: FutureBuilder(
+        future: HospitalRatingService.fetchClinicRatings(clinicId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text("❌ ${snapshot.error}"));
+          }
+
+          final hospitalRating = HospitalRatingModel.fromApi(snapshot.data!);
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _overallRatingCard(hospitalRating),
+                const SizedBox(height: 16),
+                const Text(
+                  "Patient Reviews",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-              ),
-          ],
-        ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: hospitalRating.comments.length > 5
+                        ? 5
+                        : hospitalRating.comments.length,
+                    itemBuilder: (_, i) =>
+                        reviewCard(hospitalRating.comments[i]),
+                  ),
+                ),
+                if (hospitalRating.comments.length > 5)
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AllReviewsScreen(
+                                hospitalRating: hospitalRating),
+                          ),
+                        );
+                      },
+                      child: const Text("View All"),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _overallRatingCard(HospitalRatingModel model) {
-    final double rating = double.tryParse(model.hospitalOverallRating) ?? 0.0;
+    final rating = double.tryParse(model.hospitalOverallRating) ?? 0.0;
 
     return Card(
-      color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: Colors.pinkAccent.withOpacity(0.4), // border color
-          width: 1.2, // border width
+          color: Colors.pinkAccent.withOpacity(0.4),
         ),
       ),
       child: Padding(
@@ -130,7 +100,7 @@ class HospitalRatingScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "${model.comments.length} Ratings",
+                  "${model.totalRatings} Ratings",
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),

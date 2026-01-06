@@ -3,14 +3,14 @@ import 'package:cutomer_app/NGK/ClinicManagement/clinic_slot_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
-import 'package:cutomer_app/NGK/Packges/PackageModel.dart';
-import 'package:cutomer_app/NGK/Procedures/ProcedureModel.dart';
-import 'package:cutomer_app/NGK/Screens/BookingSuccessScreen.dart';
+import 'package:cutomer_app/NGK/Modals/PriceCalculationModel.dart';
+import 'package:cutomer_app/NGK/Service/PriceCalculationService.dart';
+
 import 'package:cutomer_app/Payments/AllPayments.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
-import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
+
 import 'package:cutomer_app/Utils/ShowSnackBar%20copy.dart';
-import 'package:cutomer_app/main.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -37,10 +37,12 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
   final ClinicSlotController slotController = Get.put(ClinicSlotController());
 
   double get coinValue =>
-      walletController.walletSummary.value?.totalCredits.toDouble() ??0.0;
+      walletController.walletSummary.value?.totalCredits.toDouble() ?? 0.0;
   final ScrollController _scrollController = ScrollController();
   final customerController = Get.find<CustomerGetController>();
   String? mobile;
+  PriceCalculationModel? priceCalc;
+  bool priceLoading = false;
 
 // Value of coins
   @override
@@ -220,12 +222,27 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
             priceRow("Consultation", widget.payment.consultationFee),
             priceRow("GST (${widget.payment.gst.toStringAsFixed(0)}%)",
                 widget.payment.gstAmount),
-            priceRow(
+            if (widget.payment.taxAmount != 0)
+              priceRow(
                 "Tax (${widget.payment.taxPercentage.toStringAsFixed(0)}%)",
-                widget.payment.taxAmount),
-            priceRow("Discount (${widget.payment.discountPercentage.toInt()}%)",
-                -widget.payment.discountAmount),
+                widget.payment.taxAmount,
+              ),
+
+            if (widget.payment.discountAmount != 0)
+              priceRow(
+                "Discount (${widget.payment.discountPercentage.toInt()}%)",
+                -widget.payment.discountAmount,
+              ),
+
             priceRow("Platform Fee", platformFee),
+
+            if (useCoins && priceCalc != null && priceCalc!.appliedPoints > 0)
+              priceRow(
+                "Coins Applied",
+                -priceCalc!.appliedPoints.toDouble(),
+                amountColor: Colors.red,
+              ),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -236,44 +253,68 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                       style:
                           TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                     ),
-                    Transform.scale(
-                      scale: 0.60,
-                      child: Switch(
-                        activeColor: mainColor,
-                        value: useCoins,
-                        onChanged: (v) {
-                          setState(() {
-                            useCoins = v;
-                          });
-                        },
-                      ),
-                    ),
                   ],
+                ),
+                Transform.scale(
+                  scale: 0.60,
+                  child: Switch(
+                    activeColor: mainColor,
+                    value: useCoins,
+                    onChanged: (v) async {
+                      setState(() {
+                        useCoins = v;
+                        priceLoading = true;
+                      });
+
+                      final payload = {
+                        "customerId":
+                            customerController.customer.value!.customerId,
+                        "clinicId": widget.payment.clinicId,
+                        "serviceId": widget.payment.serviceId,
+                        "serviceType": widget.payment.serviceType,
+                        if (v)
+                          "pointsToRedeem": coinValue.toInt(), // ✅ only when ON
+                      };
+
+                      try {
+                        priceCalc =
+                            await PriceCalculationService.calculatePrice(
+                                payload);
+                      } catch (e) {
+                        showSnackbar("Error", e.toString(), "error");
+                        useCoins = false;
+                      }
+
+                      setState(() {
+                        priceLoading = false;
+                      });
+                    },
+                  ),
                 ),
 
                 /// ✅ SHOW ONLY IF BALANCE > 0
-                Obx(() {
-                  final balance = walletController
-                      .walletSummary.value!.totalCredits
-                      .toDouble();
+                // Obx(() {
+                //   final balance = walletController
+                //       .walletSummary.value!.totalCredits
+                //       .toDouble();
 
-                  if (balance <= 0) {
-                    return const SizedBox(); // 🔥 hide text
-                  }
+                //   if (balance <= 0) {
+                //     return const SizedBox(); // 🔥 hide text
+                //   }
 
-                  return Text(
-                    "-₹ $balance",
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black, // ⚠️ don't use white unless dark bg
-                    ),
-                  );
-                }),
+                //   return Text(
+                //     "-₹ $balance",
+                //     style: const TextStyle(
+                //       fontSize: 15,
+                //       fontWeight: FontWeight.w600,
+                //       color: Colors.black, // ⚠️ don't use white unless dark bg
+                //     ),
+                //   );
+                // }),
               ],
             ),
             Text(
-              "⚠️ Use up to half of your coins for this booking. The usable amount is shown above.",
+              "ℹ️ You have ${walletController.walletSummary.value?.balance} coins. By enabling this option, up to half of your coins will be used for this booking.",
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -282,7 +323,13 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
             ),
             const Divider(thickness: 1.2),
 
-            priceRow("Total Payable", widget.payment.finalCost, isBold: true),
+            priceRow(
+              "Total Payable",
+              useCoins && priceCalc != null
+                  ? priceCalc!.finalAmount
+                  : priceCalc?.originalFinalAmount ?? widget.payment.finalCost,
+              isBold: true,
+            ),
 
             const SizedBox(height: 20),
 
@@ -290,21 +337,9 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
             ElevatedButton(
               onPressed: () {
                 if (slotController.selectedIndex.value == -1) {
-                  //            ScaffoldMessageSnackbar.show(
-                  //   context: context,
-                  //   message: "Please select an available date",
-                  //   type: SnackbarType.warning,po
-                  // );
                   showSnackbar(
                       "Warning", "Please select an available date", "warning");
 
-                  // showDialog(
-                  //   context: context,
-                  //   builder: (_) => AlertDialog(
-                  //     title: const Text("Alert"),
-                  //     content: const Text("Please select an available date"),
-                  //   ),
-                  // );
                   return;
                 }
                 final customer = customerController.customer.value;
@@ -313,39 +348,35 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                   showSnackbar("Error", "Customer data not loaded", "error");
                   return;
                 }
-
                 final payload = BookingRequestModel(
                   clinicId: widget.payment.clinicId,
-                  customerId: customer.customerId, // from login
-                  serviceId: widget.payment.serviceId, // package/procedure
-                  serviceType: widget.payment.serviceType, // or PROCEDURE
+                  customerId: customer.customerId,
+                  serviceId: widget.payment.serviceId,
+                  serviceType: widget.payment.serviceType,
                   paymentType: "ONLINE",
-                  coinsUsed: coinsUsed, // ✅ ACTUAL COINS USED
                   appointmentDate: slotController
                       .slots[slotController.selectedIndex.value].date,
+
+                  // ✅ send ONLY when toggle ON
+                  pointsToRedeem:
+                      useCoins ? (priceCalc?.appliedPoints ?? 0) : 0,
                 );
+
                 print("Booing payload final ${payload.toJson()}");
+                final totalAmt = useCoins && priceCalc != null
+                    ? priceCalc!.finalAmount
+                    : priceCalc?.originalFinalAmount ??
+                        widget.payment.finalCost;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (_) => RazorpaySubscription(
-                          amount: finalPayable.toString(),
+                          amount: totalAmt,
                           onPaymentInitiated: () {},
                           context: context,
                           mobileNumber: mobile!,
                           bookingData: payload)),
                 );
-                // Navigator.of(context).pushReplacement(
-                //   MaterialPageRoute(
-                //     builder: (_) => BookingSuccessScreen(
-                //       clinicName: "Pragna Skin Care",
-                //       serviceName: "Chemical Peel",
-                //       appointmentDate: payload.appointmentDate,
-                //       clinicAddress: "Hyderabad, Telangana",
-                //       mobile: mobile!,
-                //     ),
-                //   ),
-                // );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.pink,
@@ -368,20 +399,32 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
     );
   }
 
-  Widget priceRow(String title, double amount, {bool isBold = false}) {
+  Widget priceRow(
+    String title,
+    double amount, {
+    bool isBold = false,
+    Color? amountColor,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title,
-              style: TextStyle(
-                  fontSize: isBold ? 17 : 15,
-                  fontWeight: isBold ? FontWeight.bold : FontWeight.w500)),
-          Text("₹${amount.toStringAsFixed(2)}",
-              style: TextStyle(
-                  fontSize: isBold ? 17 : 15,
-                  fontWeight: isBold ? FontWeight.bold : FontWeight.w500)),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: isBold ? 17 : 15,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+            ),
+          ),
+          Text(
+            "₹${amount.toStringAsFixed(2)}",
+            style: TextStyle(
+              fontSize: isBold ? 17 : 15,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+              color: amountColor ?? Colors.black, // ✅ default
+            ),
+          ),
         ],
       ),
     );

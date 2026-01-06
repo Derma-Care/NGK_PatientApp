@@ -8,11 +8,13 @@ import 'package:cutomer_app/NGK/BookingAppointmnet/BookingRequestModel.dart';
 import 'package:cutomer_app/NGK/BookingAppointmnet/BookingService.dart';
 import 'package:cutomer_app/NGK/BookingAppointmnet/Booking_Model.dart';
 import 'package:cutomer_app/NGK/Screens/BookingSuccessScreen.dart';
+import 'package:cutomer_app/Toasters/Toaster.dart';
 import 'package:cutomer_app/Utils/Header.dart';
 import 'package:cutomer_app/Utils/ShowSnackBar%20copy.dart';
 import 'package:cutomer_app/Widget/GobelTimer.dart';
 import 'package:cutomer_app/Widget/TimerController.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
@@ -25,7 +27,7 @@ import '../Utils/ScaffoldMessageSnacber.dart';
 class RazorpaySubscription extends StatefulWidget {
   final VoidCallback? onPaymentInitiated;
   final BookingRequestModel bookingData;
-  final String amount;
+  final double amount;
   final String mobileNumber;
 
   final BuildContext context;
@@ -57,7 +59,7 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
     // Payment options
     options = {
       'key': 'rzp_test_sor33NEn9vHr3Q',
-      'amount': (double.parse(widget.amount) * 100).toInt(), // Amount in paise
+      'amount': (widget.amount * 100), // Amount in paise
 
       'name': "Neeha's GlowKart",
       'description': 'Service Charges',
@@ -182,14 +184,14 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
     });
 
     if (response.code == Razorpay.PAYMENT_CANCELLED) {
-      ScaffoldMessageSnackbar.show(
-        context: context, // Use the new context from builder
-        message: "Payment Cancelled by User",
-        type: SnackbarType.warning,
-        durationInSeconds: 5,
-      );
+      // ScaffoldMessageSnackbar.show(
+      //   context: context, // Use the new context from builder
+      //   message: "Payment Cancelled by User",
+      //   type: SnackbarType.warning,
+      //   durationInSeconds: 5,
+      // );
       // Fluttertoast.showToast(msg: "Payment Cancelled by User");
-
+      showSuccessToast(msg: "Payment Cancelled by User");
       Navigator.pop(context);
 
       // (route) => false,

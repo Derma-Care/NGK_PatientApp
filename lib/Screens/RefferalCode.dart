@@ -193,6 +193,7 @@ $appLink
   Widget _walletCard() {
     return Obx(() {
       final summary = walletController.walletSummary.value;
+
       if (summary == null) {
         return Container(
           padding: const EdgeInsets.all(20),
@@ -200,7 +201,9 @@ $appLink
             color: Colors.grey.shade200,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Text("Loading wallet..."),
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
         );
       }
 
@@ -208,29 +211,118 @@ $appLink
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [mainColor, secondaryColor],
           ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              "Wallet Balance",
-              style: TextStyle(color: Colors.white, fontSize: 16),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: mainColor.withOpacity(0.35),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// 🔹 Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "My Wallet",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Icon(
+                  Icons.account_balance_wallet_rounded,
+                  color: Colors.white,
+                  size: 26,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            /// 🔹 Wallet Balance (Primary)
             Text(
-              "💰 ${summary.balance}",
+              "₹${summary.balance}",
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: 36,
                 fontWeight: FontWeight.bold,
+                letterSpacing: 0.6,
               ),
+            ),
+
+            const SizedBox(height: 4),
+
+            const Text(
+              "Available Balance",
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 13,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            /// 🔹 Divider
+            Container(
+              height: 1,
+              width: double.infinity,
+              color: Colors.white.withOpacity(0.25),
+            ),
+
+            const SizedBox(height: 14),
+
+            /// 🔹 Stats Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _walletStat(
+                  label: "Total Earned",
+                  value: "₹${summary.totalCredits}",
+                ),
+                _walletStat(
+                  label: "Used",
+                  value: "₹${summary.balance ?? 0}",
+                ),
+              ],
             ),
           ],
         ),
       );
     });
+  }
+
+  Widget _walletStat({required String label, required String value}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _referralCodeCard(BuildContext context) {

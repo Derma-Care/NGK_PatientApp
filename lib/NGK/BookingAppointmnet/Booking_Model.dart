@@ -2,11 +2,11 @@ class BookingModel {
   final String bookingId;
   final String? customerId;
   final String mobileNumber;
-
+  final String? fullName;
   final String serviceType; // procedure / package
   final String? serviceId;
   final String? serviceName;
-
+  final String? hospitalLogo;
   final String? clinicId;
 
   final double? consultationFee;
@@ -32,6 +32,7 @@ class BookingModel {
   final List<ProcedureSittingModel>? procedures; // ✅ nullable
   BookingModel({
     required this.bookingId,
+    this.fullName,
     this.customerId,
     this.consultationFee,
     this.gstAmount,
@@ -54,11 +55,14 @@ class BookingModel {
     required this.status,
     this.isRated,
     this.procedures,
+    this.hospitalLogo,
   });
 
   Map<String, dynamic> toJson() {
     return {
       "bookingId": bookingId,
+      "hospitalLogo": hospitalLogo,
+      "fullName": fullName,
       "customerId": customerId,
       "mobileNumber": mobileNumber,
       "serviceType": serviceType,
@@ -86,6 +90,8 @@ class BookingModel {
   factory BookingModel.fromJson(Map<String, dynamic> json) {
     return BookingModel(
       bookingId: json['bookingId'],
+      hospitalLogo: json['hospitalLogo'],
+      fullName: json['fullName'],
       isRated: json['isRated'],
       consultationFee: (json['consultationFee'] ?? 0).toDouble(),
       gstAmount: (json['gstAmount'] ?? 0).toDouble(),

@@ -144,7 +144,9 @@ class AboutClinicScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Get.to(() => HospitalRatingScreen());
+                    Get.to(() => HospitalRatingScreen(
+                          clinicId: clinic.clinicId,
+                        ));
                   },
                   child: const Text("Ratings & Comments"),
                 ),

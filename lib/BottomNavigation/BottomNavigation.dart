@@ -10,14 +10,15 @@ import 'Profile/Profiles.dart';
 
 class BottomNavController extends StatefulWidget {
   final String mobileNumber;
-
+  final int? appointmentTabIndex;
   final int index;
 
-  const BottomNavController({
-    Key? key,
-    required this.mobileNumber,
-    required this.index,
-  }) : super(key: key);
+  const BottomNavController(
+      {Key? key,
+      required this.mobileNumber,
+      required this.index,
+      this.appointmentTabIndex})
+      : super(key: key);
 
   @override
   _BottomNavControllerState createState() => _BottomNavControllerState();
@@ -41,7 +42,9 @@ class _BottomNavControllerState extends State<BottomNavController> {
       ConsultationsType(
         mobileNumber: widget.mobileNumber,
       ),
-      BookingListScreen(),
+      BookingListScreen(
+        initialTabIndex: widget.appointmentTabIndex ?? 0,
+      ),
       CustomerProfilePage(
         mobileNumber: widget.mobileNumber,
       ),

@@ -1,19 +1,26 @@
+import 'dart:convert';
+
+import 'package:cutomer_app/APIs/BaseUrl.dart';
+import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/Header.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import '../Utils/ShowSnackBar.dart';
 
 class HospitalRatingScreen extends StatefulWidget {
   final String hospitalName;
   final String hospitalLogo; // logo image (png/svg/network)
-
+  final String bookingId;
   const HospitalRatingScreen({
     super.key,
     required this.hospitalName,
     required this.hospitalLogo,
+    required this.bookingId,
   });
 
   @override
@@ -26,41 +33,66 @@ class _HospitalRatingScreenState extends State<HospitalRatingScreen> {
   bool isSubmitting = false;
 
   void _submit() async {
+    final prefs = await SharedPreferences.getInstance();
+    final mobile = prefs.getString('mobileNumber');
+
     if (_rating == 0) {
       ScaffoldMessageSnackbar.show(
-          context: context,
-          message: "Please select a rating",
-          type: SnackbarType.warning,
-          position: SnackbarPosition.top);
-
-      // _showMsg("Please select a rating");
+        context: context,
+        message: "Please select a rating",
+        type: SnackbarType.warning,
+        position: SnackbarPosition.top,
+      );
       return;
     }
-    // if (_commentController.text.trim().isEmpty) {
-    //   _showMsg("Please enter your comment");
-    //   return;
-    // }
 
     setState(() => isSubmitting = true);
 
-    // TODO: API call
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final response = await http.post(
+        Uri.parse("${wifiUrl}/booking/rate"),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "bookingId": widget.bookingId, // ✅ pass bookingId via widget
+          "rating": _rating,
+          "review": _commentController.text.trim(), // optional
+        }),
+      );
 
-    setState(() => isSubmitting = false);
-    Navigator.pop(context);
-    Navigator.pop(context);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (!mounted) return;
 
-    showSnackbar(
-      "Feedback Submitted",
-      "Thank you for sharing your experience. Your feedback helps us improve our services.",
-      "success",
-    );
-    // ScaffoldMessageSnackbar.show(
-    //   context: context,
-    //   message: "Thank you for your feedback!",
-    //   type: SnackbarType.success,
-    // );
-    // _showMsg("Thank you for your feedback!");
+        ScaffoldMessageSnackbar.show(
+          context: context,
+          message: "Thank you for your feedback!",
+          subTitle: "Your feedback helps us improve our services.",
+          type: SnackbarType.success,
+          position: SnackbarPosition.top,
+        );
+
+        Get.offAll(() => BottomNavController(
+              mobileNumber: mobile!,
+              index: 1,
+              appointmentTabIndex: 1,
+            ));
+      } else {
+        final error = jsonDecode(response.body);
+        throw error['message'] ?? "Failed to submit rating";
+      }
+    } catch (e) {
+      ScaffoldMessageSnackbar.show(
+        context: context,
+        message: e.toString(),
+        type: SnackbarType.error,
+        position: SnackbarPosition.top,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isSubmitting = false);
+      }
+    }
   }
 
   @override
@@ -93,8 +125,10 @@ class _HospitalRatingScreenState extends State<HospitalRatingScreen> {
                       ),
                     ],
                   ),
-                  child: Image.network(
-                    widget.hospitalLogo,
+                  child: Image.memory(
+                    base64Decode(
+                      widget.hospitalLogo.split(',').last,
+                    ),
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -102,6 +136,14 @@ class _HospitalRatingScreenState extends State<HospitalRatingScreen> {
                 const SizedBox(height: 16),
 
                 // Hospital Name
+                Text(
+                  widget.bookingId,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade600),
+                ),
                 Text(
                   widget.hospitalName,
                   textAlign: TextAlign.center,

@@ -1,3 +1,4 @@
+import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 
@@ -8,7 +9,7 @@ void showSuccessToast({required String msg}) {
     toastLength: Toast.LENGTH_SHORT,
     gravity: ToastGravity.BOTTOM,
     timeInSecForIosWeb: 5,
-    backgroundColor: Colors.green, // Success color
+    backgroundColor: mainColor, // Success color
     textColor: Colors.white,
     fontSize: 16.0,
   );
@@ -16,7 +17,6 @@ void showSuccessToast({required String msg}) {
 
 // Utility function for showing error toast
 void showErrorToast({required String msg}) {
-  
   Fluttertoast.showToast(
     msg: msg,
     toastLength: Toast.LENGTH_SHORT,
@@ -26,5 +26,4 @@ void showErrorToast({required String msg}) {
     textColor: Colors.white,
     fontSize: 16.0,
   );
-  
 }

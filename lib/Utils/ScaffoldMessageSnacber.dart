@@ -10,50 +10,37 @@ class ScaffoldMessageSnackbar {
     required String message,
     required SnackbarType type,
     String subTitle = '',
-    String actionLabel = "OK",
-    int durationInSeconds = 5,
+    String actionLabel = "X",
+    int durationInSeconds = 3,
     String serviceName = '',
-    String? imagePath,
-    double imageSize = 32,
-    SnackbarPosition position =
-        SnackbarPosition.bottom, // ✅ new optional position
+    SnackbarPosition position = SnackbarPosition.bottom,
   }) {
     Color backgroundColor;
-    Color textColor;
-    Color iconColor;
     IconData icon;
 
-    // Define styles based on snackbar type
     switch (type) {
       case SnackbarType.success:
         backgroundColor = mainColor;
-        textColor = Colors.white;
-        iconColor = Colors.white;
         icon = Icons.check_circle;
         break;
       case SnackbarType.error:
         backgroundColor = mainColor;
-        textColor = Colors.white;
-        iconColor = Colors.white;
         icon = Icons.error;
         break;
       case SnackbarType.warning:
         backgroundColor = mainColor;
-        textColor = Colors.white;
-        iconColor = Colors.white;
         icon = Icons.warning;
         break;
     }
 
-    // ✅ Adjust margin based on position
-    EdgeInsetsGeometry margin;
-    if (position == SnackbarPosition.top) {
-      margin = const EdgeInsets.only(top: 80, left: 16, right: 16);
-    } else {
-      margin = const EdgeInsets.only(bottom: 80, left: 16, right: 16);
-    }
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars(); // ✅ FIX
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    EdgeInsetsGeometry margin = position == SnackbarPosition.top
+        ? const EdgeInsets.only(top: 80, left: 16, right: 16)
+        : const EdgeInsets.only(bottom: 80, left: 16, right: 16);
+
+    messenger.showSnackBar(
       SnackBar(
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
@@ -63,50 +50,44 @@ class ScaffoldMessageSnackbar {
         ),
         content: Row(
           children: [
-            Icon(icon, color: iconColor, size: 26),
+            Icon(icon, color: Colors.white, size: 26),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (serviceName.isNotEmpty)
-                    Text(
-                      serviceName,
-                      style: TextStyle(
-                          color: textColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold),
-                    ),
                   Text(
                     message,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
-                  if (subTitle.isNotEmpty)
-                    Text(
-                      subTitle,
-                      style: TextStyle(
-                          color: textColor.withOpacity(0.8), fontSize: 13),
-                    ),
+                  Text(
+                    subTitle,
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
                 ],
               ),
             ),
           ],
         ),
-        action: SnackBarAction(
-          label: actionLabel,
-          textColor: Colors.white,
-          onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          },
-        ),
-        duration: Duration(seconds: durationInSeconds),
+        duration: Duration(seconds: durationInSeconds), // ✅ auto close
+
+        // action: actionLabel.isEmpty
+        //     ? null
+        //     : SnackBarAction(
+        //         label: actionLabel,
+        //         textColor: Colors.white,
+        //         onPressed: () {
+        //           messenger.hideCurrentSnackBar(); // close immediately
+        //         },
+        //       ),
       ),
     );
+    Future.delayed(Duration(seconds: durationInSeconds), () {
+      if (context.mounted) {
+        messenger.hideCurrentSnackBar();
+      }
+    });
   }
 }
 

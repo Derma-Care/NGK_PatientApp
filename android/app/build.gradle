@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.DermaCare_app"
+    namespace = "com.example.NGK_APP"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.DermaCare_app"
+        applicationId = "com.example.NGK_APP"
         minSdk = flutter.minSdkVersion
         targetSdk = 34
         versionCode = flutter.versionCode
