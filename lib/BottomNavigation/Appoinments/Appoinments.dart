@@ -422,7 +422,11 @@ class _BookingListScreenState extends State<BookingListScreen>
                       const Divider(height: 25),
 
                       // 🔹 Package Procedures Accordion
-                      if (b.serviceType == "package" && b.procedures != null)
+                      // if (b.serviceType.toLowerCase() == "package" &&
+                      //     b.procedures != null)
+                      if (b.serviceType.toLowerCase() == "package" &&
+                          b.procedures != null &&
+                          b.procedures!.isNotEmpty)
                         ExpansionTile(
                           title: const Text(
                             "Package Procedures",
@@ -451,7 +455,7 @@ class _BookingListScreenState extends State<BookingListScreen>
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  "${p.sittings} sittings",
+                                  "${p.noOfSittings} sittings",
                                   style: const TextStyle(
                                     color: mainColor,
                                     fontSize: 12,

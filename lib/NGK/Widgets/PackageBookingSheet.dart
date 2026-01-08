@@ -66,16 +66,9 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
 
   @override
   Widget build(BuildContext context) {
-    double discountAmount =
-        widget.payment.price * (widget.payment.discountPercentage / 100);
-    double discountedPrice = widget.payment.price - discountAmount;
-
-    double tax = 18;
     double platformFee = 10;
 
-    double taxAmount = discountedPrice * tax / 100;
-
-    double total = discountedPrice + taxAmount + platformFee;
+    double total = widget.payment.finalCost;
 
     double coinsUsed = 0;
 
@@ -126,15 +119,31 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
             SizedBox(
               height: 85,
               child: Obx(() {
+                // 🔹 LOADING STATE
                 if (slotController.isLoading.value) {
                   return const Center(
-                    child: SpinKitFadingCircle(
-                      color: mainColor,
-                      size: 40,
+                    child: SpinKitThreeBounce(
+                      color: Colors.pink,
+                      size: 22,
                     ),
                   );
                 }
 
+                // 🔹 EMPTY STATE (after loading)
+                if (slotController.slots.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      "No slots available",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  );
+                }
+
+                // 🔹 DATA STATE
                 return ListView.builder(
                   controller: _scrollController,
                   scrollDirection: Axis.horizontal,
@@ -218,28 +227,29 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
 
             const SizedBox(height: 12),
 
-            priceRow("Original Price", widget.payment.price),
-            priceRow("Consultation", widget.payment.consultationFee),
+            priceRow("Original Price", widget.payment.price, ""),
+            priceRow("Consultation", widget.payment.consultationFee, ""),
             priceRow("GST (${widget.payment.gst.toStringAsFixed(0)}%)",
-                widget.payment.gstAmount),
+                widget.payment.gstAmount, ""),
             if (widget.payment.taxAmount != 0)
               priceRow(
-                "Tax (${widget.payment.taxPercentage.toStringAsFixed(0)}%)",
-                widget.payment.taxAmount,
-              ),
+                  "Tax (${widget.payment.taxPercentage.toStringAsFixed(0)}%)",
+                  widget.payment.taxAmount,
+                  ""),
 
-            if (widget.payment.discountAmount != 0)
+            if (widget.payment.totalDiscountPercentage != 0)
               priceRow(
-                "Discount (${widget.payment.discountPercentage.toInt()}%)",
-                -widget.payment.discountAmount,
-              ),
+                  "Discount (${widget.payment.totalDiscountPercentage.toStringAsFixed(0)}%)",
+                  widget.payment.totalDiscountAmount,
+                  "-"),
 
-            priceRow("Platform Fee", platformFee),
+            priceRow("Platform Fee ", platformFee, ""),
 
             if (useCoins && priceCalc != null && priceCalc!.appliedPoints > 0)
               priceRow(
                 "Coins Applied",
                 -priceCalc!.appliedPoints.toDouble(),
+                "",
                 amountColor: Colors.red,
               ),
 
@@ -328,6 +338,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
               useCoins && priceCalc != null
                   ? priceCalc!.finalAmount
                   : priceCalc?.originalFinalAmount ?? widget.payment.finalCost,
+              "",
               isBold: true,
             ),
 
@@ -401,7 +412,8 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
 
   Widget priceRow(
     String title,
-    double amount, {
+    double amount,
+    String? op, {
     bool isBold = false,
     Color? amountColor,
   }) {
@@ -418,7 +430,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
             ),
           ),
           Text(
-            "₹${amount.toStringAsFixed(2)}",
+            "${op} ₹${amount.toStringAsFixed(2)}",
             style: TextStyle(
               fontSize: isBold ? 17 : 15,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w500,

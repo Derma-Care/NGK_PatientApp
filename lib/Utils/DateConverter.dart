@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 String formatDate(String date) {
@@ -40,30 +41,52 @@ String formatTime(String time24h) {
   final parsedTime = DateFormat("HH:mm").parse(time24h); // e.g., "14:30"
   return DateFormat("h:mm a").format(parsedTime); // e.g., "2:30 PM"
 }
- 
 
- 
+// String formatDateOnly(String? date) {
+//   if (date == null || date.trim().isEmpty) return "";
+
+//   DateTime parsedDate;
+
+//   try {
+//     // ISO format: 2025-12-31T00:00:00.000Z
+//     if (date.contains('T')) {
+//       parsedDate = DateTime.parse(date).toLocal();
+//     }
+//     // Text format: 03 Dec 2025
+//     else {
+//       parsedDate = DateFormat('dd MMM yyyy').parse(date);
+//     }
+//   } catch (e) {
+//     return "";
+//   }
+
+//   return DateFormat('dd MMM yyyy').format(parsedDate);
+// }
 
 String formatDateOnly(String? date) {
   if (date == null || date.trim().isEmpty) return "";
 
-  DateTime parsedDate;
-
   try {
-    // ISO format: 2025-12-31T00:00:00.000Z
+    DateTime parsedDate;
+
     if (date.contains('T')) {
+      // ISO format
       parsedDate = DateTime.parse(date).toLocal();
-    }
-    // Text format: 03 Dec 2025
-    else {
+    } else if (RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(date)) {
+      // yyyy-MM-dd ✅ FIX
+      parsedDate = DateTime.parse(date);
+    } else {
+      // dd MMM yyyy
       parsedDate = DateFormat('dd MMM yyyy').parse(date);
     }
+
+    return DateFormat('dd MMM yyyy').format(parsedDate);
   } catch (e) {
+    debugPrint("Date parse error: $e");
     return "";
   }
-
-  return DateFormat('dd MMM yyyy').format(parsedDate);
 }
+
 String formatCreateDate(DateTime date) {
   return DateFormat('dd MMM yyyy').format(date);
 }

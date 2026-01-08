@@ -40,6 +40,8 @@ class BookingController extends GetxController {
 
       bookings.assignAll(data);
       print("🔥 Stored bookings length: ${bookings.length}");
+      print(
+          "🔥 Stored bookings length: ${bookings.first.procedures?.first.procedureName}");
 
       _updateTotalPages(data.length);
     } catch (e) {
@@ -53,31 +55,40 @@ class BookingController extends GetxController {
   // 🔹 Filter + pagination
   List<BookingModel> getFiltered(String tabStatus) {
     List<BookingModel> filtered;
-    print("tabStatus ${tabStatus}");
-    if (tabStatus == "Pending") {
-      // Upcoming / confirmed bookings
-      print("filtered Bookings1 ${bookings}");
 
+    if (tabStatus == "Pending") {
       filtered =
           bookings.where((b) => b.status.toUpperCase() == "CONFIRMED").toList();
-
-      print("filtered Bookings ${filtered}");
     } else {
-      // Will show only AFTER backend sends COMPLETED
       filtered =
           bookings.where((b) => b.status.toUpperCase() == "COMPLETED").toList();
     }
 
-    final page =
-        tabStatus == "Pending" ? pendingPage.value : completedPage.value;
+    if (filtered.isEmpty) return [];
 
-    final start = (page - 1) * itemsPerPage.value;
-    final end = start + itemsPerPage.value;
+    final int perPage = itemsPerPage.value;
+    final int totalItems = filtered.length;
+    final int total = (totalItems / perPage).ceil();
 
-    return filtered.sublist(
-      start,
-      end > filtered.length ? filtered.length : end,
-    );
+    // ✅ CLAMP PAGE
+    int page = tabStatus == "Pending" ? pendingPage.value : completedPage.value;
+
+    page = page.clamp(1, total);
+
+    // ✅ UPDATE PAGE IF IT WAS INVALID
+    if (tabStatus == "Pending") {
+      pendingPage.value = page;
+    } else {
+      completedPage.value = page;
+    }
+
+    final int start = (page - 1) * perPage;
+    final int end = (start + perPage).clamp(0, totalItems);
+
+    // ✅ FINAL SAFETY
+    if (start >= totalItems) return [];
+
+    return filtered.sublist(start, end);
   }
 
   void nextPage(String status) {
@@ -135,6 +146,6 @@ class BookingController extends GetxController {
   }
 
   void _updateTotalPages(int length) {
-    totalPages.value = (length / itemsPerPage.value).ceil();
+    totalPages.value = length == 0 ? 1 : (length / itemsPerPage.value).ceil();
   }
 }

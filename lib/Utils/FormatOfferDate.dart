@@ -48,11 +48,11 @@ String formatOfferDate(String? offerDate) {
   }
 
   if (remainingDays == 0) {
-    return "$formattedDate";
+    return "Ends today";
   }
 
   if (remainingDays == 1) {
-    return "$formattedDate";
+    return "Ends Tomorrow";
   }
 
   return "$remainingDays days left";

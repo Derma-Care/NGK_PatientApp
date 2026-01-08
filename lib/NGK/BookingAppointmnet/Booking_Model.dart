@@ -113,16 +113,28 @@ class BookingModel {
       taxPercentage: (json['taxPercentage'] ?? 0).toDouble(),
       paymentType: json['paymentType'],
       status: json['status'],
+
+      // ✅ THIS IS THE MISSING PART
+      procedures: (json['procedures'] as List?)
+          ?.map((e) => ProcedureSittingModel.fromJson(e))
+          .toList(),
     );
   }
 }
 
 class ProcedureSittingModel {
   final String procedureName;
-  final int sittings;
+  final int noOfSittings;
 
   ProcedureSittingModel({
     required this.procedureName,
-    required this.sittings,
+    required this.noOfSittings,
   });
+
+  factory ProcedureSittingModel.fromJson(Map<String, dynamic> json) {
+    return ProcedureSittingModel(
+      procedureName: json['procedureName'] ?? '',
+      noOfSittings: json['noOfSittings'] ?? 0,
+    );
+  }
 }

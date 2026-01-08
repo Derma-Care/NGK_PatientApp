@@ -273,7 +273,10 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
                                         child: OutlinedButton(
                                           onPressed: () {
                                             Get.to(() => AboutClinicScreen(
-                                                clinic: clinic));
+                                                  clinicId: clinic.clinicId,
+                                                  distanceInKm:
+                                                      clinic.distanceInKm,
+                                                ));
                                           },
                                           style: OutlinedButton.styleFrom(
                                             padding: const EdgeInsets.symmetric(

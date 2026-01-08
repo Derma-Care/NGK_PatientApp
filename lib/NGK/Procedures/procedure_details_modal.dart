@@ -16,6 +16,20 @@ class ProcedureDetailsPage extends StatefulWidget {
 }
 
 class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
+  bool _isFutureOrToday(String date) {
+    try {
+      final endDate = DateTime.parse(date);
+      final today = DateTime.now();
+
+      final normalizedEnd = DateTime(endDate.year, endDate.month, endDate.day);
+      final normalizedToday = DateTime(today.year, today.month, today.day);
+
+      return !normalizedEnd.isBefore(normalizedToday);
+    } catch (e) {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final service = widget.service;
@@ -129,12 +143,13 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
 
                 /// 🏷 Offer End Date
                 if (service.offerValidDate != null &&
-                    service.offerValidDate!.isNotEmpty)
+                    service.offerValidDate!.isNotEmpty &&
+                    _isFutureOrToday(service.offerValidDate!))
                   infoItem(
                     label: "Offer End Date",
                     icon: Icons.calendar_today,
                     value: Text(
-                      formatDateOnly(service.offerValidDate),
+                      "${formatDateOnly(service.offerValidDate)}",
                       style: const TextStyle(fontSize: 14),
                     ),
                   ),
