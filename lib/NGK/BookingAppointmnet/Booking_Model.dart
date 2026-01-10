@@ -106,7 +106,8 @@ class BookingModel {
       clinicAddress: json['clinicAddress'],
       appointmentDate: json['appointmentDate'],
       price: (json['price'] ?? 0).toDouble(),
-      discount: json['discount'],
+      discount: (json['discount'] ?? 0).toDouble(),
+
       discountAmount: (json['discountAmount'] ?? 0).toDouble(),
       finalAmount: (json['finalAmount'] ?? 0).toDouble(),
       taxAmount: (json['taxAmount'] ?? 0).toDouble(),

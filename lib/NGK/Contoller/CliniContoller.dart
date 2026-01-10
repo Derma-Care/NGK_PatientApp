@@ -38,6 +38,61 @@ class ClinicContoller {
     }
   }
 
+  Future<void> loadClinicsWithOffers() async {
+    isLoading.value = true;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lat = prefs.getDouble('latitude');
+      final lng = prefs.getDouble('longitude');
+
+      if (lat == null || lng == null) return;
+
+      _allClinics = await ClinicService.fetchNearbyClinicsWithOffers(
+        lat: lat,
+        lng: lng,
+      );
+
+      // ✅ DEFAULT STATE
+      _filteredClinics = List.from(_allClinics);
+      clinicList.value = _filteredClinics;
+    } catch (e) {
+      debugPrint("Clinic API Error: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> loadProcedurePricingWithClinicId(
+      String clinicId, String procedureId) async {
+    try {
+      final pricing = await ClinicService.getProcedurePricingWithClinicId(
+        clinicId: clinicId,
+        procedureId: procedureId,
+      );
+
+      debugPrint("Procedure: ${pricing.procedureName}");
+      debugPrint("Final Price: ${pricing.totalDiscountedAmount}");
+    } catch (e) {
+      debugPrint("ERROR: $e");
+    }
+  }
+
+  Future<void> loadPackagePricingWithClinicId(
+      String clinicId, String procedureId) async {
+    try {
+      final pricing = await ClinicService.getPackagePricingWithClinicId(
+        clinicId: clinicId,
+        packageId: procedureId,
+      );
+
+      debugPrint("Procedure: ${pricing.packageName}");
+      debugPrint("Final Price: ${pricing.totalDiscountedAmount}");
+    } catch (e) {
+      debugPrint("ERROR: $e");
+    }
+  }
+
   // ---------------- SEARCH ----------------
   void applySearch(String query) {
     final q = query.toLowerCase();
@@ -60,7 +115,8 @@ class ClinicContoller {
 
     switch (filter) {
       case "Rating":
-        list.sort((a, b) => b.hospitalOverallRating.compareTo(a.hospitalOverallRating));
+        list.sort((a, b) =>
+            b.hospitalOverallRating.compareTo(a.hospitalOverallRating));
         break;
 
       case "Near Me":

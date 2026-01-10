@@ -19,10 +19,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PackageBookingSheet extends StatefulWidget {
   final PaymentModal payment;
+  final String? info;
 
   const PackageBookingSheet({
     super.key,
     required this.payment,
+    this.info,
   });
 
   @override
@@ -224,6 +226,9 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
             // -------------------- PRICE DETAILS --------------------
             const Text("Payment Details",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            if (widget.info != null)
+              Text("Note: ${widget.info ?? ""}",
+                  style: TextStyle(fontSize: 12, color: mainColor)),
 
             const SizedBox(height: 12),
 

@@ -115,8 +115,11 @@ class SiginSignUpController extends GetxController {
         });
         final response = await _loginapiService.sendUserDataWithFCMToken(
             fullname, mobileNumber, token ?? "");
+        final statusCode = response['statusCode'];
+        final message =
+            response['message'] ?? "Something went wrong. Please try again.";
 
-        if (response['statusCode'] == 200) {
+        if (statusCode == 200) {
           getOTPButton.value = "GET OTP";
 
           final prefs = await SharedPreferences.getInstance();
@@ -128,7 +131,7 @@ class SiginSignUpController extends GetxController {
 
           ScaffoldMessageSnackbar.show(
             context: context,
-            message: "OTP has been sent successfully to $mobileNumber",
+            message: message, // 👈 BACKEND MESSAGE
             type: SnackbarType.success,
           );
           // showSnackbar("Success",
@@ -139,9 +142,21 @@ class SiginSignUpController extends GetxController {
                 mobileNumber: mobileNumber,
                 deviceId: token,
               ));
+        } else {
+          ScaffoldMessageSnackbar.show(
+            context: context,
+            message: message, // 👈 BACKEND MESSAGE
+            type: SnackbarType.error,
+          );
         }
       } catch (e) {
         print("Error during login: $e");
+        ScaffoldMessageSnackbar.show(
+          context: context,
+          message: "Unable to connect to server. Please try again.",
+          type: SnackbarType.error,
+        );
+
         getOTPButton.value = "GET OTP";
       } finally {
         isLoading.value = false;
@@ -149,7 +164,6 @@ class SiginSignUpController extends GetxController {
       }
     }
   }
-
 
   void showFetchingLocationDialog(BuildContext context) {
     showDialog(
@@ -177,9 +191,12 @@ class SiginSignUpController extends GetxController {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(mainColor),
-                    strokeWidth: 4,
+                  Center(
+                    child: Image.asset(
+                      'assets/lo_1.gif', // your image path
+                      width: 80,
+                      height: 80,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(

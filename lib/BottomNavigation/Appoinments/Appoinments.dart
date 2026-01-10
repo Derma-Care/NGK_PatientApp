@@ -1,9 +1,13 @@
 import 'package:cutomer_app/NGK/BookingAppointmnet/Bookin_Controller.dart';
 import 'package:cutomer_app/NGK/BookingAppointmnet/Booking_Model.dart';
+import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
+import 'package:cutomer_app/NGK/Service/clinic_service.dart';
 import 'package:cutomer_app/NGK/Widgets/CommonPaginationBar.dart';
+import 'package:cutomer_app/NGK/Widgets/PackageBookingSheet.dart';
 import 'package:cutomer_app/Review/hospital_rating_screen.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -87,6 +91,17 @@ class _BookingListScreenState extends State<BookingListScreen>
 
   Widget _buildList(String status) {
     return Obx(() {
+      /// 🔄 SHOW LOADER FIRST
+      if (controller.isLoading.value) {
+        return const Center(
+          child: const Center(
+            child: SpinKitFadingCircle(
+              color: mainColor,
+              size: 40,
+            ),
+          ),
+        );
+      }
       final paginatedList = controller.getFiltered(status);
 
       if (paginatedList.isEmpty) {
@@ -338,6 +353,76 @@ class _BookingListScreenState extends State<BookingListScreen>
   }
 
   void _showBookingDetails(BuildContext context, BookingModel b) {
+    Future<void> handleBookAgain(BuildContext context, BookingModel b) async {
+      if (b.clinicId == null || b.serviceId == null) {
+        Get.snackbar("Error", "Invalid booking data");
+        return;
+      }
+
+      try {
+        /// 🔹 PROCEDURE FLOW
+        if (b.serviceType.toLowerCase() == "procedure") {
+          final pricing = await ClinicService.getProcedurePricingWithClinicId(
+            clinicId: b.clinicId!, // make sure this exists in BookingModel
+            procedureId: b.serviceId!, // serviceId = procedureId
+          );
+
+          /// ✅ Convert API response → PaymentModal
+          final payment = PaymentModal.fromProcedure(pricing);
+
+          debugPrint("========== PROCEDURE PAYMENT ==========");
+          debugPrint(payment.toJson().toString());
+          debugPrint("======================================");
+
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.white,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (_) => PackageBookingSheet(
+              payment: payment,
+              info:
+                  "The price shown is the latest price as of today and may differ from your earlier appointment.",
+            ),
+          );
+        }
+
+        /// 🔹 PACKAGE FLOW
+        else if (b.serviceType.toLowerCase() == "package") {
+          final pricing = await ClinicService.getPackagePricingWithClinicId(
+            clinicId: b.clinicId!, // make sure this exists in BookingModel
+            packageId: b.serviceId!, // serviceId = procedureId
+          );
+          debugPrint("%%%%  : ${pricing.consultationFee.toString()}");
+          final payment = PaymentModal.fromPackage(pricing);
+
+          debugPrint("========== PACKAGE PAYMENT ==========");
+          debugPrint(payment.toJson().toString());
+          debugPrint("====================================");
+
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.white,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (_) => PackageBookingSheet(
+              payment: payment,
+              info:
+                  "The price shown is the latest price as of today and may differ from your earlier appointment.",
+            ),
+          );
+        }
+        print("PACKAGE PAYMENT ${b.serviceType}");
+      } catch (e) {
+        debugPrint("BOOK AGAIN ERROR: $e");
+        Get.snackbar("Error", "Unable to rebook. Please try again");
+      }
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -396,23 +481,26 @@ class _BookingListScreenState extends State<BookingListScreen>
 
                       const Divider(height: 25),
 
-                      _detailRow("Price", "₹${b.price}"),
+                      _detailRow("Price", "₹${b.price.toStringAsFixed(0)}"),
 
-                      _detailRow("consultation Fee", "₹ ${b.consultationFee}"),
-                      _detailRow("Gst(${b.gst}%)", "₹ ${b.gstAmount}"),
+                      _detailRow("consultation Fee",
+                          "₹ ${b.consultationFee?.toStringAsFixed(0)}"),
+                      _detailRow("Gst(${b.gst?.toStringAsFixed(0)}%)",
+                          "₹ ${b.gstAmount?.toStringAsFixed(0)}"),
                       if ((b.taxAmount ?? 0) > 0)
                         _detailRow(
                           "Tax (${b.taxPercentage}%)",
-                          "₹ ${b.taxAmount}",
+                          "₹ ${b.taxAmount?.toStringAsFixed(0)}",
                         ),
 
                       if ((b.discountAmount ?? 0) > 0)
                         _detailRow(
-                          "Discount (${b.discount}%)",
-                          "₹ ${b.discountAmount}",
+                          "Discount (${b.discount.toStringAsFixed(0)}%)",
+                          "₹ ${b.discountAmount.toStringAsFixed(0)}",
                         ),
 
-                      _detailRow("Final Amount", "₹ ${b.finalAmount}"),
+                      _detailRow("Final Amount",
+                          "₹ ${b.finalAmount.toStringAsFixed(0)}"),
 
                       const Divider(height: 25),
 
@@ -493,7 +581,7 @@ class _BookingListScreenState extends State<BookingListScreen>
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.pop(context);
-                            Get.snackbar("Booking", "Rebooking action here");
+                            handleBookAgain(context, b);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.pink,

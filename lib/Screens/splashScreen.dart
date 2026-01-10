@@ -259,6 +259,8 @@
 // }
 
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
+import 'package:cutomer_app/Notification/Notifications.dart';
+import 'package:cutomer_app/Notification/notification_intent.dart';
 import 'package:cutomer_app/SigninSignUp/BiometricAuthScreen.dart';
 import 'package:cutomer_app/SigninSignUp/BiometricPermissionScreen.dart';
 import 'package:cutomer_app/SigninSignUp/LoginScreen.dart';
@@ -346,6 +348,16 @@ class _SplashScreenState extends State<SplashScreen>
           ));
       return;
     }
+    // ✅ AUTHENTICATED
+    if (NotificationIntent.openedFromNotification) {
+      NotificationIntent.openedFromNotification = false;
+      Get.offAll(() => NotificationScreen());
+    } else {
+      Get.offAll(() => BottomNavController(
+            mobileNumber: mobileNumber,
+            index: 0,
+          ));
+    }
 
     // 🟢 BIOMETRIC ENABLED → AUTH SCREEN
     if (isAuthenticated && biometricAvailable) {
@@ -392,7 +404,6 @@ class _SplashScreenState extends State<SplashScreen>
                     child: Image.asset(
                       'assets/ic_launcher.png',
                       height: 150,
-                      
                       colorBlendMode: BlendMode.srcATop,
                     ),
                   ),

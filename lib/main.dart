@@ -63,17 +63,17 @@ Future<void> main() async {
     android: androidSettings,
   );
 
-  // await flutterLocalNotificationsPlugin.initialize(
-  //   initializationSettings,
-  //   // ✅ Updated callback for v12+
-  //   onDidReceiveNotificationResponse: (NotificationResponse response) async {
-  //     print('[🔔] Notification tapped: ${response.payload}');
-  //     // Handle navigation if needed
-  //     if (Get.currentRoute != '/NotificationScreen') {
-  //       await Get.to(() => NotificationScreen());
-  //     }
-  //   },
-  // );
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    // ✅ Updated callback for v12+
+    onDidReceiveNotificationResponse: (NotificationResponse response) async {
+      print('[🔔] Notification tapped: ${response.payload}');
+      // Handle navigation if needed
+      if (Get.currentRoute != '/NotificationScreen') {
+        await Get.to(() => NotificationScreen());
+      }
+    },
+  );
 
   // ✅ Configure TTS
   await flutterTts.setLanguage('en-US');
@@ -113,6 +113,9 @@ Future<void> main() async {
   // if (initialMessage != null) {
   //   notificationController.handleNotification(initialMessage);
   // }
+  FirebaseMessaging.onBackgroundMessage(
+    firebaseMessagingBackgroundHandler,
+  );
 
   // ✅ Check login state
   final prefs = await SharedPreferences.getInstance();

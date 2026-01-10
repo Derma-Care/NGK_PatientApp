@@ -61,6 +61,20 @@ class _ServicesTabScreenState extends State<ServicesTabScreen>
     });
   }
 
+  Future<void> _refreshServices() async {
+    // reset pagination
+    procedurePage.value = 1;
+    packagePage.value = 1;
+
+    // re-call API
+    setState(() {
+      servicesFuture = ClinicService.fetchClinicServices(widget.clinicId);
+    });
+
+    // optional delay for UX
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+
   List paginate({
     required List list,
     required ValueNotifier<int> page,
@@ -138,18 +152,22 @@ class _ServicesTabScreenState extends State<ServicesTabScreen>
                   total: packageTotal,
                 );
 
-                return TabBarView(
-                  controller: tabController,
-                  children: [
-                    ServicesListView(
-                      items: procedureItems,
-                      isPackage: false,
-                    ),
-                    ServicesListView(
-                      items: packageItems,
-                      isPackage: true,
-                    ),
-                  ],
+                return RefreshIndicator(
+                  color: Colors.pink,
+                  onRefresh: _refreshServices,
+                  child: TabBarView(
+                    controller: tabController,
+                    children: [
+                      ServicesListView(
+                        items: procedureItems,
+                        isPackage: false,
+                      ),
+                      ServicesListView(
+                        items: packageItems,
+                        isPackage: true,
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -208,10 +226,17 @@ class ServicesListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return const Center(child: Text("No data available"));
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          SizedBox(height: 200),
+          Center(child: Text("No data available")),
+        ],
+      );
     }
 
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -456,7 +481,18 @@ bool isOfferValid(bool offerActive, String? offerValidDate) {
 
   try {
     final endDate = DateTime.parse(offerValidDate);
-    return endDate.isAfter(DateTime.now());
+
+    // Offer valid until 11:59:59 PM of the given date
+    final expiryDateTime = DateTime(
+      endDate.year,
+      endDate.month,
+      endDate.day,
+      23,
+      59,
+      59,
+    );
+
+    return DateTime.now().isBefore(expiryDateTime);
   } catch (_) {
     return false;
   }

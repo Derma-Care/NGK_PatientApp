@@ -8,27 +8,28 @@ import 'package:cutomer_app/NGK/Widgets/FiltterButtons.dart';
 import 'package:cutomer_app/NGK/Widgets/clinic_details_modal.dart';
 import 'package:cutomer_app/NGK/Widgets/procedures_packages_tab_screen.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
+import 'package:cutomer_app/Utils/FormatOfferDate.dart';
 import 'package:cutomer_app/Utils/Header.dart';
 import 'package:cutomer_app/Utils/NOClinicAvailableUi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 
-class ClinicListScreen extends StatefulWidget {
-  const ClinicListScreen({super.key});
+class Offerslistscreen extends StatefulWidget {
+  const Offerslistscreen({super.key});
 
   @override
-  State<ClinicListScreen> createState() => _ClinicListScreenState();
+  State<Offerslistscreen> createState() => _OfferslistscreenState();
 }
 
-class _ClinicListScreenState extends State<ClinicListScreen> {
+class _OfferslistscreenState extends State<Offerslistscreen> {
   final ClinicContoller controller = ClinicContoller();
   final TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    controller.loadClinics();
+    controller.loadClinicsWithOffers();
   }
 
   @override
@@ -39,7 +40,7 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
       body: RefreshIndicator(
         color: mainColor,
         onRefresh: () {
-          controller.loadClinics();
+          controller.loadClinicsWithOffers();
           return Future.value();
         },
         child: Column(
@@ -135,92 +136,101 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
                                 ),
                               ),
                               SizedBox(height: 12),
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(14),
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(14),
-                                  onTap: () {
-                                    Get.to(() => ServicesTabScreen(
-                                          clinicId: clinic.clinicId,
-                                        ));
-                                  },
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      /// 🟩 LOGO — 30%
-                                      Expanded(
-                                        flex: 3, // 👈 30%
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          child: SizedBox(
-                                            height: 70,
-                                            child: clinicLogoWidget(
-                                                clinic.hospitalLogo),
+                              Stack(
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.fromLTRB(12, 36,
+                                        12, 12), // 👈 top space for strip
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(
+                                          color: Colors.grey.shade300),
+                                    ),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(14),
+                                      onTap: () {
+                                        Get.to(() => ServicesTabScreen(
+                                              clinicId: clinic.clinicId,
+                                            ));
+                                      },
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          /// 🟩 LOGO — 30%
+                                          Expanded(
+                                            flex: 3,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: SizedBox(
+                                                height: 70,
+                                                child: clinicLogoWidget(
+                                                    clinic.hospitalLogo),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
 
-                                      const SizedBox(width: 12),
+                                          const SizedBox(width: 12),
 
-                                      /// 🟦 DETAILS — 70%
-                                      Expanded(
-                                        flex: 7,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              clinic.name,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              clinic.address,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey.shade700,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                          /// 🟦 DETAILS — 70%
+                                          Expanded(
+                                            flex: 7,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
-                                                Row(
-                                                  children: [
-                                                    const Icon(Icons.star,
-                                                        size: 16,
-                                                        color: Colors.amber),
-                                                    const SizedBox(width: 4),
-                                                    Text(
-                                                        "${clinic.hospitalOverallRating}"),
-                                                    const SizedBox(width: 12),
-                                                    const Icon(
-                                                        Icons.directions_car,
-                                                        size: 16),
-                                                    const SizedBox(width: 4),
-                                                    Text(clinic.distanceInKm),
-                                                  ],
+                                                Text(
+                                                  clinic.name,
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
                                                 ),
-                                                Column(
+                                                const SizedBox(height: 6),
+                                                Text(
+                                                  clinic.address,
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.grey.shade700,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
+                                                    Row(
+                                                      children: [
+                                                        const Icon(Icons.star,
+                                                            size: 16,
+                                                            color:
+                                                                Colors.amber),
+                                                        const SizedBox(
+                                                            width: 4),
+                                                        Text(
+                                                            "${clinic.hospitalOverallRating}"),
+                                                        const SizedBox(
+                                                            width: 12),
+                                                        const Icon(
+                                                            Icons
+                                                                .directions_car,
+                                                            size: 16),
+                                                        const SizedBox(
+                                                            width: 4),
+                                                        Text(clinic
+                                                            .distanceInKm),
+                                                      ],
+                                                    ),
                                                     SizedBox(
                                                       height: 30,
                                                       child: OutlinedButton(
@@ -267,12 +277,38 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
                                                 ),
                                               ],
                                             ),
-                                          ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  if (clinic.maxOfferPercentage != null &&
+                                      clinic.maxOfferPercentage! > 0)
+                                    Positioned(
+                                      top: 0,
+                                      left: 0,
+                                      right: 0,
+                                      child: Container(
+                                        height: 28,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Colors.redAccent,
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(14),
+                                            topRight: Radius.circular(14),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "UP TO ${clinic.maxOfferPercentage!.toStringAsFixed(0)}% OFF",
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
+                                    ),
+                                ],
                               ),
                             ],
                           );
@@ -284,6 +320,54 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget discountStrip(
+    String text,
+  ) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: mainColor,
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
+      ),
+      child: Center(
+        child: RotatedBox(
+          quarterTurns: 3,
+          child: Column(
+            children: [
+              Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                  letterSpacing: 1,
+                ),
+              ),
+              // Text(
+              //   formatOfferDate(procedure?.offerValidDate),
+              //   style: const TextStyle(
+              //     fontSize: 12,
+              //     fontWeight: FontWeight.w600,
+              //     color: Colors.white,
+              //   ),
+              // ),
+              // Text(
+              //   formatOfferDate(procedure?.offerValidDate),
+              //   style: const TextStyle(
+              //     fontSize: 12,
+              //     fontWeight: FontWeight.w600,
+              //     color: Colors.white,
+              //   ),
+              // ),
+            ],
+          ),
         ),
       ),
     );

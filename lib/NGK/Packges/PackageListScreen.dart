@@ -275,310 +275,404 @@ class _PackageListScreenState extends State<PackageListScreen> {
                                         children: [
                                           SizedBox(height: 20),
 
-                                          // 🌈 Gradient Header
-                                          Row(
-                                            children: [
-                                              Icon(Icons.local_offer,
-                                                  color: mainColor, size: 26),
-                                              SizedBox(width: 10),
-                                              Expanded(
-                                                child: Text(
-                                                  pkg.packageName,
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-
                                           // CLINIC NAME + RATING
+
                                           widget.isClinic
-                                              ? SizedBox(
-                                                  // child: Center(
-                                                  //     child: Text(
-                                                  //       "Hurry! Offer ends on 12 Dec 2025",
-                                                  //       style: TextStyle(
-                                                  //         fontSize: 15,
-                                                  //         fontWeight: FontWeight.w600,
-                                                  //         color: Colors.grey[700],
-                                                  //       ),
-                                                  //     ),
-                                                  //   ),
-                                                  )
-                                              : Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Icon(
-                                                            Icons
-                                                                .local_hospital_sharp,
-                                                            color: Colors.amber,
-                                                            size: 18),
-                                                        SizedBox(
-                                                          width: 5,
-                                                        ),
-                                                        Text(pkg.clinicName,
-                                                            style: TextStyle(
-                                                                fontSize: 15,
-                                                                color:
-                                                                    Colors.grey[
-                                                                        600])),
-                                                      ],
-                                                    ),
-                                                    SizedBox(
-                                                      height: 28,
-                                                      child: OutlinedButton(
-                                                        onPressed: () {
-                                                          Get.to(() =>
-                                                              AboutClinicScreen(
-                                                                clinicId: pkg
-                                                                    .clinicId,
-                                                                distanceInKm:
-                                                                    pkg.distance,
-                                                              ));
-                                                        },
-                                                        style: OutlinedButton
-                                                            .styleFrom(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                  horizontal:
-                                                                      12),
-                                                          side: const BorderSide(
-                                                              color: Colors
-                                                                  .deepOrange),
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        6),
-                                                          ),
-                                                        ),
-                                                        child: const Text(
-                                                          "About",
-                                                          style: TextStyle(
-                                                            fontSize: 12,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            color: Colors
-                                                                .deepOrange,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                          Row(
-                                            children: [
-                                              Icon(Icons.star,
-                                                  color: Colors.amber,
-                                                  size: 18),
-                                              Text(" ${pkg.clinicRating}"),
-                                            ],
-                                          ),
-                                          SizedBox(height: 12),
-
-                                          // 💰 PRICE BOX (Offer Style)
-                                          Container(
-                                            padding: EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              color: Colors.pink.shade50,
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              border: Border.all(
-                                                  color: Colors.pink.shade100),
-                                            ),
-                                            child: Column(
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    // Original price
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text("Original Price",
-                                                            style: TextStyle(
-                                                                fontSize: 13)),
-                                                        Text(
-                                                          "₹${pkg.price.toStringAsFixed(0)}",
-                                                          style: TextStyle(
-                                                            fontSize: 16,
-                                                            decoration:
-                                                                TextDecoration
-                                                                    .lineThrough,
-                                                            color: Colors
-                                                                .redAccent,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-
-                                                    // Final price highlighted
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .end,
-                                                      children: [
-                                                        Text("Now",
-                                                            style: TextStyle(
-                                                                fontSize: 13,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600)),
-                                                        Text(
-                                                          "₹${pkg.totalDiscountedAmount.toStringAsFixed(0)}",
-                                                          style: TextStyle(
-                                                            fontSize: 22,
-                                                            color: Colors
-                                                                .pink.shade700,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                                // Center(
-                                                //   child: Text(
-                                                //     "ends on ${formatDateOnly(
-                                                //       pkg.offerValidDate != null
-                                                //           ? "${pkg.offerValidDate}T00:00:00"
-                                                //           : null,
-                                                //     )}",
-                                                //     style: TextStyle(
-                                                //       fontSize: 15,
-                                                //       fontWeight: FontWeight.w600,
-                                                //       color: Colors.grey[700],
-                                                //     ),
-                                                //   ),
-                                                // ),
-                                              ],
-                                            ),
-                                          ),
-
-                                          SizedBox(height: 12),
-
-                                          // ADDRESS + DISTANCE
-                                          widget.isClinic
-                                              ? const SizedBox()
-                                              : Row(
+                                              ? SizedBox()
+                                              : // ===== COLLAPSED HEADER =====
+                                              Row(
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    // 📍 ADDRESS (2 lines, flexible)
+                                                    // LEFT INFO (70%)
                                                     Expanded(
-                                                      child: Row(
+                                                      flex: 7,
+                                                      child: Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          const Icon(Icons.map,
-                                                              color: Colors.red,
-                                                              size: 18),
-                                                          const SizedBox(
-                                                              width: 5),
-                                                          Expanded(
-                                                            child: Text(
-                                                              pkg.clinicAddress,
-                                                              maxLines: 2,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                              style: TextStyle(
-                                                                color: Colors
-                                                                    .grey[700],
+                                                          // PACKAGE NAME
+                                                          Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .local_offer,
+                                                                color:
+                                                                    mainColor,
+                                                                size: 26,
                                                               ),
-                                                            ),
+                                                              const SizedBox(
+                                                                  width: 8),
+                                                              Expanded(
+                                                                child: Text(
+                                                                  pkg.packageName,
+                                                                  maxLines: 2,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        16,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+
+                                                          const SizedBox(
+                                                              height: 4),
+
+                                                          // HOSPITAL NAME + CITY
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Column(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    pkg.clinicName,
+                                                                    maxLines: 2,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          14,
+                                                                      color: Colors
+                                                                              .grey[
+                                                                          600],
+                                                                    ),
+                                                                  ),
+                                                                  Text(
+                                                                    pkg.city,
+                                                                    maxLines: 2,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          14,
+                                                                      color: Colors
+                                                                              .grey[
+                                                                          600],
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              SizedBox(
+                                                                height: 28,
+                                                                child:
+                                                                    OutlinedButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    Get.to(() =>
+                                                                        AboutClinicScreen(
+                                                                          clinicId:
+                                                                              pkg.clinicId,
+                                                                          distanceInKm:
+                                                                              pkg.distance,
+                                                                        ));
+                                                                  },
+                                                                  style: OutlinedButton
+                                                                      .styleFrom(
+                                                                    padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                        horizontal:
+                                                                            12),
+                                                                    side: const BorderSide(
+                                                                        color: Colors
+                                                                            .deepOrange),
+                                                                    shape:
+                                                                        RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              6),
+                                                                    ),
+                                                                  ),
+                                                                  child:
+                                                                      const Text(
+                                                                    "About",
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          12,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                      color: Colors
+                                                                          .deepOrange,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
                                                           ),
                                                         ],
                                                       ),
                                                     ),
 
-                                                    const SizedBox(width: 10),
-
-                                                    // 📏 DISTANCE (right aligned)
-                                                    Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        const Icon(
-                                                            Icons.location_on,
-                                                            color: Colors.red,
-                                                            size: 18),
-                                                        const SizedBox(
-                                                            width: 3),
-                                                        Text(
-                                                          pkg.distance,
-                                                          style: const TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500),
-                                                        ),
-                                                      ],
-                                                    ),
+                                                    // RIGHT DISCOUNT (30%)
                                                   ],
                                                 ),
 
-                                          // ▼ EXPANDABLE PROCEDURES
-                                          AnimatedCrossFade(
-                                            duration:
-                                                Duration(milliseconds: 300),
-                                            firstChild: SizedBox(),
-                                            secondChild: Column(
-                                              children: pkg.procedures.map((p) {
-                                                return Container(
-                                                  margin:
-                                                      EdgeInsets.only(top: 10),
-                                                  padding: EdgeInsets.all(12),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.grey[100],
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12),
+                                          Row(
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(Icons.star,
+                                                      color: Colors.amber,
+                                                      size: 18),
+                                                  Text(" ${pkg.clinicRating}"),
+                                                ],
+                                              ),
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(Icons.location_on,
+                                                      color: Colors.red,
+                                                      size: 18),
+                                                  const SizedBox(width: 3),
+                                                  Text(
+                                                    pkg.distance,
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w500),
                                                   ),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Text(p.procedureName,
-                                                          style: TextStyle(
-                                                              fontSize: 14)),
-                                                      Text(
-                                                          "${p.noOfSittings} sittings",
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500)),
-                                                    ],
-                                                  ),
-                                                );
-                                              }).toList(),
-                                            ),
-                                            crossFadeState:
-                                                openCard == pkg.packageId
-                                                    ? CrossFadeState.showSecond
-                                                    : CrossFadeState.showFirst,
+                                                ],
+                                              ),
+                                            ],
                                           ),
+                                          SizedBox(height: 12),
 
+                                          Text(
+                                            "tap to view more details",
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.redAccent),
+                                          ),
+                                          // ▼ EXPANDABLE PROCEDURES
                                           if (openCard == pkg.packageId) ...[
-                                            SizedBox(height: 12),
+                                            AnimatedOpacity(
+                                              duration: const Duration(
+                                                  milliseconds: 200),
+                                              opacity: openCard == pkg.packageId
+                                                  ? 0
+                                                  : 1,
+                                              child: const Text(
+                                                "tap to view more details",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.redAccent,
+                                                ),
+                                              ),
+                                            ),
+
+                                            AnimatedCrossFade(
+                                              duration: const Duration(
+                                                  milliseconds: 300),
+                                              firstChild: const SizedBox(),
+                                              secondChild: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  // 📍 ADDRESS (SHOW ONCE)
+                                                  if (!widget.isClinic)
+                                                    Row(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        const Icon(Icons.map,
+                                                            color: Colors.red,
+                                                            size: 18),
+                                                        const SizedBox(
+                                                            width: 5),
+                                                        Expanded(
+                                                          child: Text(
+                                                            pkg.clinicAddress,
+                                                            maxLines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .grey[700]),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                            width: 10),
+                                                      ],
+                                                    ),
+
+                                                  const SizedBox(height: 12),
+
+                                                  // 🧪 PROCEDURES + SITTINGS (LOOP ONLY HERE)
+                                                  ...pkg.procedures.map((p) {
+                                                    return Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                              bottom: 10),
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              12),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.grey[100],
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          // 70% – Procedure Name (max 2 lines)
+                                                          Expanded(
+                                                            flex: 7,
+                                                            child: Text(
+                                                              p.procedureName,
+                                                              maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style:
+                                                                  const TextStyle(
+                                                                      fontSize:
+                                                                          14),
+                                                            ),
+                                                          ),
+
+                                                          // 30% – Sittings (right aligned)
+                                                          Expanded(
+                                                            flex: 3,
+                                                            child: Align(
+                                                              alignment: Alignment
+                                                                  .centerRight,
+                                                              child: Text(
+                                                                "${p.noOfSittings} sittings",
+                                                                style: const TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  }).toList(),
+
+                                                  const SizedBox(height: 12),
+
+                                                  // 💰 PRICE CARD (ONLY ONCE)
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.all(8),
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          Colors.pink.shade50,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12),
+                                                      border: Border.all(
+                                                          color: Colors
+                                                              .pink.shade100),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            const Text(
+                                                                "Original Price",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        13)),
+                                                            Column(
+                                                              children: [
+                                                                Text(
+                                                                  "₹${pkg.price.toStringAsFixed(0)}",
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        16,
+                                                                    decoration:
+                                                                        TextDecoration
+                                                                            .lineThrough,
+                                                                    color: Colors
+                                                                        .redAccent,
+                                                                  ),
+                                                                ),
+                                                                Text(
+                                                                  "Save ₹${pkg.totalDiscountAmount.toStringAsFixed(0)}",
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        10,
+                                                                    color: Colors
+                                                                        .redAccent,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .end,
+                                                          children: [
+                                                            const Text("Now",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        13,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600)),
+                                                            Text(
+                                                              "₹${pkg.totalDiscountedAmount.toStringAsFixed(0)}",
+                                                              style: TextStyle(
+                                                                fontSize: 22,
+                                                                color: Colors
+                                                                    .pink
+                                                                    .shade700,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              crossFadeState: openCard ==
+                                                      pkg.packageId
+                                                  ? CrossFadeState.showSecond
+                                                  : CrossFadeState.showFirst,
+                                            ),
+
+                                            const SizedBox(height: 12),
+
+                                            // 🔘 BOOK BUTTON (ONCE)
                                             ElevatedButton(
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors.pink,
@@ -594,22 +688,22 @@ class _PackageListScreenState extends State<PackageListScreen> {
                                                     PaymentModal.fromPackage(
                                                         pkg);
                                                 showModalBottomSheet(
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    context: context,
-                                                    isScrollControlled: true,
-                                                    shape:
-                                                        const RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.vertical(
-                                                              top: Radius
-                                                                  .circular(
-                                                                      20)),
-                                                    ),
-                                                    builder: (_) =>
-                                                        PackageBookingSheet(
-                                                            payment:
-                                                                paymentModal));
+                                                  backgroundColor: Colors.white,
+                                                  context: context,
+                                                  isScrollControlled: true,
+                                                  shape:
+                                                      const RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.vertical(
+                                                            top:
+                                                                Radius.circular(
+                                                                    20)),
+                                                  ),
+                                                  builder: (_) =>
+                                                      PackageBookingSheet(
+                                                          payment:
+                                                              paymentModal),
+                                                );
                                               },
                                               child: const Text(
                                                 "Book Package",
@@ -618,7 +712,7 @@ class _PackageListScreenState extends State<PackageListScreen> {
                                                     fontWeight:
                                                         FontWeight.w600),
                                               ),
-                                            )
+                                            ),
                                           ]
                                         ],
                                       ),
@@ -634,6 +728,7 @@ class _PackageListScreenState extends State<PackageListScreen> {
               },
             ),
           ),
+
           CommonPaginationBar(
             showPagination: showPagination,
             itemsPerPage: controller.itemsPerPage,

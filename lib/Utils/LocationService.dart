@@ -64,8 +64,6 @@ class LocationService {
       await prefs.setDouble('longitude', position.longitude);
       await prefs.setString('cityName', cityName);
 
-      
-
       print("📍 Location saved: ${position.latitude}, ${position.longitude}");
       print("🏙 City saved: $cityName");
     } catch (e) {
@@ -99,9 +97,12 @@ class LocationService {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(mainColor),
-                    strokeWidth: 4,
+                  Center(
+                    child: Image.asset(
+                      'assets/lo_1.gif', // your image path
+                      width: 80,
+                      height: 80,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(

@@ -85,7 +85,6 @@ class _LoginscreenState extends State<Loginscreen> {
                         ),
                       ),
                     ),
-                    
                     const SizedBox(height: 30.0),
                     CustomTextField(
                       controller: siginSignUpController.mobileController,
@@ -109,7 +108,7 @@ class _LoginscreenState extends State<Loginscreen> {
                                 ),
                               )
                             : const SizedBox.shrink()),
-                    const SizedBox(height: 20.0),
+                    Text(siginSignUpController.errorMessage.value),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: GradientButton(
@@ -129,9 +128,7 @@ class _LoginscreenState extends State<Loginscreen> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 20,
-            ),
+
             // GestureDetector(
             //   onTap: () {
             //     Navigator.of(context).pushNamed('/manualscreen');

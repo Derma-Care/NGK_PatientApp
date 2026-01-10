@@ -6,7 +6,7 @@ import 'BookingService.dart';
 class BookingController extends GetxController {
   RxList<BookingModel> bookings = <BookingModel>[].obs;
 
-  RxBool isLoading = false.obs;
+  RxBool isLoading = true.obs;
   RxString error = ''.obs;
   RxInt currentPage = 1.obs;
   // PAGINATION
@@ -14,6 +14,7 @@ class BookingController extends GetxController {
   RxInt pendingPage = 1.obs;
   RxInt completedPage = 1.obs;
   RxInt totalPages = 1.obs;
+ 
 
   // 🔹 Fetch bookings from backend
   Future<void> fetchBookings() async {

@@ -8,9 +8,9 @@ import 'package:cutomer_app/APIs/BaseUrl.dart'; // Make sure this is correct
 Future<GetCustomerModel> fetchUserData(String customerId) async {
   try {
     final response = await http.get(
-      Uri.parse('$clinicUrl/customers/$customerId'),
+      Uri.parse('$registerUrl/id/$customerId'),
     );
-    print("Response Data statusCode url: $clinicUrl/customers/$customerId");
+    print("Response Data statusCode url: $registerUrl/id/$customerId");
     print("Response Data statusCode: ${response.statusCode}");
 
     if (response.statusCode == 200) {

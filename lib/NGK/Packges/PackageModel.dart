@@ -2,6 +2,7 @@ class PackageModel {
   final String packageId;
   final String packageName;
   final String clinicId;
+  final String city;
   final String clinicName;
   final String clinicAddress;
   final String clinicRating;
@@ -19,6 +20,7 @@ class PackageModel {
   final double discountedCost;
   final double clinicPay;
   final int sittings;
+
   final double ngkDiscountPercentage;
   final double ngkDiscountAmount;
   final double totalDiscountPercentage;
@@ -33,6 +35,7 @@ class PackageModel {
 
   PackageModel({
     required this.packageId,
+    required this.city,
     required this.packageName,
     required this.clinicId,
     required this.clinicName,
@@ -71,6 +74,7 @@ class PackageModel {
       packageName: pkg['packageName'] ?? '',
       clinicId: pkg['clinicId'] ?? '',
       clinicName: clinic['name'] ?? '',
+      city: clinic['city'] ?? '',
       clinicAddress: clinic['address'] ?? '',
       clinicRating: (clinic['hospitalOverallRating'] ?? 0).toString(),
       distance: clinic['distanceInKm'] ?? '',
@@ -90,7 +94,7 @@ class PackageModel {
       totalDiscountAmount: (pkg['totalDiscountAmount'] ?? 0).toDouble(),
       totalDiscountedAmount: (pkg['totalDiscountedAmount'] ?? 0).toDouble(),
       offerStart: pkg['offerStart'],
-      sittings: pkg['sittings'],
+      sittings: (pkg['sittings'] as num?)?.toInt() ?? 1,
       offerValidDate: pkg['offerValidDate'],
       offerActive: pkg['offerActive'] ?? false,
       procedures: (pkg['procedures'] as List? ?? [])
@@ -104,6 +108,7 @@ class PackageModel {
       packageName: json['packageName'] ?? '',
       clinicId: json['clinicId'] ?? '',
       clinicName: json['clinicName'] ?? '',
+      city: json['city'] ?? '',
       clinicAddress: json['clinicAddress'] ?? '',
       clinicRating: (json['clinicRating'] ?? '').toString(),
       distance: (json['distance'] ?? '').toString(),
@@ -126,6 +131,45 @@ class PackageModel {
       offerStart: json['offerStart'],
       offerValidDate: json['offerValidDate'],
       sittings: json['sittings'],
+      offerActive: json['offerActive'] ?? false,
+      procedures: (json['procedures'] as List? ?? [])
+          .map((e) => ProcedureModel.fromJson(e))
+          .toList(),
+    );
+  }
+
+  factory PackageModel.fromDirectApi(Map<String, dynamic> json) {
+    return PackageModel(
+      packageId: json['packageId'] ?? '',
+      packageName: json['packageName'] ?? '',
+      clinicId: json['clinicId'] ?? '',
+      clinicName: json['clinicName'] ?? '',
+      city: json['city'] ?? '',
+      clinicAddress: json['clinicAddress'] ?? '',
+      clinicRating: (json['clinicRating'] ?? '').toString(),
+      distance: (json['distance'] ?? '').toString(),
+      price: (json['price'] as num?)?.toDouble() ?? 0,
+      discountPercentage: (json['discountPercentage'] as num?)?.toDouble() ?? 0,
+      finalCost: (json['finalCost'] as num?)?.toDouble() ?? 0,
+      taxPercentage: (json['taxPercentage'] as num?)?.toDouble() ?? 0,
+      taxAmount: (json['taxAmount'] as num?)?.toDouble() ?? 0,
+      gst: (json['gst'] as num?)?.toDouble() ?? 0,
+      gstAmount: (json['gstAmount'] as num?)?.toDouble() ?? 0,
+      consultationFee: (json['consultationFee'] as num?)?.toDouble() ?? 0,
+      discountedCost: (json['discountedCost'] as num?)?.toDouble() ?? 0,
+      clinicPay: (json['clinicPay'] as num?)?.toDouble() ?? 0,
+      ngkDiscountPercentage:
+          (json['ngkDiscountPercentage'] as num?)?.toDouble() ?? 0,
+      ngkDiscountAmount: (json['ngkDiscountAmount'] as num?)?.toDouble() ?? 0,
+      totalDiscountPercentage:
+          (json['totalDiscountPercentage'] as num?)?.toDouble() ?? 0,
+      totalDiscountAmount:
+          (json['totalDiscountAmount'] as num?)?.toDouble() ?? 0,
+      totalDiscountedAmount:
+          (json['totalDiscountedAmount'] as num?)?.toDouble() ?? 0,
+      sittings: (json['sittings'] as num?)?.toInt() ?? 1,
+      offerStart: json['offerStart'],
+      offerValidDate: json['offerValidDate'],
       offerActive: json['offerActive'] ?? false,
       procedures: (json['procedures'] as List? ?? [])
           .map((e) => ProcedureModel.fromJson(e))

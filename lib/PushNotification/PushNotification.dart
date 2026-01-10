@@ -3,6 +3,10 @@ import 'dart:io';
 
 import 'package:cutomer_app/Notification/LocalNotification.dart';
 import 'package:cutomer_app/Notification/NotificationController.dart';
+import 'package:cutomer_app/Notification/Notifications.dart';
+import 'package:cutomer_app/Notification/notification_intent.dart';
+import 'package:cutomer_app/Services/notification_service.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -10,83 +14,66 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final _flutterLocal = FlutterLocalNotificationsPlugin();
 
 /// ---------- BACKGROUND / TERMINATED ------------
-@pragma('vm:entry-point') // <— needed so the VM keeps this symbol
-Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
-  await _NotificationHelper._ensureInitialized();
-  // _NotificationHelper.show(message);
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  debugPrint("🔕 Background message: ${message.data}");
 }
 
 /// ---------- PUBLIC API -------------------------
 class NotificationService {
   NotificationService._();
   static final instance = NotificationService._();
-  final notificationController = Get.put(NotificationController());
+
+  final NotificationController controller = Get.find<NotificationController>();
+
   Future<void> init() async {
-    // 1️⃣ Initialise Firebase background–handler (Android only)
-    FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
-
-    // 2️⃣ Ask for permission (iOS & Android 13+)
-    await _NotificationHelper.requestUserPermission();
-
-    // 3️⃣ Wire up listeners for every app‑state
+    await _requestPermission();
     _setupListeners();
-
-    // 4️⃣ Print (or send) FCM token
-    final token = await FirebaseMessaging.instance.getToken();
-    debugPrint('📲 FCM Token: $token');
+    _printFCMToken();
   }
 
-  /* ------------------ INTERNAL ------------------ */
   void _setupListeners() async {
-    // 🔹 Foreground
-    FirebaseMessaging.onMessage.listen((msg) async {
-      debugPrint('📥 Foreground: $msg');
+    /// 🟢 FOREGROUND → IN-APP BANNER
+    FirebaseMessaging.onMessage.listen((message) {
+      controller.handleNotification(message);
 
-      // 🔸 Show local notification banner
-      if (msg.notification != null) {
-        await _flutterLocal.show(
-          0,
-          msg.notification!.title ?? 'Notification',
-          msg.notification!.body ?? '',
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'general',
-              'General',
-              importance: Importance.max,
-              priority: Priority.high,
-            ),
-          ),
-        );
-      }
-
-      // ✅ Update controller & badge count in real time
-      notificationController.handleNotification(msg);
+      showInAppBanner(
+        title: message.notification?.title ?? "Notification",
+        body: message.notification?.body ?? "",
+      );
     });
 
-    // 🔹 Background ➜ foreground
-    FirebaseMessaging.onMessageOpenedApp.listen((msg) {
-      debugPrint('📬 Opened from background: $msg');
-      notificationController.handleNotification(msg);
+    /// 🟡 BACKGROUND → TAP
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      NotificationIntent.openedFromNotification = true;
+      controller.handleNotification(message);
     });
 
-    // 🔹 Terminated ➜ launch
-    final msg = await FirebaseMessaging.instance.getInitialMessage();
-    if (msg != null) {
-      debugPrint('🚀 Opened from quit state: $msg');
-      notificationController.handleNotification(msg);
+    /// 🔴 TERMINATED → APP OPEN
+    final message = await FirebaseMessaging.instance.getInitialMessage();
+    if (message != null) {
+      NotificationIntent.openedFromNotification = true;
+      controller.handleNotification(message);
     }
+  }
 
-    // 🔹 iOS presentation options
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
+  Future<void> _requestPermission() async {
+    await FirebaseMessaging.instance.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
+  }
+
+  Future<void> _printFCMToken() async {
+    final token = await FirebaseMessaging.instance.getToken();
+    debugPrint('📲 FCM TOKEN: $token');
   }
 }
 

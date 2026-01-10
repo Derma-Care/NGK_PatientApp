@@ -6,6 +6,7 @@ import 'package:cutomer_app/Dashboard/DashBoardController.dart';
 import 'package:cutomer_app/Dashboard/ImagePreview.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
+import 'package:cutomer_app/NGK/Offers/OffersListScreen.dart';
 import 'package:cutomer_app/NGK/Packges/PackageListScreen.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureListScreen.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureScreenName.dart';
@@ -254,7 +255,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                       "Offers",
                       "assets/offer.png",
                       () {
-                        Get.to(ClinicListScreen());
+                        Get.to(Offerslistscreen());
                       },
                     ),
                   ],
@@ -524,37 +525,45 @@ class ConsultationsTypeState extends State<ConsultationsType> {
         const Spacer(),
         Obx(() {
           final count = Get.find<NotificationController>().unreadCount.value;
-          return Obx(() => Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.notifications_outlined),
-                    onPressed: () {
-                      Get.to(() => NotificationScreen());
-                    },
-                  ),
-                  if (notificationController.unreadCount.value > 0)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          notificationController.unreadCount.value.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
+
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () {
+                  Get.to(() => NotificationScreen());
+                  Get.find<NotificationController>().markAllAsRead();
+                },
+              ),
+              if (count > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        count > 99 ? "99+" : count.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                ],
-              ));
+                  ),
+                ),
+            ],
+          );
         }),
         GestureDetector(
           onTap: () =>
