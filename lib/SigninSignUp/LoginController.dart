@@ -125,6 +125,7 @@ class SiginSignUpController extends GetxController {
           final prefs = await SharedPreferences.getInstance();
 
           await prefs.setString('mobileNumber', mobileNumber);
+          await prefs.setString('customer_full_name', mobileNumber);
           await prefs.setString('fcm', token ?? "");
 
           // ✅ User is registered

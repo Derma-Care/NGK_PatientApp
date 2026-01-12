@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:cutomer_app/APIs/FetchServices.dart';
 import 'package:cutomer_app/Dashboard/DashBoardController.dart';
 import 'package:cutomer_app/Dashboard/ImagePreview.dart';
+import 'package:cutomer_app/NGK/ClinicManagement/ClinicLactionScreen.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
 import 'package:cutomer_app/NGK/Offers/OffersListScreen.dart';
@@ -58,6 +59,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
   @override
   void initState() {
     super.initState();
+
     _loadLocation();
     dashboardcontroller.setMobileNumber(widget.mobileNumber);
     _focusNode.addListener(() {
@@ -66,9 +68,11 @@ class ConsultationsTypeState extends State<ConsultationsType> {
       }
     });
     loadProcedures();
-    _fetchCustomerName();
-    _loadCustomerNameFromPrefs();
+    _loadCustomerProfile();
     walletController.loadWallet();
+
+    // 👇 BEAUTIFUL FIRST-TIME ANIMATED POPUP
+    showWelcomeRewardBottomSheet();
   }
 
   Future<CustomerProfileModel?> _loadProfile() {
@@ -154,22 +158,16 @@ class ConsultationsTypeState extends State<ConsultationsType> {
   //   );
   // }
 
-  Future<void> _fetchCustomerName() async {
+  Future<void> _loadCustomerProfile() async {
     final profile = await CustomerService.getCustomer(widget.mobileNumber);
-    if (profile != null) {
+
+    if (profile != null && mounted) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('customer_full_name', profile.fullName);
       await prefs.setString('customer_Id', profile.customerId);
-    }
-  }
 
-  Future<void> _loadCustomerNameFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedName = prefs.getString('customer_full_name');
-
-    if (savedName != null) {
       setState(() {
-        fullName = savedName;
+        fullName = profile.fullName;
       });
     }
   }
@@ -267,6 +265,127 @@ class ConsultationsTypeState extends State<ConsultationsType> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> showWelcomeRewardBottomSheet() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final bool alreadyShown = prefs.getBool('welcome_reward_shown') ?? false;
+    final mobile = prefs.getString('mobileNumber') ?? widget.mobileNumber;
+
+    debugPrint("Welcome reward shown before: $alreadyShown");
+
+    // ✅ If already shown, do nothing
+    if (alreadyShown) return;
+
+    await Future.delayed(const Duration(milliseconds: 700));
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return TweenAnimationBuilder<double>(
+          duration: const Duration(milliseconds: 600),
+          tween: Tween(begin: 0.85, end: 1),
+          curve: Curves.easeOutBack,
+          builder: (context, scale, child) {
+            return Transform.scale(scale: scale, child: child);
+          },
+          child: Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [mainColor, secondaryColor],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.wallet,
+                    size: 42,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "Congratulations 🎉",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  "You received 100 Reward Coins",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    "Membership: BASIC",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: mainColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+
+                      // ✅ Mark as shown
+                      await prefs.setBool('welcome_reward_shown', true);
+
+                      Navigator.pop(context);
+                      Get.to(() => ReferralWalletPage(mobile: mobile));
+                    },
+                    child: const Text(
+                      "Start Exploring",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -415,9 +534,13 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                           setState(() => filteredProcedures.clear());
 
                           // 🚀 Navigate to next screen with ID & NAME
-                          Get.to(() => SubServiceListScreen(
-                                mainProcedures: item,
-                              ));
+                          Get.to(
+                            () => const ClinicListLocationScreen(),
+                            arguments: {
+                              "procedureId": item.procedureId,
+                              "procedureName": item.name
+                            },
+                          );
                         },
                       );
                     },
@@ -579,15 +702,32 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                 },
               ),
               Positioned(
-                right: 0,
-                top: -2,
-                child: Obx(() => Text(
-                      "💰${walletController.walletSummary.value?.balance.toDouble().toStringAsFixed(0)}",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
+                right: 4,
+                top: 0,
+                child: Obx(() => Row(
+                      children: [
+                        Container(
+                          width: 14,
+                          height: 14,
+
+                          // decoration: BoxDecoration(
+                          //   color: Colors.white.withOpacity(0.2),
+                          //   shape: BoxShape.circle,
+                          // ),
+                          child: Image.asset(
+                            "assets/coin.png",
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        Text(
+                          "${walletController.walletSummary.value?.balance.toDouble().toStringAsFixed(0)}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     )),
                 // child: Text('💰 2000',
                 //     style: TextStyle(

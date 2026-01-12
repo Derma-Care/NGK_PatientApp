@@ -81,6 +81,21 @@ class ClinicService {
     throw Exception("Failed to load services");
   }
 
+  
+  static Future<ClinicServicesResponse> fetchClinicServicesOffers(
+      String clinicId) async {
+    final url = Uri.parse("${wifiUrl}/api/customer/offers/clinics/$clinicId");
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      return ClinicServicesResponse.fromJson(body['data']);
+    }
+
+    throw Exception("Failed to load services");
+  }
+
   static Future<List<ClinicModelWithLocation>> fetchNearbyClinicsWithOffers({
     required double lat,
     required double lng,
@@ -126,6 +141,8 @@ class ClinicService {
       return [];
     }
   }
+
+
 
   static Future<ProcedureListModal> getProcedurePricingWithClinicId({
     required String clinicId,

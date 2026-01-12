@@ -17,12 +17,12 @@ import 'package:get/get.dart';
 
 class ServicesTabScreen extends StatefulWidget {
   final String clinicId;
-  final bool isClinic;
+  final bool isofferClinic;
 
   const ServicesTabScreen({
     super.key,
     required this.clinicId,
-    this.isClinic = false,
+    this.isofferClinic = false,
   });
 
   @override
@@ -47,7 +47,7 @@ class _ServicesTabScreenState extends State<ServicesTabScreen>
   void initState() {
     super.initState();
     tabController = TabController(length: 2, vsync: this);
-    servicesFuture = ClinicService.fetchClinicServices(widget.clinicId);
+    servicesFuture = _fetchServices();
 
     tabController.addListener(() {
       if (tabController.indexIsChanging) {
@@ -61,17 +61,22 @@ class _ServicesTabScreenState extends State<ServicesTabScreen>
     });
   }
 
+  Future<ClinicServicesResponse> _fetchServices() {
+    if (widget.isofferClinic) {
+      return ClinicService.fetchClinicServicesOffers(widget.clinicId);
+    } else {
+      return ClinicService.fetchClinicServices(widget.clinicId);
+    }
+  }
+
   Future<void> _refreshServices() async {
-    // reset pagination
     procedurePage.value = 1;
     packagePage.value = 1;
 
-    // re-call API
     setState(() {
-      servicesFuture = ClinicService.fetchClinicServices(widget.clinicId);
+      servicesFuture = _fetchServices();
     });
 
-    // optional delay for UX
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
