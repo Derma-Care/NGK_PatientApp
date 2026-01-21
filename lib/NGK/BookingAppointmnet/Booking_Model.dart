@@ -27,6 +27,14 @@ class BookingModel {
   final double finalAmount;
 
   final String paymentType;
+
+  final String paymentStatus;
+  final double partialAmount;
+  final double dueAmount;
+  final double partialPaymentPercentage;
+  final String? paymentMode;
+  
+
   final String status;
   final bool? isRated;
   final List<ProcedureSittingModel>? procedures; // ✅ nullable
@@ -53,6 +61,11 @@ class BookingModel {
     required this.finalAmount,
     required this.paymentType,
     required this.status,
+    required this.paymentStatus,
+    required this.partialAmount,
+    required this.dueAmount,
+    required this.partialPaymentPercentage,
+    this.paymentMode,
     this.isRated,
     this.procedures,
     this.hospitalLogo,
@@ -83,7 +96,12 @@ class BookingModel {
       "gstAmount": gstAmount,
       "gst": gst,
       "taxAmount": taxAmount,
-      "taxPercentage": taxPercentage
+      "taxPercentage": taxPercentage,
+      "paymentStatus": paymentStatus,
+      "partialAmount": partialAmount,
+      "dueAmount": dueAmount,
+      "partialPaymentPercentage": partialPaymentPercentage,
+      "paymentMode": paymentMode,
     };
   }
 
@@ -92,6 +110,7 @@ class BookingModel {
       bookingId: json['bookingId'],
       hospitalLogo: json['hospitalLogo'],
       fullName: json['fullName'],
+      paymentMode: json['paymentMode'],
       isRated: json['isRated'],
       consultationFee: (json['consultationFee'] ?? 0).toDouble(),
       gstAmount: (json['gstAmount'] ?? 0).toDouble(),
@@ -107,6 +126,12 @@ class BookingModel {
       appointmentDate: json['appointmentDate'],
       price: (json['price'] ?? 0).toDouble(),
       discount: (json['discount'] ?? 0).toDouble(),
+
+      paymentStatus: json['paymentStatus'],
+      partialAmount: (json['partialAmount'] ?? 0).toDouble(),
+      dueAmount: (json['dueAmount'] ?? 0).toDouble(),
+      partialPaymentPercentage:
+          (json['partialPaymentPercentage'] ?? 0).toDouble(),
 
       discountAmount: (json['discountAmount'] ?? 0).toDouble(),
       finalAmount: (json['finalAmount'] ?? 0).toDouble(),

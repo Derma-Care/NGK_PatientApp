@@ -171,7 +171,8 @@ class _AboutClinicScreenState extends State<AboutClinicScreen> {
         if (clinic.website.isNotEmpty)
           _linkTile(Icons.language, "Website", clinic.website),
         if (clinic.walkthrough?.isNotEmpty == true)
-          _linkTile(Icons.play_circle, "Walkthrough", clinic.walkthrough!),
+          _linkTile(
+              Icons.play_circle, "Clinic Virtual Tour", clinic.walkthrough!),
       ],
     );
   }

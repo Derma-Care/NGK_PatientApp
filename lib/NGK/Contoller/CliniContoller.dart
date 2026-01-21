@@ -63,20 +63,20 @@ class ClinicContoller {
     }
   }
 
-  Future<void> loadProcedurePricingWithClinicId(
-      String clinicId, String procedureId) async {
-    try {
-      final pricing = await ClinicService.getProcedurePricingWithClinicId(
-        clinicId: clinicId,
-        procedureId: procedureId,
-      );
+  // Future<void> loadProcedurePricingWithClinicId(
+  //     String clinicId, String procedureId) async {
+  //   try {
+  //     final pricing = await ClinicService.getProcedurePricingWithClinicId(
+  //       clinicId: clinicId,
+  //       procedureId: procedureId,
+  //     );
 
-      debugPrint("Procedure: ${pricing.procedureName}");
-      debugPrint("Final Price: ${pricing.totalDiscountedAmount}");
-    } catch (e) {
-      debugPrint("ERROR: $e");
-    }
-  }
+  //     debugPrint("Procedure: ${pricing.procedureName}");
+  //     debugPrint("Final Price: ${pricing.totalDiscountedAmount}");
+  //   } catch (e) {
+  //     debugPrint("ERROR: $e");
+  //   }
+  // }
 
   Future<void> loadPackagePricingWithClinicId(
       String clinicId, String procedureId) async {

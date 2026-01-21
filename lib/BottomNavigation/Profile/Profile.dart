@@ -187,17 +187,44 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
             child: Obx(() {
               final file = dashboardcontroller.imageFile.value;
 
-              return CircleAvatar(
-                radius: 47,
-                backgroundColor: mainColor,
-                child: CircleAvatar(
-                  radius: 45,
-                  backgroundColor: Colors.grey[300],
-                  backgroundImage: file != null ? FileImage(file) : null,
-                  child: file == null
-                      ? const Icon(Icons.person, size: 40, color: mainColor)
-                      : null,
-                ),
+              return Stack(
+                children: [
+                  /// 🔵 Outer Border
+                  CircleAvatar(
+                    radius: 47,
+                    backgroundColor: mainColor,
+                    child: CircleAvatar(
+                      radius: 45,
+                      backgroundColor: Colors.grey[300],
+                      backgroundImage: file != null
+                          ? FileImage(file)
+                          : const AssetImage('assets/ic_launcher.png')
+                              as ImageProvider,
+                    ),
+                  ),
+
+                  /// 📸 Camera Icon (Bottom Right)
+                  Positioned(
+                    bottom: 2,
+                    right: 2,
+                    child: GestureDetector(
+                      onTap: pickProfileImage,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: mainColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               );
             }),
           ),

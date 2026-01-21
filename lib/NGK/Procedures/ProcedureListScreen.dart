@@ -35,7 +35,6 @@ class _SubServiceListScreenState extends State<SubServiceListScreen> {
     super.initState();
     scrollController = ScrollController();
     scrollController.addListener(_onScroll);
-    controller.fetchSubServices();
   }
 
   void _onScroll() {
@@ -414,7 +413,6 @@ class _SubServiceListScreenState extends State<SubServiceListScreen> {
       ),
     );
   }
-
 
   Widget _priceRow(String title, String value,
       {bool bold = false, bool highlight = false}) {

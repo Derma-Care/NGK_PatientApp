@@ -6,6 +6,9 @@ import 'package:cutomer_app/NGK/Widgets/CommonPaginationBar.dart';
 import 'package:cutomer_app/NGK/Widgets/PackageBookingSheet.dart';
 import 'package:cutomer_app/Review/hospital_rating_screen.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
+import 'package:cutomer_app/Utils/FirstLatterCap.dart';
+import 'package:cutomer_app/Utils/MapOnGoogle.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
@@ -126,6 +129,29 @@ class _BookingListScreenState extends State<BookingListScreen>
                 itemCount: paginatedList.length,
                 itemBuilder: (context, index) {
                   final b = paginatedList[index];
+                  double getDisplayAmount() {
+                    // If fully paid → always show final amount
+                    if (b.paymentStatus == "PAID") {
+                      return b.finalAmount ?? 0;
+                    }
+
+                    // If payment is due
+                    if (b.paymentStatus == "DUE") {
+                      // Full payment selected
+                      if (b.paymentType == "FULL_PAYMENT") {
+                        return b.finalAmount ?? 0;
+                      }
+
+                      // Partial payment selected and percentage valid
+                      if (b.paymentType == "PARTIAL_PAYMENT" &&
+                          (b.partialPaymentPercentage ?? 0) > 0) {
+                        return b.partialAmount ?? 0;
+                      }
+                    }
+
+                    // Fallback
+                    return b.finalAmount ?? 0;
+                  }
 
                   return InkWell(
                     borderRadius: BorderRadius.circular(18),
@@ -247,7 +273,7 @@ class _BookingListScreenState extends State<BookingListScreen>
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                "₹${(b.finalAmount.toStringAsFixed(0)) ?? 0}",
+                                "₹${getDisplayAmount().toStringAsFixed(0)}",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -255,14 +281,22 @@ class _BookingListScreenState extends State<BookingListScreen>
                                 ),
                               ),
                               Text(
-                                "${b.serviceType.toLowerCase()}",
-                                style: TextStyle(
+                                capitalizeFirst(b.serviceType),
+                                style: const TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               _statusChip(b.status),
+                              const SizedBox(height: 8),
+                              Text(
+                                "${capitalizeFirst(b.paymentStatus)}",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -468,15 +502,25 @@ class _BookingListScreenState extends State<BookingListScreen>
                       const SizedBox(height: 20),
 
                       _detailRow("Booking ID", b.bookingId),
-                      _detailRow("Booking Type", b.serviceType),
-                      if (b.serviceId != null)
-                        _detailRow("Service ID", b.serviceId!),
+                      _detailRow(
+                          "Booking Type", capitalizeFirst(b.serviceType)),
+                      // if (b.serviceId != null)
+                      //   _detailRow("Service ID", b.serviceId!),
 
                       // _detailRow("Customer ID", b.customerId),
                       _detailRow("Mobile", b.mobileNumber),
 
                       _detailRow("Clinic", b.clinicName),
-                      _detailRow("Clinic Address", b.clinicAddress),
+                      _detailRow(
+                        "Clinic Address",
+                        b.clinicAddress,
+                        onTap: () {
+                          if (b.clinicAddress.isNotEmpty) {
+                            MapUtils.openMapByAddress(b.clinicAddress);
+                          }
+                        },
+                      ),
+
                       _detailRow("Booking Date", b.appointmentDate),
 
                       const Divider(height: 25),
@@ -502,9 +546,43 @@ class _BookingListScreenState extends State<BookingListScreen>
                       _detailRow("Final Amount",
                           "₹ ${b.finalAmount.toStringAsFixed(0)}"),
 
+                      if (b.paymentType == "PARTIAL_PAYMENT")
+                        Container(
+                          margin: const EdgeInsets.only(top: 12),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.orange.shade200),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Partial Payment Details",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              _detailRow(
+                                "You Paid",
+                                "₹ ${b.partialAmount.toStringAsFixed(0)}",
+                              ),
+                              _detailRow(
+                                "Amount to Pay",
+                                "₹ ${b.dueAmount.toStringAsFixed(0)}",
+                              ),
+                            ],
+                          ),
+                        ),
+
                       const Divider(height: 25),
 
-                      _detailRow("Payment Method", b.paymentType),
+                      _detailRow("Payment Type", b.paymentType),
+                      _detailRow("Payment Method", b.paymentMode ?? "_"),
+                      _detailRow("Payment Staus", b.paymentStatus),
                       _detailRow("Status", b.status),
 
                       const Divider(height: 25),
@@ -632,21 +710,36 @@ class _BookingListScreenState extends State<BookingListScreen>
     );
   }
 
-  Widget _detailRow(String title, String value) {
+  Widget _detailRow(
+    String title,
+    String value, {
+    VoidCallback? onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style:
-                  const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: const TextStyle(fontSize: 15),
+            child: InkWell(
+              onTap: onTap, // 👈 ONLY triggers on user click
+              child: Text(
+                value,
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: onTap != null ? Colors.blue : Colors.black,
+                  decoration: onTap != null ? TextDecoration.underline : null,
+                ),
+              ),
             ),
           ),
         ],

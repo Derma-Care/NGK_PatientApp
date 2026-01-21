@@ -33,6 +33,12 @@ class PackageModel {
 
   final List<ProcedureModel> procedures;
 
+  final String? paymentType; //TODO: this required
+  final double? partialPaymentPercentage;
+  
+  final double? platformFeePercentage;
+  final double? platformFee; // ✅ ADD
+
   PackageModel({
     required this.packageId,
     required this.city,
@@ -62,6 +68,10 @@ class PackageModel {
     required this.offerActive,
     required this.procedures,
     required this.sittings,
+    this.paymentType,
+    this.partialPaymentPercentage,
+    this.platformFeePercentage,
+    this.platformFee,
   });
 
   factory PackageModel.fromApi(Map<String, dynamic> json) {
@@ -82,6 +92,8 @@ class PackageModel {
       discountPercentage: (pkg['discountPercentage'] ?? 0).toDouble(),
       finalCost: (pkg['finalCost'] ?? 0).toDouble(),
       taxPercentage: (pkg['taxPercentage'] ?? 0).toDouble(),
+      platformFeePercentage: (pkg['platformFeePercentage'] ?? 0).toDouble(),
+      platformFee: (pkg['platformFee'] ?? 0).toDouble(),
       taxAmount: (pkg['taxAmount'] ?? 0).toDouble(),
       gst: (pkg['gst'] ?? 0).toDouble(),
       gstAmount: (pkg['gstAmount'] ?? 0).toDouble(),
@@ -97,6 +109,9 @@ class PackageModel {
       sittings: (pkg['sittings'] as num?)?.toInt() ?? 1,
       offerValidDate: pkg['offerValidDate'],
       offerActive: pkg['offerActive'] ?? false,
+      paymentType: json['paymentType'],
+      partialPaymentPercentage:
+          (json['partialPaymentPercentage'] as num?)?.toDouble(),
       procedures: (pkg['procedures'] as List? ?? [])
           .map((e) => ProcedureModel.fromJson(e))
           .toList(),
@@ -132,6 +147,11 @@ class PackageModel {
       offerValidDate: json['offerValidDate'],
       sittings: json['sittings'],
       offerActive: json['offerActive'] ?? false,
+      paymentType: json['paymentType'],
+      platformFeePercentage: (json['platformFeePercentage'] ?? 0).toDouble(),
+      platformFee: (json['platformFee'] ?? 0).toDouble(),
+      partialPaymentPercentage:
+          (json['partialPaymentPercentage'] as num?)?.toDouble(),
       procedures: (json['procedures'] as List? ?? [])
           .map((e) => ProcedureModel.fromJson(e))
           .toList(),
@@ -171,6 +191,11 @@ class PackageModel {
       offerStart: json['offerStart'],
       offerValidDate: json['offerValidDate'],
       offerActive: json['offerActive'] ?? false,
+      paymentType: json['paymentType'],
+      platformFeePercentage: (json['platformFeePercentage'] ?? 0).toDouble(),
+      platformFee: (json['platformFee'] ?? 0).toDouble(),
+      partialPaymentPercentage:
+          (json['partialPaymentPercentage'] as num?)?.toDouble(),
       procedures: (json['procedures'] as List? ?? [])
           .map((e) => ProcedureModel.fromJson(e))
           .toList(),

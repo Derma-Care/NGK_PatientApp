@@ -17,6 +17,7 @@ import 'package:cutomer_app/NGK/Service/customer_service.dart'
 import 'package:cutomer_app/Notification/NotificationController.dart';
 import 'package:cutomer_app/Notification/Notifications.dart';
 import 'package:cutomer_app/Screens/RefferalCode.dart';
+import 'package:cutomer_app/Screens/WhatsUpPreviewCard.dart';
 import 'package:cutomer_app/TreatmentAndServices/SubserviceController.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/GradintColor.dart';
@@ -260,6 +261,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                 ),
 
                 const SizedBox(height: 20),
+                // WhatsAppPreviewCard()
               ],
             ),
           ),
@@ -693,13 +695,15 @@ class ConsultationsTypeState extends State<ConsultationsType> {
               Get.to(() => ReferralWalletPage(mobile: widget.mobileNumber)),
           child: Stack(
             children: [
-              IconButton(
-                icon: const Icon(Icons.wallet, color: Colors.white),
-                onPressed: () {
-                  Get.to(
-                    () => ReferralWalletPage(mobile: widget.mobileNumber),
-                  );
-                },
+              Center(
+                child: IconButton(
+                  icon: const Icon(Icons.wallet, color: Colors.white, size: 28),
+                  onPressed: () {
+                    Get.to(
+                      () => ReferralWalletPage(mobile: widget.mobileNumber),
+                    );
+                  },
+                ),
               ),
               Positioned(
                 right: 4,

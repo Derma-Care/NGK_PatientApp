@@ -3,9 +3,9 @@ String timeAgo(String dateString) {
 
   DateTime dateTime;
   try {
-    dateTime = DateTime.parse(dateString);
+    dateTime = DateTime.parse(dateString).toLocal(); // ✅ FIX
   } catch (e) {
-    return dateString; // fallback if format fails
+    return dateString;
   }
 
   final now = DateTime.now();

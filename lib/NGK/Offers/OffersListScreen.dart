@@ -219,7 +219,8 @@ class _OfferslistscreenState extends State<Offerslistscreen> {
                                                         const SizedBox(
                                                             width: 4),
                                                         Text(
-                                                            "${clinic.hospitalOverallRating}"),
+                                                          "${clinic.hospitalOverallRating.toStringAsFixed(1)}",
+                                                        ),
                                                         const SizedBox(
                                                             width: 12),
                                                         const Icon(

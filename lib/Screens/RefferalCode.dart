@@ -1,3 +1,4 @@
+import 'package:cutomer_app/APIs/BaseUrl.dart';
 import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
@@ -50,8 +51,7 @@ class _ReferralWalletPageState extends State<ReferralWalletPage> {
     }
 
     final String referralCode = customer.referId!;
-    final String appLink =
-        "https://glowkartclinic.ashokfruit.shop/NGK-Registration-Form";
+    final String appLink = "${wifiUrl}/NGK-Registration-Form";
 
     final String message = '''
 ✨ Join Neeha’s Glow Kart ✨

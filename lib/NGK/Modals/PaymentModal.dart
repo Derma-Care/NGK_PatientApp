@@ -19,7 +19,6 @@ class PaymentModal {
   final double discountPercentage;
   final double discountAmount;
 
-  final double platformFee;
   final double finalCost;
 
   final double ngkDiscountPercentage;
@@ -28,6 +27,11 @@ class PaymentModal {
   final double totalDiscountAmount;
   final double totalDiscountedAmount;
   final double totalDiscountPercentage;
+  final String? paymentType;
+  final double? partialPaymentPercentage;
+  final double? platformFeePercentage;
+  final double? platformFee;
+
   PaymentModal({
     required this.clinicId,
     required this.serviceId,
@@ -40,13 +44,16 @@ class PaymentModal {
     required this.taxAmount,
     required this.discountPercentage,
     required this.discountAmount,
-    required this.platformFee,
+    this.platformFee,
     required this.finalCost,
     required this.ngkDiscountPercentage,
     required this.ngkDiscountAmount,
     required this.totalDiscountAmount,
     required this.totalDiscountedAmount,
     required this.totalDiscountPercentage,
+    this.paymentType,
+    this.partialPaymentPercentage,
+    this.platformFeePercentage,
   });
 
   // ================= FACTORY HELPERS =================
@@ -65,12 +72,15 @@ class PaymentModal {
         taxAmount: p.taxAmount,
         discountPercentage: p.totalDiscountPercentage,
         discountAmount: p.totalDiscountAmount,
-        platformFee: 10,
         finalCost: p.finalCost,
         ngkDiscountPercentage: p.ngkDiscountPercentage,
         ngkDiscountAmount: p.ngkDiscountAmount,
         totalDiscountAmount: p.totalDiscountAmount,
         totalDiscountedAmount: p.totalDiscountedAmount,
+        paymentType: p.paymentType,
+        partialPaymentPercentage: p.partialPaymentPercentage,
+        platformFee: p.platformFee, // ✅ ADD
+        platformFeePercentage: p.platformFeePercentage, // ✅ ADD
         totalDiscountPercentage: p.totalDiscountPercentage);
   }
 
@@ -88,12 +98,15 @@ class PaymentModal {
         taxAmount: p.taxAmount,
         discountPercentage: p.discountPercentage,
         discountAmount: p.totalDiscountAmount,
-        platformFee: 10,
         finalCost: p.finalCost,
         ngkDiscountPercentage: p.ngkDiscountPercentage,
         ngkDiscountAmount: p.ngkDiscountAmount,
         totalDiscountAmount: p.totalDiscountAmount,
         totalDiscountedAmount: p.totalDiscountedAmount,
+        paymentType: p.paymentType,
+        partialPaymentPercentage: p.partialPaymentPercentage,
+        platformFee: p.platformFee, // ✅ ADD
+        platformFeePercentage: p.platformFeePercentage, // ✅ ADD
         totalDiscountPercentage: p.totalDiscountPercentage);
   }
 
@@ -104,6 +117,9 @@ class PaymentModal {
     return PaymentModal(
       clinicId: json['clinicId'],
       serviceId: json['serviceId'],
+      paymentType: json['paymentType'],
+      partialPaymentPercentage:
+          (json['partialPaymentPercentage'] as num).toDouble(),
       serviceType: json['serviceType'],
       price: (json['price'] as num).toDouble(),
       consultationFee: (json['consultationFee'] as num).toDouble(),
@@ -113,7 +129,8 @@ class PaymentModal {
       taxAmount: (json['taxAmount'] as num).toDouble(),
       discountPercentage: (json['discountPercentage'] as num).toDouble(),
       discountAmount: (json['discountAmount'] as num).toDouble(),
-      platformFee: (json['platformFee'] as num).toDouble(),
+      platformFee: (json['platformFee'] ?? 0).toDouble(),
+      platformFeePercentage: (json['platformFeePercentage'] ?? 0).toDouble(),
       finalCost: (json['finalCost'] as num).toDouble(),
       ngkDiscountPercentage: (json['ngkDiscountPercentage'] as num).toDouble(),
       ngkDiscountAmount: (json['ngkDiscountAmount'] as num).toDouble(),
@@ -123,8 +140,6 @@ class PaymentModal {
           (json['totalDiscountPercentage'] as num).toDouble(),
     );
   }
-
-  
 
   /// 🔹 Convert to JSON
   Map<String, dynamic> toJson() {
@@ -147,6 +162,9 @@ class PaymentModal {
       "totalDiscountAmount": totalDiscountAmount,
       "totalDiscountedAmount": totalDiscountedAmount,
       "totalDiscountPercentage": totalDiscountPercentage,
+      "paymentType": paymentType,
+      "partialPaymentPercentage": partialPaymentPercentage,
+      "platformFeePercentage": platformFeePercentage,
     };
   }
 }

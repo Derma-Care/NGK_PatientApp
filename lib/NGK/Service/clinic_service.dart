@@ -81,7 +81,6 @@ class ClinicService {
     throw Exception("Failed to load services");
   }
 
-  
   static Future<ClinicServicesResponse> fetchClinicServicesOffers(
       String clinicId) async {
     final url = Uri.parse("${wifiUrl}/api/customer/offers/clinics/$clinicId");
@@ -142,7 +141,7 @@ class ClinicService {
     }
   }
 
-
+//Rebooking TODO:Provide customer Url
 
   static Future<ProcedureListModal> getProcedurePricingWithClinicId({
     required String clinicId,

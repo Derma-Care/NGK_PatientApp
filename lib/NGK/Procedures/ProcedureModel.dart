@@ -1,4 +1,3 @@
-
 class ProcedureListModal {
   final String procedureId;
   final String procedureName;
@@ -38,6 +37,11 @@ class ProcedureListModal {
   final double totalDiscountPercentage;
   final double totalDiscountAmount;
   final double totalDiscountedAmount;
+  final String? paymentType;
+  final double? partialPaymentPercentage;
+
+  final double? platformFeePercentage;
+  final double? platformFee;
 
   ProcedureListModal({
     required this.procedureId,
@@ -70,6 +74,10 @@ class ProcedureListModal {
     required this.totalDiscountPercentage,
     required this.totalDiscountAmount,
     required this.totalDiscountedAmount,
+    required this.paymentType,
+    this.partialPaymentPercentage,
+    this.platformFeePercentage,
+    this.platformFee,
   });
 
   factory ProcedureListModal.fromJson(Map<String, dynamic> json) {
@@ -101,10 +109,15 @@ class ProcedureListModal {
       offerActive: json['offerActive'] ?? false,
       ngkDiscountPercentage: (json['ngkDiscountPercentage'] ?? 0).toDouble(),
       ngkDiscountAmount: (json['ngkDiscountAmount'] ?? 0).toDouble(),
+      platformFee: (json['platformFee'] ?? 0).toDouble(),
+      platformFeePercentage: (json['platformFeePercentage'] ?? 0).toDouble(),
       totalDiscountPercentage:
           (json['totalDiscountPercentage'] ?? 0).toDouble(),
       totalDiscountAmount: (json['totalDiscountAmount'] ?? 0).toDouble(),
       totalDiscountedAmount: (json['totalDiscountedAmount'] ?? 0).toDouble(),
+      paymentType: json['paymentType'],
+      partialPaymentPercentage:
+          (json['partialPaymentPercentage'] as num?)?.toDouble(),
     );
   }
 

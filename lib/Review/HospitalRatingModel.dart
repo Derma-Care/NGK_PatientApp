@@ -15,15 +15,11 @@ class HospitalRatingModel {
     final ratings = json['ratings'] as List? ?? [];
 
     return HospitalRatingModel(
-      clinicName: ratings.isNotEmpty
-          ? ratings[0]['clinicName'] ?? 'Clinic'
-          : 'Clinic',
-      hospitalOverallRating:
-          (json['averageRating'] ?? 0).toString(),
+      clinicName:
+          ratings.isNotEmpty ? ratings[0]['clinicName'] ?? 'Clinic' : 'Clinic',
+      hospitalOverallRating: (json['averageRating'] ?? 0).toString(),
       totalRatings: json['totalRatings'] ?? 0,
-      comments: ratings
-          .map((e) => CommentModel.fromJson(e))
-          .toList(),
+      comments: ratings.map((e) => CommentModel.fromJson(e)).toList(),
     );
   }
 }

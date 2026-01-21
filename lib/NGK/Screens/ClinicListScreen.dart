@@ -210,7 +210,7 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
                                                         color: Colors.amber),
                                                     const SizedBox(width: 4),
                                                     Text(
-                                                        "${clinic.hospitalOverallRating}"),
+                                                        "${clinic.hospitalOverallRating.toStringAsFixed(1)}"),
                                                     const SizedBox(width: 12),
                                                     const Icon(
                                                         Icons.directions_car,

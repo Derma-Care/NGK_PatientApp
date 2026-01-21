@@ -23,9 +23,12 @@ class NotificationController extends GetxController {
 
   // When a new push notification arrives
   void handleNotification(RemoteMessage message) {
+    print("🔥 handleNotification() CALLED ${message}");
     final newNotification = NotificationModel(
-      title: message.notification?.title ?? "No Title",
-      body: message.notification?.body ?? "No Body",
+      title: message.data['title'] ??
+          message.notification?.title ??
+          "Notification",
+      body: message.data['body'] ?? message.notification?.body ?? "",
       type: message.data['type'] ?? 'general',
       timestamp: DateTime.now(),
       isRead: false,
@@ -36,11 +39,6 @@ class NotificationController extends GetxController {
 
     // Increase unread count
     unreadCount.value++;
-
-    // ✅ Navigate to Notifications screen only if not already there
-    // if (Get.currentRoute != '/NotificationScreen') {
-    //   Get.to(() => NotificationScreen());
-    // }
   }
 
   // Remove a specific notification

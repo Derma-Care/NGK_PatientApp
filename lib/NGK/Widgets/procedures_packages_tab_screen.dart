@@ -322,22 +322,35 @@ class ServiceExpandableCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 6),
-                Row(
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "₹${price.toStringAsFixed(0)}",
-                      style: const TextStyle(
-                        decoration: TextDecoration.lineThrough,
-                        color: Colors.grey,
-                        fontSize: 13,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          "₹${price.toStringAsFixed(0)}",
+                          style: const TextStyle(
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.grey,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "₹${finalCost.toStringAsFixed(0)}",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.pink,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
                     Text(
-                      "₹${finalCost.toStringAsFixed(0)}",
+                      "Save ₹${item.totalDiscountAmount.toStringAsFixed(0)}",
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
                         color: Colors.pink,
                       ),
                     ),

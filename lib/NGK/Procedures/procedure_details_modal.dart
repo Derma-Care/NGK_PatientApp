@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureModel.dart';
 import 'package:cutomer_app/NGK/Widgets/PackageBookingSheet.dart';
 import 'package:cutomer_app/Utils/DateConverter.dart';
+import 'package:cutomer_app/Utils/procedureImageWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -73,11 +75,10 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
             // IMAGE
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.memory(
-                base64Decode(service.procedureImage),
+              child: SizedBox(
                 height: 200,
                 width: double.infinity,
-                fit: BoxFit.cover,
+                child: procedureImageWidget(service.procedureImage),
               ),
             ),
 

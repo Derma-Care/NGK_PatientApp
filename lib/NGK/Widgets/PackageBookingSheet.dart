@@ -17,6 +17,11 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum PaymentType {
+  FULL_PAYMENT,
+  PARTIAL_PAYMENT,
+}
+
 class PackageBookingSheet extends StatefulWidget {
   final PaymentModal payment;
   final String? info;
@@ -51,8 +56,27 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
   void initState() {
     super.initState();
     slotController.fetchSlots(widget.payment.clinicId);
-
+// ✅ Force FULL_PAYMENT if partial is not valid
+    if ((widget.payment.partialPaymentPercentage ?? 0) <= 0) {
+      _paymentType = PaymentType.FULL_PAYMENT;
+    }
     _loadCustomer();
+  }
+
+  Map<String, dynamic> getPaymentPayload() {
+    final fullAmount = useCoins && priceCalc != null
+        ? priceCalc!.finalAmount
+        : priceCalc?.originalFinalAmount ?? widget.payment.finalCost;
+
+    return {
+      "paymentType": _paymentType == PaymentType.FULL_PAYMENT
+          ? "FULL_PAYMENT"
+          : "PARTIAL_PAYMENT",
+      "fullAmount": fullAmount,
+      "payableAmount": payableAmount,
+      "partialPercentage":
+          _paymentType == PaymentType.PARTIAL_PAYMENT ? 20 : 100,
+    };
   }
 
   Future<void> _loadCustomer() async {
@@ -66,9 +90,35 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
     }
   }
 
+  PaymentType _paymentType = PaymentType.FULL_PAYMENT;
+
+  double get payableAmount {
+    final fullAmount = useCoins && priceCalc != null
+        ? priceCalc!.finalAmount
+        : priceCalc?.originalFinalAmount ?? widget.payment.finalCost;
+
+    final partialPercent = widget.payment.partialPaymentPercentage;
+
+    // ✅ Apply partial ONLY if valid (>0)
+    if (_paymentType == PaymentType.PARTIAL_PAYMENT &&
+        partialPercent != null &&
+        partialPercent > 0) {
+      return fullAmount * (partialPercent / 100);
+    }
+
+    return fullAmount;
+  }
+
+  String get paymentTypeString {
+    return _paymentType == PaymentType.FULL_PAYMENT
+        ? "FULL_PAYMENT"
+        : "PARTIAL_PAYMENT";
+  }
+
   @override
   Widget build(BuildContext context) {
-    double platformFee = 10;
+    double platformFee = widget.payment.platformFee ?? 0;
+    // double platformFee = 0;
 
     double total = widget.payment.finalCost;
 
@@ -223,6 +273,29 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
 
             const SizedBox(height: 25),
 
+            if ((widget.payment.partialPaymentPercentage ?? 0) > 0) ...[
+              const Text(
+                "Payment Type",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  paymentTab(
+                    title: "Full Payment",
+                    value: PaymentType.FULL_PAYMENT,
+                  ),
+                  const SizedBox(width: 12),
+                  paymentTab(
+                    title:
+                        "Partial Payment (${widget.payment.partialPaymentPercentage!.toStringAsFixed(0)}%)",
+                    value: PaymentType.PARTIAL_PAYMENT,
+                  ),
+                ],
+              ),
+            ],
+
+            const SizedBox(height: 12),
             // -------------------- PRICE DETAILS --------------------
             const Text("Payment Details",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -232,7 +305,12 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
 
             const SizedBox(height: 12),
 
-            priceRow("Original Price", widget.payment.price, ""),
+            priceRow(
+              "Original Price",
+              widget.payment.price,
+              "",
+            ),
+
             priceRow("Consultation", widget.payment.consultationFee, ""),
             priceRow("GST (${widget.payment.gst.toStringAsFixed(0)}%)",
                 widget.payment.gstAmount, ""),
@@ -248,7 +326,11 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                   widget.payment.totalDiscountAmount,
                   "-"),
 
-            priceRow("Platform Fee ", platformFee, ""),
+            priceRow(
+                // "Platform Fee (${widget.payment.platformFeePercentage?.toStringAsFixed(0)}%) ",
+                "Platform Fee ",
+                platformFee,
+                ""),
 
             if (useCoins && priceCalc != null && priceCalc!.appliedPoints > 0)
               priceRow(
@@ -340,9 +422,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
 
             priceRow(
               "Total Payable",
-              useCoins && priceCalc != null
-                  ? priceCalc!.finalAmount
-                  : priceCalc?.originalFinalAmount ?? widget.payment.finalCost,
+              payableAmount,
               "",
               isBold: true,
             ),
@@ -364,25 +444,28 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                   showSnackbar("Error", "Customer data not loaded", "error");
                   return;
                 }
+
                 final payload = BookingRequestModel(
                   clinicId: widget.payment.clinicId,
                   customerId: customer.customerId,
                   serviceId: widget.payment.serviceId,
                   serviceType: widget.payment.serviceType,
-                  paymentType: "ONLINE",
+
+                  paymentType: _paymentType == PaymentType.FULL_PAYMENT
+                      ? "FULL_PAYMENT"
+                      : "PARTIAL_PAYMENT",
+                  //TODO:  Check this ont acceprt other but here keep Patial amount and full amount
                   appointmentDate: slotController
                       .slots[slotController.selectedIndex.value].date,
 
                   // ✅ send ONLY when toggle ON
                   pointsToRedeem:
                       useCoins ? (priceCalc?.appliedPoints ?? 0) : 0,
+                  paymentMode: "ONLINE",
                 );
 
                 print("Booing payload final ${payload.toJson()}");
-                final totalAmt = useCoins && priceCalc != null
-                    ? priceCalc!.finalAmount
-                    : priceCalc?.originalFinalAmount ??
-                        widget.payment.finalCost;
+                final totalAmt = payableAmount;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -415,6 +498,42 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
     );
   }
 
+  Widget paymentTab({
+    required String title,
+    required PaymentType value,
+  }) {
+    final isSelected = _paymentType == value;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _paymentType = value;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.blue : Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? Colors.blue : Colors.grey,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget priceRow(
     String title,
     double amount,
@@ -435,7 +554,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
             ),
           ),
           Text(
-            "${op} ₹${amount.toStringAsFixed(2)}",
+            "${op} ₹${amount.toStringAsFixed(0)}",
             style: TextStyle(
               fontSize: isBold ? 17 : 15,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w500,

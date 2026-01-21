@@ -136,14 +136,14 @@ class _HospitalRatingScreenState extends State<HospitalRatingScreen> {
                 const SizedBox(height: 16),
 
                 // Hospital Name
-                Text(
-                  widget.bookingId,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade600),
-                ),
+                // Text(
+                //   widget.bookingId,
+                //   textAlign: TextAlign.center,
+                //   style: TextStyle(
+                //       fontSize: 14,
+                //       fontWeight: FontWeight.bold,
+                //       color: Colors.grey.shade600),
+                // ),
                 Text(
                   widget.hospitalName,
                   textAlign: TextAlign.center,
