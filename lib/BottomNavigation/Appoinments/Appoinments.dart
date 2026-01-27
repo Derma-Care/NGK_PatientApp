@@ -537,10 +537,21 @@ class _BookingListScreenState extends State<BookingListScreen>
                           "₹ ${b.taxAmount?.toStringAsFixed(0)}",
                         ),
 
+                      _detailRow(
+                        "Platform Fee",
+                        "₹ ${b.platformFee.toStringAsFixed(0)}",
+                      ),
+
                       if ((b.discountAmount ?? 0) > 0)
                         _detailRow(
-                          "Discount (${b.discount.toStringAsFixed(0)}%)",
-                          "₹ ${b.discountAmount.toStringAsFixed(0)}",
+                          "Discount (${b.totalDiscountPercentage}%)",
+                          "-₹ ${b.discountAmount.toStringAsFixed(0)}",
+                        ),
+
+                      if ((b.redeemedPoints ?? 0) > 0)
+                        _detailRow(
+                          "Used Coins",
+                          "₹ ${b.redeemedPoints}",
                         ),
 
                       _detailRow("Final Amount",

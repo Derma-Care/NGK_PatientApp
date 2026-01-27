@@ -107,7 +107,9 @@ class PaymentModal {
         partialPaymentPercentage: p.partialPaymentPercentage,
         platformFee: p.platformFee, // ✅ ADD
         platformFeePercentage: p.platformFeePercentage, // ✅ ADD
-        totalDiscountPercentage: p.totalDiscountPercentage);
+        totalDiscountPercentage: p.totalDiscountPercentage
+        
+        );
   }
 
   // ================= JSON SUPPORT =================

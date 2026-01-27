@@ -71,6 +71,18 @@ class _AboutClinicScreenState extends State<AboutClinicScreen> {
                 _timingsSection(clinic),
                 _doctorsAccordion(clinic),
                 if (_hasSocial(clinic)) _socialSection(clinic),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pinkAccent),
+                    onPressed: () {
+                      Get.to(() =>
+                          HospitalRatingScreen(clinicId: clinic.clinicId));
+                    },
+                    child: const Text("Ratings & Comments"),
+                  ),
+                )
               ],
             ),
           );
@@ -133,7 +145,7 @@ class _AboutClinicScreenState extends State<AboutClinicScreen> {
   Widget _clinicImage(ClinicModelWithLocation clinic) {
     if (clinic.hospitalLogo.startsWith("data:image")) {
       final bytes = base64Decode(clinic.hospitalLogo.split(',').last);
-      return Image.memory(bytes, width: 70, height: 70, fit: BoxFit.cover);
+      return Image.memory(bytes, width: 70, height: 70, fit: BoxFit.fill);
     }
     return Container(
       width: 70,
@@ -246,16 +258,6 @@ class _AboutClinicScreenState extends State<AboutClinicScreen> {
           _linkTile(Icons.camera_alt, "Instagram", clinic.instagramHandle!),
         if (clinic.twitterHandle?.isNotEmpty == true)
           _linkTile(Icons.alternate_email, "Twitter", clinic.twitterHandle!),
-        Align(
-          alignment: Alignment.centerRight,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.pinkAccent),
-            onPressed: () {
-              Get.to(() => HospitalRatingScreen(clinicId: clinic.clinicId));
-            },
-            child: const Text("Ratings & Comments"),
-          ),
-        )
       ],
     );
   }

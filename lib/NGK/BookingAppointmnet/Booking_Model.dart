@@ -25,6 +25,7 @@ class BookingModel {
   final double discount;
   final double discountAmount;
   final double finalAmount;
+  final double totalDiscountPercentage;
 
   final String paymentType;
 
@@ -32,44 +33,48 @@ class BookingModel {
   final double partialAmount;
   final double dueAmount;
   final double partialPaymentPercentage;
+  final double platformFee;
   final String? paymentMode;
-  
+  final int? redeemedPoints;
 
   final String status;
   final bool? isRated;
   final List<ProcedureSittingModel>? procedures; // ✅ nullable
-  BookingModel({
-    required this.bookingId,
-    this.fullName,
-    this.customerId,
-    this.consultationFee,
-    this.gstAmount,
-    this.gst,
-    this.taxAmount,
-    this.taxPercentage,
-    required this.mobileNumber,
-    required this.serviceType,
-    this.serviceName,
-    this.serviceId,
-    this.clinicId,
-    required this.clinicName,
-    required this.clinicAddress,
-    required this.appointmentDate,
-    required this.price,
-    required this.discount,
-    required this.discountAmount,
-    required this.finalAmount,
-    required this.paymentType,
-    required this.status,
-    required this.paymentStatus,
-    required this.partialAmount,
-    required this.dueAmount,
-    required this.partialPaymentPercentage,
-    this.paymentMode,
-    this.isRated,
-    this.procedures,
-    this.hospitalLogo,
-  });
+
+  BookingModel(
+      {required this.bookingId,
+      this.fullName,
+      this.customerId,
+      this.consultationFee,
+      this.gstAmount,
+      this.gst,
+      this.taxAmount,
+      this.taxPercentage,
+      required this.mobileNumber,
+      required this.serviceType,
+      this.serviceName,
+      this.serviceId,
+      this.clinicId,
+      required this.clinicName,
+      required this.clinicAddress,
+      required this.appointmentDate,
+      required this.price,
+      required this.discount,
+      required this.discountAmount,
+      required this.finalAmount,
+      required this.paymentType,
+      required this.status,
+      required this.paymentStatus,
+      required this.partialAmount,
+      required this.dueAmount,
+      required this.partialPaymentPercentage,
+      required this.totalDiscountPercentage,
+      required this.platformFee,
+      this.paymentMode,
+      this.isRated,
+      this.procedures,
+      this.hospitalLogo,
+      this.redeemedPoints});
 
   Map<String, dynamic> toJson() {
     return {
@@ -102,6 +107,9 @@ class BookingModel {
       "dueAmount": dueAmount,
       "partialPaymentPercentage": partialPaymentPercentage,
       "paymentMode": paymentMode,
+      "totalDiscountPercentage": totalDiscountPercentage,
+      "platformFee": platformFee,
+      "redeemedPoints": redeemedPoints
     };
   }
 
@@ -124,11 +132,17 @@ class BookingModel {
       clinicName: json['clinicName'],
       clinicAddress: json['clinicAddress'],
       appointmentDate: json['appointmentDate'],
+      redeemedPoints: json['redeemedPoints' ?? 0],
+
       price: (json['price'] ?? 0).toDouble(),
       discount: (json['discount'] ?? 0).toDouble(),
 
       paymentStatus: json['paymentStatus'],
       partialAmount: (json['partialAmount'] ?? 0).toDouble(),
+      platformFee: (json['platformFee'] ?? 0).toDouble(),
+
+      totalDiscountPercentage:
+          (json['totalDiscountPercentage'] ?? 0).toDouble(),
       dueAmount: (json['dueAmount'] ?? 0).toDouble(),
       partialPaymentPercentage:
           (json['partialPaymentPercentage'] ?? 0).toDouble(),
@@ -146,6 +160,8 @@ class BookingModel {
           .toList(),
     );
   }
+
+  get discountPercentage => null;
 }
 
 class ProcedureSittingModel {

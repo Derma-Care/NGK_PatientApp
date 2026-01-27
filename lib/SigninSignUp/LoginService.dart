@@ -38,9 +38,8 @@ class LoginApiService {
         Uri.parse('$endpoint'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-    
           'mobile': mobileNumber,
-          'deviceToken': token,
+          // 'deviceToken': token,
         }),
       );
 
@@ -49,13 +48,13 @@ class LoginApiService {
       print("response for statusCode body ${body}");
 
       final decoded = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        print("response for login $decoded");
-
-        return decoded;
+      if (response.body.isNotEmpty) {
+        return jsonDecode(response.body);
       } else {
-        showSnackbar("Error", "${decoded['message']}", "error");
-        return {'error': '${decoded['message']}'};
+        return {
+          'statusCode': response.statusCode,
+          'message': 'Empty response from server'
+        };
       }
     } catch (e) {
       showSnackbar("Error", "server not respond", "error");

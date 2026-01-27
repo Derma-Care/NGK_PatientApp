@@ -93,6 +93,22 @@ class _OfferslistscreenState extends State<Offerslistscreen> {
                 ),
               ),
             ),
+            SizedBox(
+              height: 12,
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center, // centers buttons
+                children: [
+                  filterButton("All", controller),
+                  const SizedBox(width: 8),
+                  filterButton("Near Me", controller),
+                  const SizedBox(width: 8),
+                  filterButton("Rating", controller),
+                ],
+              ),
+            ),
             Expanded(
               child: ValueListenableBuilder<bool>(
                 valueListenable: controller.isLoading,
@@ -112,6 +128,7 @@ class _OfferslistscreenState extends State<Offerslistscreen> {
                       if (list.isEmpty) {
                         return noClinicAvailableUI();
                       }
+                      // if (list.isNotEmpty)
 
                       return ListView.builder(
                         padding: const EdgeInsets.all(16),
@@ -121,21 +138,6 @@ class _OfferslistscreenState extends State<Offerslistscreen> {
 
                           return Column(
                             children: [
-                              SizedBox(
-                                width: double.infinity,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.center, // ✅ KEY LINE
-                                  children: [
-                                    filterButton("All", controller),
-                                    const SizedBox(width: 8),
-                                    filterButton("Near Me", controller),
-                                    const SizedBox(width: 8),
-                                    filterButton("Rating", controller),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: 12),
                               Stack(
                                 children: [
                                   Container(

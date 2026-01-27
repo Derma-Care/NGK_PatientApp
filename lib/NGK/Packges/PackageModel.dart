@@ -35,7 +35,7 @@ class PackageModel {
 
   final String? paymentType; //TODO: this required
   final double? partialPaymentPercentage;
-  
+
   final double? platformFeePercentage;
   final double? platformFee; // ✅ ADD
 
@@ -109,9 +109,9 @@ class PackageModel {
       sittings: (pkg['sittings'] as num?)?.toInt() ?? 1,
       offerValidDate: pkg['offerValidDate'],
       offerActive: pkg['offerActive'] ?? false,
-      paymentType: json['paymentType'],
+      paymentType: pkg['paymentType'],
       partialPaymentPercentage:
-          (json['partialPaymentPercentage'] as num?)?.toDouble(),
+          (pkg['partialPaymentPercentage'] as num?)?.toDouble(),
       procedures: (pkg['procedures'] as List? ?? [])
           .map((e) => ProcedureModel.fromJson(e))
           .toList(),

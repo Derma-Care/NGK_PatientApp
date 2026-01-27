@@ -63,20 +63,34 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
     _loadCustomer();
   }
 
-  Map<String, dynamic> getPaymentPayload() {
-    final fullAmount = useCoins && priceCalc != null
-        ? priceCalc!.finalAmount
-        : priceCalc?.originalFinalAmount ?? widget.payment.finalCost;
+  double get payableAmount {
+    final double fullAmount =
+        priceCalc?.originalFinalAmount ?? widget.payment.finalCost;
 
-    return {
-      "paymentType": _paymentType == PaymentType.FULL_PAYMENT
-          ? "FULL_PAYMENT"
-          : "PARTIAL_PAYMENT",
-      "fullAmount": fullAmount,
-      "payableAmount": payableAmount,
-      "partialPercentage":
-          _paymentType == PaymentType.PARTIAL_PAYMENT ? 20 : 100,
-    };
+    final double coinsReducedAmount =
+        (useCoins && priceCalc != null) ? priceCalc!.finalAmount : fullAmount;
+
+    final double partialPercent = widget.payment.partialPaymentPercentage ?? 0;
+
+    // ✅ FULL PAYMENT → coins apply normally
+    if (_paymentType == PaymentType.FULL_PAYMENT) {
+      return coinsReducedAmount;
+    }
+
+    // ✅ PARTIAL PAYMENT
+    // ❗ Coins same as full payment
+    // ❗ Percentage applies ONLY on FULL amount
+    if (_paymentType == PaymentType.PARTIAL_PAYMENT && partialPercent > 0) {
+      final partialBase = fullAmount * (partialPercent / 100);
+
+      // subtract coins ONLY once
+      final payable =
+          partialBase - (useCoins ? (fullAmount - coinsReducedAmount) : 0);
+
+      return payable < 0 ? 0 : payable;
+    }
+
+    return fullAmount;
   }
 
   Future<void> _loadCustomer() async {
@@ -91,23 +105,6 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
   }
 
   PaymentType _paymentType = PaymentType.FULL_PAYMENT;
-
-  double get payableAmount {
-    final fullAmount = useCoins && priceCalc != null
-        ? priceCalc!.finalAmount
-        : priceCalc?.originalFinalAmount ?? widget.payment.finalCost;
-
-    final partialPercent = widget.payment.partialPaymentPercentage;
-
-    // ✅ Apply partial ONLY if valid (>0)
-    if (_paymentType == PaymentType.PARTIAL_PAYMENT &&
-        partialPercent != null &&
-        partialPercent > 0) {
-      return fullAmount * (partialPercent / 100);
-    }
-
-    return fullAmount;
-  }
 
   String get paymentTypeString {
     return _paymentType == PaymentType.FULL_PAYMENT
