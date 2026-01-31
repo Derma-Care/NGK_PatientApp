@@ -161,6 +161,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
 
   Future<void> _loadCustomerProfile() async {
     final profile = await CustomerService.getCustomer(widget.mobileNumber);
+    debugPrint("👤 Customer API result: $profile");
 
     if (profile != null && mounted) {
       final prefs = await SharedPreferences.getInstance();

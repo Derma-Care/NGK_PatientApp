@@ -11,7 +11,7 @@ class ClinicControllerLocation extends GetxController {
   RxList<ClinicModelWithLocation> paginatedList =
       <ClinicModelWithLocation>[].obs;
   RxBool isLoading = false.obs;
-  ValueNotifier<int> itemsPerPage = ValueNotifier(1);
+  ValueNotifier<int> itemsPerPage = ValueNotifier(5);
   ValueNotifier<int> currentPage = ValueNotifier(1);
   ValueNotifier<int> totalPages = ValueNotifier(1);
   ValueNotifier<bool> showPagination = ValueNotifier(false);
@@ -40,7 +40,7 @@ class ClinicControllerLocation extends GetxController {
 
       clinicList.assignAll(clinics);
       filteredList.assignAll(clinics);
-      currentPage.value = 1;
+      currentPage.value = 5;
       _applyPagination();
     } finally {
       isLoading.value = false;

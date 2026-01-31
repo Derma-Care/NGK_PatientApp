@@ -4,6 +4,7 @@ import 'package:cutomer_app/NGK/ClinicManagement/AboutClinicScreen.dart';
 import 'package:cutomer_app/NGK/ClinicManagement/ClinicModelWithLocation.dart';
 import 'package:cutomer_app/NGK/Contoller/CliniContoller.dart';
 import 'package:cutomer_app/NGK/Modals/clinic_model.dart';
+import 'package:cutomer_app/NGK/Screens/ClinicListScreen.dart';
 import 'package:cutomer_app/NGK/Widgets/FiltterButtons.dart';
 import 'package:cutomer_app/NGK/Widgets/clinic_details_modal.dart';
 import 'package:cutomer_app/NGK/Widgets/procedures_packages_tab_screen.dart';
@@ -377,27 +378,6 @@ class _OfferslistscreenState extends State<Offerslistscreen> {
     );
   }
 
-  Widget clinicLogoWidget(String logo) {
-    try {
-      if (logo.startsWith("data:image") && logo.contains(",")) {
-        final base64Str = logo.split(',').last.trim();
-        if (base64Str.isNotEmpty) {
-          return Image.memory(
-            base64Decode(base64Str),
-            fit: BoxFit.cover,
-          );
-        }
-      }
-    } catch (_) {}
+ 
 
-    return Container(
-      color: Colors.grey.shade200,
-      alignment: Alignment.center,
-      child: const Icon(
-        Icons.local_hospital,
-        size: 36,
-        color: Colors.grey,
-      ),
-    );
-  }
 }

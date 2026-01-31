@@ -50,6 +50,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
   String? mobile;
   PriceCalculationModel? priceCalc;
   bool priceLoading = false;
+  bool showBillDetails = false;
 
 // Value of coins
   @override
@@ -296,46 +297,123 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
             // -------------------- PRICE DETAILS --------------------
             const Text("Payment Details",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            if (widget.info != null)
-              Text("Note: ${widget.info ?? ""}",
-                  style: TextStyle(fontSize: 12, color: mainColor)),
-
             const SizedBox(height: 12),
-
-            priceRow(
-              "Original Price",
-              widget.payment.price,
-              "",
-            ),
-
-            priceRow("Consultation", widget.payment.consultationFee, ""),
-            priceRow("GST (${widget.payment.gst.toStringAsFixed(0)}%)",
-                widget.payment.gstAmount, ""),
-            if (widget.payment.taxAmount != 0)
-              priceRow(
-                  "Tax (${widget.payment.taxPercentage.toStringAsFixed(0)}%)",
-                  widget.payment.taxAmount,
-                  ""),
-
-            if (widget.payment.totalDiscountPercentage != 0)
-              priceRow(
-                  "Discount (${widget.payment.totalDiscountPercentage.toStringAsFixed(0)}%)",
-                  widget.payment.totalDiscountAmount,
-                  "-"),
-
-            priceRow(
-                // "Platform Fee (${widget.payment.platformFeePercentage?.toStringAsFixed(0)}%) ",
-                "Platform Fee ",
-                platformFee,
-                ""),
-
-            if (useCoins && priceCalc != null && priceCalc!.appliedPoints > 0)
-              priceRow(
-                "Coins Applied",
-                -priceCalc!.appliedPoints.toDouble(),
-                "",
-                amountColor: Colors.red,
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  showBillDetails = !showBillDetails;
+                });
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    showBillDetails ? "Hide Bill Details" : "View Bill Details",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: mainColor,
+                    ),
+                  ),
+                  Icon(
+                    showBillDetails
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: mainColor,
+                  )
+                ],
               ),
+            ),
+            const SizedBox(height: 12),
+            // if (widget.info != null)
+            //   Text("Note: ${widget.info ?? ""}",
+            //       style: TextStyle(fontSize: 12, color: mainColor)),
+
+            // const SizedBox(height: 12),
+
+            // priceRow(
+            //   "Original Price",
+            //   widget.payment.price,
+            //   "",
+            // ),
+
+            // priceRow("Consultation", widget.payment.consultationFee, ""),
+            // priceRow("GST (${widget.payment.gst.toStringAsFixed(0)}%)",
+            //     widget.payment.gstAmount, ""),
+            // if (widget.payment.taxAmount != 0)
+            //   priceRow(
+            //       "Tax (${widget.payment.taxPercentage.toStringAsFixed(0)}%)",
+            //       widget.payment.taxAmount,
+            //       ""),
+
+            // if (widget.payment.totalDiscountPercentage != 0)
+            //   priceRow(
+            //       "Discount (${widget.payment.totalDiscountPercentage.toStringAsFixed(0)}%)",
+            //       widget.payment.totalDiscountAmount,
+            //       "-"),
+
+            // priceRow(
+            //     // "Platform Fee (${widget.payment.platformFeePercentage?.toStringAsFixed(0)}%) ",
+            //     "Platform Fee ",
+            //     platformFee,
+            //     ""),
+
+            // if (useCoins && priceCalc != null && priceCalc!.appliedPoints > 0)
+            //   priceRow(
+            //     "Coins Applied",
+            //     -priceCalc!.appliedPoints.toDouble(),
+            //     "",
+            //     amountColor: Colors.red,
+            //   ),
+            AnimatedCrossFade(
+              duration: const Duration(milliseconds: 300),
+              crossFadeState: showBillDetails
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              firstChild: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 12),
+                  if (widget.info != null)
+                    Text(
+                      "Note: ${widget.info ?? ""}",
+                      style: TextStyle(fontSize: 12, color: mainColor),
+                    ),
+                  const SizedBox(height: 8),
+                  priceRow("Original Price", widget.payment.price, ""),
+                  priceRow("Consultation", widget.payment.consultationFee, ""),
+                  priceRow(
+                    "GST (${widget.payment.gst.toStringAsFixed(0)}%)",
+                    widget.payment.gstAmount,
+                    "",
+                  ),
+                  if (widget.payment.taxAmount != 0)
+                    priceRow(
+                      "Tax (${widget.payment.taxPercentage.toStringAsFixed(0)}%)",
+                      widget.payment.taxAmount,
+                      "",
+                    ),
+                  if (widget.payment.totalDiscountPercentage != 0)
+                    priceRow(
+                      "Discount (${widget.payment.totalDiscountPercentage.toStringAsFixed(0)}%)",
+                      widget.payment.totalDiscountAmount,
+                      "-",
+                    ),
+                  priceRow("Platform Fee", widget.payment.platformFee ?? 0, ""),
+                  if (useCoins &&
+                      priceCalc != null &&
+                      priceCalc!.appliedPoints > 0)
+                    priceRow(
+                      "Coins Applied",
+                      -priceCalc!.appliedPoints.toDouble(),
+                      "",
+                      amountColor: Colors.red,
+                    ),
+                  const Divider(thickness: 1.2),
+                ],
+              ),
+              secondChild: const SizedBox.shrink(),
+            ),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

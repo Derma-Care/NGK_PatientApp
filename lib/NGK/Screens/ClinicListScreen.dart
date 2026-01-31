@@ -92,6 +92,20 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
                 ),
               ),
             ),
+            SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center, // ✅ KEY LINE
+                children: [
+                  filterButton("All", controller),
+                  const SizedBox(width: 8),
+                  filterButton("Near Me", controller),
+                  const SizedBox(width: 8),
+                  filterButton("Rating", controller),
+                ],
+              ),
+            ),
             Expanded(
               child: ValueListenableBuilder<bool>(
                 valueListenable: controller.isLoading,
@@ -120,21 +134,6 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
 
                           return Column(
                             children: [
-                              SizedBox(
-                                width: double.infinity,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.center, // ✅ KEY LINE
-                                  children: [
-                                    filterButton("All", controller),
-                                    const SizedBox(width: 8),
-                                    filterButton("Near Me", controller),
-                                    const SizedBox(width: 8),
-                                    filterButton("Rating", controller),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: 12),
                               Container(
                                 margin: const EdgeInsets.only(bottom: 12),
                                 padding: const EdgeInsets.all(12),
@@ -288,28 +287,28 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
       ),
     );
   }
+}
 
-  Widget clinicLogoWidget(String logo) {
-    try {
-      if (logo.startsWith("data:image") && logo.contains(",")) {
-        final base64Str = logo.split(',').last.trim();
-        if (base64Str.isNotEmpty) {
-          return Image.memory(
-            base64Decode(base64Str),
-            fit: BoxFit.cover,
-          );
-        }
+clinicLogoWidget(String logo) {
+  try {
+    if (logo.startsWith("data:image") && logo.contains(",")) {
+      final base64Str = logo.split(',').last.trim();
+      if (base64Str.isNotEmpty) {
+        return Image.memory(
+          base64Decode(base64Str),
+          fit: BoxFit.fill,
+        );
       }
-    } catch (_) {}
+    }
+  } catch (_) {}
 
-    return Container(
-      color: Colors.grey.shade200,
-      alignment: Alignment.center,
-      child: const Icon(
-        Icons.local_hospital,
-        size: 36,
-        color: Colors.grey,
-      ),
-    );
-  }
+  return Container(
+    color: Colors.grey.shade200,
+    alignment: Alignment.center,
+    child: const Icon(
+      Icons.local_hospital,
+      size: 36,
+      color: Colors.grey,
+    ),
+  );
 }

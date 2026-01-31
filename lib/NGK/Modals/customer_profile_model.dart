@@ -17,7 +17,7 @@ class CustomerProfileModel {
 
   final String? registrationCode;
   final String? referBy;
-  final String aadharNumber;
+  final String? aadharNumber;
   final String? prescription;
   final String? spinRewardId;
   final String? spinRewardValue;
@@ -48,7 +48,7 @@ class CustomerProfileModel {
     this.photo,
     this.registrationCode,
     this.referBy,
-    required this.aadharNumber,
+      this.aadharNumber,
     this.prescription,
     this.spinRewardId,
     this.spinRewardValue,

@@ -96,7 +96,7 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
   Future<void> resendOtp(String mobileNumber, String deviceId) async {
     print("Resend Otpn: ${deviceId}");
     print("~ ${mobileNumber}");
-    final url = Uri.parse('$registerUrl/resendOtp');
+    final url = Uri.parse('$authUrl/resendOtp');
 
     try {
       final response = await http.post(
@@ -134,13 +134,20 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           "mobile": widget.mobileNumber,
-          "otp": otp,
-          "deviceToken":widget.deviceId
+          "otp": otp.toString(),
+          "deviceToken": widget.deviceId
         }),
       );
 
       final data = json.decode(response.body);
       print("veryfy data : ${data}");
+      print("veryfy data : ${widget.mobileNumber}");
+      print("veryfy data : ${otp}");
+      print("veryfy data : ${widget.deviceId}");
+      print("veryfy data : ${wifiUrl}/api/auth/verify-otp");
+      print("veryfy data : ${response.statusCode}");
+      debugPrint("👤 Customer API result: $data");
+
       if (response.statusCode != 200 || data['success'] != true) {
         ScaffoldMessageSnackbar.show(
           context: context,
@@ -196,6 +203,7 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
         message: "Something went wrong: $e",
         type: SnackbarType.error,
       );
+      debugPrint("👤 Customer API result: $e");
     } finally {
       setState(() => isLoading = false);
     }

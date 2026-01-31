@@ -1,8 +1,8 @@
 //Testing
-const String wifiUrl = "http://52.66.132.57:8080";
+// const String wifiUrl = "http://52.66.132.57:8080";
 
 //Devlopment
-// const String wifiUrl = "https://glowkartapi.ashokfruit.shop";
+const String wifiUrl = "https://glowkartapi.ashokfruit.shop";
 
 // const String serverUrl = "${wifiUrl}:9090/api";
 const String serverUrl = "${wifiUrl}";
@@ -11,6 +11,7 @@ const String baseUrl = '$serverUrl/customers';
 const String booking_Url = '$serverUrl/booking/customer';
 const String consultationUrl = "${wifiUrl}/api/customer/getAllConsultations";
 const String registerUrl = '${wifiUrl}/api/customer';
+const String authUrl = '${wifiUrl}/api/customer';
 const String categoryUrl = '${wifiUrl}/admin/getCategories';
 const String getServiceByCategoriesID = '${wifiUrl}/admin/getServiceById';
 const String getSubServiceByServiceID =

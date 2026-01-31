@@ -30,6 +30,7 @@ class _BookingListScreenState extends State<BookingListScreen>
   late TabController tabController;
   final BookingController controller = Get.put(BookingController());
   // late String fullname;
+  bool showBillDetails = false;
 
   @override
   void initState() {
@@ -465,257 +466,334 @@ class _BookingListScreenState extends State<BookingListScreen>
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.8, // ✅ 80% height
-          child: Column(
-            children: [
-              // 🔹 Drag Handle
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Container(
-                  width: 50,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(10),
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SizedBox(
+              height: MediaQuery.of(context).size.height * 0.8, // ✅ 80% height
+              child: Column(
+                children: [
+                  // 🔹 Drag Handle
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Container(
+                      width: 50,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   ),
-                ),
-              ),
 
-              // 🔹 Scrollable Content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Text(
-                          b.serviceName ?? "",
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      _detailRow("Booking ID", b.bookingId),
-                      _detailRow(
-                          "Booking Type", capitalizeFirst(b.serviceType)),
-                      // if (b.serviceId != null)
-                      //   _detailRow("Service ID", b.serviceId!),
-
-                      // _detailRow("Customer ID", b.customerId),
-                      _detailRow("Mobile", b.mobileNumber),
-
-                      _detailRow("Clinic", b.clinicName),
-                      _detailRow(
-                        "Clinic Address",
-                        b.clinicAddress,
-                        onTap: () {
-                          if (b.clinicAddress.isNotEmpty) {
-                            MapUtils.openMapByAddress(b.clinicAddress);
-                          }
-                        },
-                      ),
-
-                      _detailRow("Booking Date", b.appointmentDate),
-
-                      const Divider(height: 25),
-
-                      _detailRow("Price", "₹${b.price.toStringAsFixed(0)}"),
-
-                      _detailRow("consultation Fee",
-                          "₹ ${b.consultationFee?.toStringAsFixed(0)}"),
-                      _detailRow("Gst(${b.gst?.toStringAsFixed(0)}%)",
-                          "₹ ${b.gstAmount?.toStringAsFixed(0)}"),
-                      if ((b.taxAmount ?? 0) > 0)
-                        _detailRow(
-                          "Tax (${b.taxPercentage}%)",
-                          "₹ ${b.taxAmount?.toStringAsFixed(0)}",
-                        ),
-
-                      _detailRow(
-                        "Platform Fee",
-                        "₹ ${b.platformFee.toStringAsFixed(0)}",
-                      ),
-
-                      if ((b.discountAmount ?? 0) > 0)
-                        _detailRow(
-                          "Discount (${b.totalDiscountPercentage}%)",
-                          "-₹ ${b.discountAmount.toStringAsFixed(0)}",
-                        ),
-
-                      if ((b.redeemedPoints ?? 0) > 0)
-                        _detailRow(
-                          "Used Coins",
-                          "₹ ${b.redeemedPoints}",
-                        ),
-
-                      _detailRow("Final Amount",
-                          "₹ ${b.finalAmount.toStringAsFixed(0)}"),
-
-                      if (b.paymentType == "PARTIAL_PAYMENT")
-                        Container(
-                          margin: const EdgeInsets.only(top: 12),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.orange.shade200),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "Partial Payment Details",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                  // 🔹 Scrollable Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: Text(
+                              b.serviceName ?? "",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(height: 10),
-                              _detailRow(
-                                "You Paid",
-                                "₹ ${b.partialAmount.toStringAsFixed(0)}",
-                              ),
-                              _detailRow(
-                                "Amount to Pay",
-                                "₹ ${b.dueAmount.toStringAsFixed(0)}",
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
 
-                      const Divider(height: 25),
+                          const SizedBox(height: 20),
 
-                      _detailRow("Payment Type", b.paymentType),
-                      _detailRow("Payment Method", b.paymentMode ?? "_"),
-                      _detailRow("Payment Staus", b.paymentStatus),
-                      _detailRow("Status", b.status),
+                          _detailRow("Booking ID", b.bookingId),
+                          _detailRow(
+                              "Booking Type", capitalizeFirst(b.serviceType)),
+                          // if (b.serviceId != null)
+                          //   _detailRow("Service ID", b.serviceId!),
 
-                      const Divider(height: 25),
+                          // _detailRow("Customer ID", b.customerId),
+                          _detailRow("Mobile", b.mobileNumber),
 
-                      // 🔹 Package Procedures Accordion
-                      // if (b.serviceType.toLowerCase() == "package" &&
-                      //     b.procedures != null)
-                      if (b.serviceType.toLowerCase() == "package" &&
-                          b.procedures != null &&
-                          b.procedures!.isNotEmpty)
-                        ExpansionTile(
-                          title: const Text(
-                            "Package Procedures",
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                          _detailRow("Clinic", b.clinicName),
+                          _detailRow(
+                            "Clinic Address",
+                            b.clinicAddress,
+                            onTap: () {
+                              if (b.clinicAddress.isNotEmpty) {
+                                MapUtils.openMapByAddress(b.clinicAddress);
+                              }
+                            },
                           ),
-                          leading: const Icon(
-                            Icons.medical_services_outlined,
-                            color: mainColor,
-                          ),
-                          children: b.procedures!.map((p) {
-                            return ListTile(
-                              leading: const Icon(
-                                Icons.check_circle_outline,
-                                color: Colors.green,
-                                size: 18,
-                              ),
-                              title: Text(
-                                p.procedureName,
-                                style: const TextStyle(fontSize: 13),
-                              ),
-                              trailing: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: mainColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  "${p.noOfSittings} sittings",
+
+                          _detailRow("Booking Date", b.appointmentDate),
+
+                          const Divider(height: 25),
+                          GestureDetector(
+                            onTap: () {
+                              setModalState(() {
+                                showBillDetails = !showBillDetails;
+                              });
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  showBillDetails
+                                      ? "Hide Bill Details"
+                                      : "View Bill Details",
                                   style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                     color: mainColor,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
+                                Icon(
+                                  showBillDetails
+                                      ? Icons.keyboard_arrow_up
+                                      : Icons.keyboard_arrow_down,
+                                  color: mainColor,
+                                )
+                              ],
+                            ),
+                          ),
+
+                          // _detailRow("Price", "₹${b.price.toStringAsFixed(0)}"),
+
+                          // _detailRow("consultation Fee",
+                          //     "₹ ${b.consultationFee?.toStringAsFixed(0)}"),
+                          // _detailRow("Gst(${b.gst?.toStringAsFixed(0)}%)",
+                          //     "₹ ${b.gstAmount?.toStringAsFixed(0)}"),
+                          // if ((b.taxAmount ?? 0) > 0)
+                          //   _detailRow(
+                          //     "Tax (${b.taxPercentage}%)",
+                          //     "₹ ${b.taxAmount?.toStringAsFixed(0)}",
+                          //   ),
+
+                          // _detailRow(
+                          //   "Platform Fee",
+                          //   "₹ ${b.platformFee.toStringAsFixed(0)}",
+                          // ),
+
+                          // if ((b.discountAmount ?? 0) > 0)
+                          //   _detailRow(
+                          //     "Discount (${b.totalDiscountPercentage}%)",
+                          //     "-₹ ${b.discountAmount.toStringAsFixed(0)}",
+                          //   ),
+
+                          // if ((b.redeemedPoints ?? 0) > 0)
+                          //   _detailRow(
+                          //     "Used Coins",
+                          //     "₹ ${b.redeemedPoints}",
+                          //
+                          // ),
+                          AnimatedCrossFade(
+                            duration: const Duration(milliseconds: 300),
+                            crossFadeState: showBillDetails
+                                ? CrossFadeState.showFirst
+                                : CrossFadeState.showSecond,
+                            firstChild: Column(
+                              children: [
+                                _detailRow(
+                                    "Price", "₹${b.price.toStringAsFixed(0)}"),
+                                _detailRow(
+                                  "Consultation Fee",
+                                  "₹ ${b.consultationFee?.toStringAsFixed(0)}",
+                                ),
+                                _detailRow(
+                                  "GST (${b.gst?.toStringAsFixed(0)}%)",
+                                  "₹ ${b.gstAmount?.toStringAsFixed(0)}",
+                                ),
+                                if ((b.taxAmount ?? 0) > 0)
+                                  _detailRow(
+                                    "Tax (${b.taxPercentage}%)",
+                                    "₹ ${b.taxAmount?.toStringAsFixed(0)}",
+                                  ),
+                                _detailRow(
+                                  "Platform Fee",
+                                  "₹ ${b.platformFee.toStringAsFixed(0)}",
+                                ),
+                                if ((b.discountAmount ?? 0) > 0)
+                                  _detailRow(
+                                    "Discount (${b.totalDiscountPercentage}%)",
+                                    "-₹ ${b.discountAmount.toStringAsFixed(0)}",
+                                  ),
+                                if ((b.redeemedPoints ?? 0) > 0)
+                                  _detailRow(
+                                    "Used Coins",
+                                    "-₹ ${b.redeemedPoints}",
+                                  ),
+                                const Divider(height: 20),
+                              ],
+                            ),
+                            secondChild: const SizedBox.shrink(),
+                          ),
+                          const Divider(height: 25),
+
+                          _detailRow("Final Amount",
+                              "₹ ${b.finalAmount.toStringAsFixed(0)}"),
+
+                          if (b.paymentType == "PARTIAL_PAYMENT")
+                            Container(
+                              margin: const EdgeInsets.only(top: 12),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border:
+                                    Border.all(color: Colors.orange.shade200),
                               ),
-                            );
-                          }).toList(),
-                        ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Partial Payment Details",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _detailRow(
+                                    "You Paid",
+                                    "₹ ${b.partialAmount.toStringAsFixed(0)}",
+                                  ),
+                                  _detailRow(
+                                    "Amount to Pay",
+                                    "₹ ${b.dueAmount.toStringAsFixed(0)}",
+                                  ),
+                                ],
+                              ),
+                            ),
 
-                      const SizedBox(height: 80), // 🔥 space for fixed buttons
-                    ],
-                  ),
-                ),
-              ),
+                          const Divider(height: 25),
 
-              // 🔹 FIXED BOTTOM BUTTONS
-              if (b.status == "COMPLETED")
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, -4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            handleBookAgain(context, b);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.pink,
-                            minimumSize: const Size(0, 50),
-                          ),
-                          child: const Text(
-                            "Book Again",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: (b.isRated ?? false)
-                              ? null
-                              : () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => HospitalRatingScreen(
-                                        hospitalName: b.clinicName,
-                                        bookingId: b.bookingId,
-                                        hospitalLogo: b.hospitalLogo ?? "",
+                          _detailRow("Payment Type", b.paymentType),
+                          _detailRow("Payment Method", b.paymentMode ?? "_"),
+                          _detailRow("Payment Staus", b.paymentStatus),
+                          _detailRow("Status", b.status),
+
+                          const Divider(height: 25),
+
+                          // 🔹 Package Procedures Accordion
+                          // if (b.serviceType.toLowerCase() == "package" &&
+                          //     b.procedures != null)
+                          if (b.serviceType.toLowerCase() == "package" &&
+                              b.procedures != null &&
+                              b.procedures!.isNotEmpty)
+                            ExpansionTile(
+                              title: const Text(
+                                "Package Procedures",
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              leading: const Icon(
+                                Icons.medical_services_outlined,
+                                color: mainColor,
+                              ),
+                              children: b.procedures!.map((p) {
+                                return ListTile(
+                                  leading: const Icon(
+                                    Icons.check_circle_outline,
+                                    color: Colors.green,
+                                    size: 18,
+                                  ),
+                                  title: Text(
+                                    p.procedureName,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  trailing: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: mainColor.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      "${p.noOfSittings} sittings",
+                                      style: const TextStyle(
+                                        color: mainColor,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                  );
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: (b.isRated ?? false)
-                                ? Colors.grey.shade400
-                                : Colors.pink,
-                            minimumSize: const Size(0, 50),
-                          ),
-                          child: Text(
-                            (b.isRated ?? false) ? "Rated" : "Rate",
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+
+                          const SizedBox(
+                              height: 80), // 🔥 space for fixed buttons
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-            ],
-          ),
+
+                  // 🔹 FIXED BOTTOM BUTTONS
+                  if (b.status == "COMPLETED")
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, -4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                handleBookAgain(context, b);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.pink,
+                                minimumSize: const Size(0, 50),
+                              ),
+                              child: const Text(
+                                "Book Again",
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: (b.isRated ?? false)
+                                  ? null
+                                  : () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => HospitalRatingScreen(
+                                            hospitalName: b.clinicName,
+                                            bookingId: b.bookingId,
+                                            hospitalLogo: b.hospitalLogo ?? "",
+                                          ),
+                                        ),
+                                      );
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: (b.isRated ?? false)
+                                    ? Colors.grey.shade400
+                                    : Colors.pink,
+                                minimumSize: const Size(0, 50),
+                              ),
+                              child: Text(
+                                (b.isRated ?? false) ? "Rated" : "Rate",
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
