@@ -4,7 +4,7 @@ import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
 import 'package:cutomer_app/NGK/Modals/PriceCalculationModel.dart';
-import 'package:cutomer_app/NGK/Service/PriceCalculationService.dart';
+import 'package:cutomer_app/NGK/service/PriceCalculationService.dart';
 
 import 'package:cutomer_app/Payments/AllPayments.dart';
 import 'package:cutomer_app/Utils/Constant.dart';

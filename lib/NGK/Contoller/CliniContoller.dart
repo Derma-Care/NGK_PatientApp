@@ -1,6 +1,6 @@
 import 'package:cutomer_app/NGK/ClinicManagement/ClinicModelWithLocation.dart';
 import 'package:cutomer_app/NGK/Modals/clinic_model.dart';
-import 'package:cutomer_app/NGK/Service/clinic_service.dart';
+import 'package:cutomer_app/NGK/service/clinic_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

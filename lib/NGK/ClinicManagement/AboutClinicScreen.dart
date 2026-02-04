@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'package:cutomer_app/NGK/Service/clinic_service.dart';
+import 'package:cutomer_app/NGK/service/clinic_service.dart';
 import 'package:cutomer_app/Review/HospitalRatingScreen.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'ClinicModelWithLocation.dart';
@@ -47,7 +48,10 @@ class _AboutClinicScreenState extends State<AboutClinicScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: mainColor),
+              child: SpinKitFadingCircle(
+                color: mainColor,
+                size: 40,
+              ),
             );
           }
 

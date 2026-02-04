@@ -1,37 +1,47 @@
-import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 
 import '../APIs/BaseUrl.dart';
-
-import 'package:http/http.dart' as http;
+import 'package:cutomer_app/NGK/service/api_provider.dart';
 
 class CustomerDataBasicInfo {
-  // Change return type to Future<Map<String, dynamic>> since you're returning parsed JSON
-  Future<Map<String, dynamic>?> fetchCustomerDataData(String mobileNumber) async {
-    String url = "$serverUrl/admin/getBasicCustomerDetails/$mobileNumber";
-    print("Requesting: $url");
+
+  // Fetch basic customer data
+  Future<Map<String, dynamic>?> fetchCustomerDataData(
+      String mobileNumber) async {
+
+    final endpoint = "/admin/getBasicCustomerDetails/$mobileNumber";
+    final api = Get.find<ApiProvider>().dio;
+
+    debugPrint("📤 Requesting: ${api.options.baseUrl}$endpoint");
 
     try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      final response = await api.get(
+        endpoint,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
       );
 
-      print("Response Status provider: ${response.statusCode}");
-      print("Response Body provider: ${response.body}");
+      debugPrint(
+          "📥 Response Status provider: ${response.statusCode}");
+      debugPrint(
+          "📥 Response Body provider: ${response.data}");
 
       if (response.statusCode == 200) {
-        // Parse and return the data if the response is successful
-        final data = jsonDecode(response.body);
-        return data; // Return the data as a map
+        final data = response.data;
+        return Map<String, dynamic>.from(data);
       } else {
-        print("Error: ${response.reasonPhrase}");
+        debugPrint(
+            "❌ Error: ${response.statusMessage}");
         throw Exception('Failed to load user data');
       }
     } catch (e) {
-      print("Exception caught: $e");
-      return null; // Return null if an exception occurs
+      debugPrint("⚠️ Exception caught: $e");
+      return null;
     }
   }
 }

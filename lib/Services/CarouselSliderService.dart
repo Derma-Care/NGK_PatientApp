@@ -1,20 +1,26 @@
-import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
+
 import 'package:cutomer_app/APIs/BaseUrl.dart';
-import 'package:http/http.dart' as http;
+import 'package:cutomer_app/NGK/service/api_provider.dart';
 
 class CarouselSliderService {
-  // Replace with your actual server URL
 
-  // Method to fetch image URLs from the API and return them
+  /// Fetch dashboard image ads (customer side)
   Future<List<String>> fetchImages() async {
-    final url = Uri.parse('$serverUrl/api/login/dashboard-ads');
+    final endpoint = '/api/login/dashboard-ads';
+    final api = Get.find<ApiProvider>().dio;
+
+    debugPrint("📤 [CAROUSEL] Fetch images URL: ${api.options.baseUrl}$endpoint");
 
     try {
-      final response = await http.get(url);
+      final response = await api.get(endpoint);
+
+      debugPrint("📥 [CAROUSEL] Status: ${response.statusCode}");
+      debugPrint("📥 [CAROUSEL] Body: ${response.data}");
 
       if (response.statusCode == 200) {
-        final decoded = json.decode(response.body);
-
+        final decoded = response.data;
         final List list = decoded['data']; // ✅ correct path
 
         return list
@@ -25,42 +31,49 @@ class CarouselSliderService {
         throw Exception('Failed to load images');
       }
     } catch (e) {
-      print("Error fetching images: $e");
+      debugPrint("❌ Error fetching images: $e");
       return [];
     }
   }
 
+  /// Fetch service / admin carousel images
   Future<List<String>> fetchServiceImages() async {
-    final url = Uri.parse(
-        '$serverUrl/admin/dashboard-ads'); // Replace with your API endpoint
+    final endpoint = '/admin/dashboard-ads';
+    final api = Get.find<ApiProvider>().dio;
+
+    debugPrint(
+        "📤 [CAROUSEL ADMIN] Fetch images URL: ${api.options.baseUrl}$endpoint");
+
     try {
-      final response = await http.get(url);
-      print("carouselPicture ${response.body}");
+      final response = await api.get(endpoint);
+
+      debugPrint("📥 [CAROUSEL ADMIN] Status: ${response.statusCode}");
+      debugPrint("📥 [CAROUSEL ADMIN] Body: ${response.data}");
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print("carouselPicture ${response.statusCode}");
-        print("carouselPicture body ${response}");
-        print("carouselPictures data ${data}");
+        final data = response.data;
 
-        // Assuming the API returns an array of objects, each containing 'carouselPicture'
         List<String> imageUrls = [];
 
-        // Loop through the response data to extract 'carouselPicture' from each object
+        // Extract mediaUrlOrImage from each object
         for (var item in data) {
           if (item.containsKey('mediaUrlOrImage')) {
             imageUrls.add(item['mediaUrlOrImage']);
           }
         }
-        print("imageUrlsimageUrls lengrt ${imageUrls.length}");
+
+        debugPrint(
+            "🖼️ [CAROUSEL ADMIN] imageUrls length: ${imageUrls.length}");
+
         return imageUrls;
       } else {
-        print("carouselPicture ${response.statusCode}");
+        debugPrint(
+            "❌ [CAROUSEL ADMIN] Status code: ${response.statusCode}");
         throw Exception('Failed to load images');
       }
     } catch (e) {
-      print("Error fetching images: $e");
-      return []; // Return an empty list if an error occurs
+      debugPrint("❌ Error fetching images: $e");
+      return [];
     }
   }
 }

@@ -1,32 +1,37 @@
 // api_service.dart
-import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
+
+import 'package:cutomer_app/APIs/BaseUrl.dart';
 import 'package:cutomer_app/Customers/GetCustomerModel.dart';
-import 'package:http/http.dart' as http;
-import 'package:cutomer_app/APIs/BaseUrl.dart'; // Make sure this is correct
+import 'package:cutomer_app/NGK/service/api_provider.dart';
 
 // Define the API call function
 Future<GetCustomerModel> fetchUserData(String customerId) async {
+  final endpoint = '$registerUrl/id/$customerId';
+  final api = Get.find<ApiProvider>().dio;
+
+  debugPrint("🔍 URL: ${api.options.baseUrl}$endpoint");
+
   try {
-    final response = await http.get(
-      Uri.parse('$registerUrl/id/$customerId'),
-    );
-    print("Response Data statusCode url: $registerUrl/id/$customerId");
-    print("Response Data statusCode: ${response.statusCode}");
+    final response = await api.get(endpoint);
+
+    debugPrint("🔍 StatusCode: ${response.statusCode}");
+    debugPrint("📦 Response Data: ${response.data}");
 
     if (response.statusCode == 200) {
-      // Decode the response body
-      final responseData = json.decode(response.body);
+      final responseData = response.data;
 
-      // Print the entire response data for debugging
-      print("Response Data useradat: $responseData");
+      // Debug full response
+      debugPrint("👤 User Data Response: $responseData");
 
-      // Return the decoded data as a GetCustomerModel instance
+      // Convert JSON → Model
       return GetCustomerModel.fromJson(responseData);
     } else {
       throw Exception('Failed to load user data');
     }
   } catch (e) {
-    print("Error fetching user data: $e");
+    debugPrint("❌ Error fetching user data: $e");
     throw Exception('Error fetching user data');
   }
 }

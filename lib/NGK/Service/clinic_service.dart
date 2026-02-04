@@ -1,32 +1,33 @@
-import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
+
 import 'package:cutomer_app/APIs/BaseUrl.dart';
 import 'package:cutomer_app/NGK/ClinicManagement/ClinicModelWithLocation.dart';
 import 'package:cutomer_app/NGK/Modals/clinic_model.dart';
 import 'package:cutomer_app/NGK/Packges/PackageModel.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureModel.dart';
-import 'package:http/http.dart' as http;
+import 'package:cutomer_app/NGK/service/api_provider.dart';
 
 class ClinicService {
+  // ---------------- NEARBY CLINICS ----------------
   static Future<List<ClinicModelWithLocation>> fetchNearbyClinics({
     required double lat,
     required double lng,
   }) async {
-    final url = "${registerUrl}/clinics/nearby?latitude=$lat&longitude=$lng";
+    final endpoint = "/clinics/nearby?latitude=$lat&longitude=$lng";
+    final api = Get.find<ApiProvider>().dio;
 
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await api.get(endpoint);
 
-      print("CLINIC API STATUS: ${response.statusCode}");
-      print("CLINIC API BODY: ${response.body}");
+      debugPrint("CLINIC API STATUS: ${response.statusCode}");
+      debugPrint("CLINIC API BODY: ${response.data}");
 
       if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-
+        final body = response.data;
         final data = body['data'];
 
-        if (data == null || data is! List) {
-          return [];
-        }
+        if (data == null || data is! List) return [];
 
         return data
             .map<ClinicModelWithLocation>(
@@ -36,86 +37,90 @@ class ClinicService {
 
       // 🔴 BACKEND BUG CASE (distance = "4 KM")
       if (response.statusCode == 400) {
-        final body = jsonDecode(response.body);
+        final body = response.data;
         final msg = body['message'] ?? "";
 
         if (msg.toString().contains("KM")) {
-          print("Backend distance format error ignored");
+          debugPrint("Backend distance format error ignored");
           return [];
         }
       }
 
       return [];
     } catch (e) {
-      print("Clinic API Exception: $e");
+      debugPrint("Clinic API Exception: $e");
       return [];
     }
   }
 
+  // ---------------- CLINIC BY ID ----------------
   static Future<ClinicModelWithLocation> fetchClinicById(
       String clinicId) async {
-    final url = "$wifiUrl/admin/clinics/get/$clinicId";
+    final endpoint = "/admin/clinics/get/$clinicId";
+    final api = Get.find<ApiProvider>().dio;
 
-    final response = await http.get(Uri.parse(url));
+    final response = await api.get(endpoint);
 
     if (response.statusCode != 200) {
       throw Exception("Failed to load clinic details");
     }
 
-    final body = jsonDecode(response.body);
-
+    final body = response.data;
     return ClinicModelWithLocation.fromJson(body['data']);
   }
 
+  // ---------------- CLINIC SERVICES ----------------
   static Future<ClinicServicesResponse> fetchClinicServices(
       String clinicId) async {
-    final url = Uri.parse("${wifiUrl}/api/customer/clinics/$clinicId/details");
+    final endpoint = "/api/customer/clinics/$clinicId/details";
+    final api = Get.find<ApiProvider>().dio;
 
-    final response = await http.get(url);
+    final response = await api.get(endpoint);
 
     if (response.statusCode == 200) {
-      final body = jsonDecode(response.body);
+      final body = response.data;
       return ClinicServicesResponse.fromJson(body['data']);
     }
 
     throw Exception("Failed to load services");
   }
 
+  // ---------------- CLINIC SERVICES OFFERS ----------------
   static Future<ClinicServicesResponse> fetchClinicServicesOffers(
       String clinicId) async {
-    final url = Uri.parse("${wifiUrl}/api/customer/offers/clinics/$clinicId");
+    final endpoint = "/api/customer/offers/clinics/$clinicId";
+    final api = Get.find<ApiProvider>().dio;
 
-    final response = await http.get(url);
+    final response = await api.get(endpoint);
 
     if (response.statusCode == 200) {
-      final body = jsonDecode(response.body);
+      final body = response.data;
       return ClinicServicesResponse.fromJson(body['data']);
     }
 
     throw Exception("Failed to load services");
   }
 
+  // ---------------- NEARBY CLINICS WITH OFFERS ----------------
   static Future<List<ClinicModelWithLocation>> fetchNearbyClinicsWithOffers({
     required double lat,
     required double lng,
   }) async {
-    final url =
-        "${registerUrl}/offers/clinics/nearby?latitude=$lat&longitude=$lng";
+    final endpoint =
+        "$registerUrl/offers/clinics/nearby?latitude=$lat&longitude=$lng";
+    final api = Get.find<ApiProvider>().dio;
 
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await api.get(endpoint);
 
-      print("CLINIC API STATUS: ${response.statusCode}");
-      print("CLINIC API BODY: ${response.body}");
+      debugPrint("CLINIC API STATUS: ${response.statusCode}");
+      debugPrint("CLINIC API BODY: ${response.data}");
 
       if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-
+        final body = response.data;
         final data = body['data'];
 
-        if (data == null || data is! List) {
-          return [];
-        }
+        if (data == null || data is! List) return [];
 
         return data
             .map<ClinicModelWithLocation>(
@@ -125,47 +130,38 @@ class ClinicService {
 
       // 🔴 BACKEND BUG CASE (distance = "4 KM")
       if (response.statusCode == 400) {
-        final body = jsonDecode(response.body);
+        final body = response.data;
         final msg = body['message'] ?? "";
 
         if (msg.toString().contains("KM")) {
-          print("Backend distance format error ignored");
+          debugPrint("Backend distance format error ignored");
           return [];
         }
       }
 
       return [];
     } catch (e) {
-      print("Clinic API Exception: $e");
+      debugPrint("Clinic API Exception: $e");
       return [];
     }
   }
 
-//Rebooking TODO:Provide customer Url
-
+  // ---------------- PROCEDURE PRICING ----------------
   static Future<ProcedureListModal> getProcedurePricingWithClinicId({
     required String clinicId,
     required String procedureId,
   }) async {
-    final url = Uri.parse(
-      "$clinicUrl/procedure-pricing/get/$procedureId/$clinicId",
-    );
+    final endpoint = "$clinicUrl/procedure-pricing/get/$procedureId/$clinicId";
+    final api = Get.find<ApiProvider>().dio;
 
-    print("📤 URL getProcedurePricingWithClinicId: $url");
+    debugPrint(
+        "📤 URL getProcedurePricingWithClinicId: ${api.options.baseUrl}$endpoint");
 
-    final response = await http.get(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    );
+    final response = await api.get(endpoint);
 
     if (response.statusCode == 200) {
-      final body = json.decode(response.body);
-
-      /// If API wraps data inside "data"
+      final body = response.data;
       final data = body['data'] ?? body;
-
       return ProcedureListModal.fromJson(data);
     } else {
       throw Exception(
@@ -174,29 +170,24 @@ class ClinicService {
     }
   }
 
+  // ---------------- PACKAGE PRICING ----------------
   static Future<PackageModel> getPackagePricingWithClinicId({
     required String clinicId,
     required String packageId,
   }) async {
-    final url = Uri.parse(
-      "$clinicUrl/packages/clinic/$clinicId/$packageId",
-    );
+    final endpoint = "$clinicUrl/packages/clinic/$clinicId/$packageId";
+    final api = Get.find<ApiProvider>().dio;
 
-    print("📤 URL getProcedurePricingWithClinicId: $url");
+    debugPrint(
+        "📤 URL getPackagePricingWithClinicId: ${api.options.baseUrl}$endpoint");
 
-    final response = await http.get(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    );
+    final response = await api.get(endpoint);
 
     if (response.statusCode == 200) {
-      final body = json.decode(response.body);
-
-      /// If API wraps data inside "data"
+      final body = response.data;
       final data = body['data'] ?? body;
-      print("📤 URL getProcedurePricingWithClinicId: $data");
+
+      debugPrint("📦 Package pricing data: $data");
 
       return PackageModel.fromDirectApi(data);
     } else {

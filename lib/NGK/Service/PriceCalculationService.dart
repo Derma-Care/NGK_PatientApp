@@ -1,32 +1,35 @@
 import 'dart:convert';
-import 'package:cutomer_app/APIs/BaseUrl.dart';
 import 'package:cutomer_app/NGK/Modals/PriceCalculationModel.dart';
-import 'package:http/http.dart' as http;
+import 'package:cutomer_app/NGK/service/api_provider.dart';
+import 'package:get/get.dart';
 
 class PriceCalculationService {
+
   static Future<PriceCalculationModel> calculatePrice(
       Map<String, dynamic> payload) async {
-    final url = "${wifiUrl}/booking/calculate-price";
+
+    final endpoint = "/booking/calculate-price";
 
     // 🔹 PRINT PAYLOAD
     print("📤 PRICE CALCULATION API CALL");
-    print("🔗 URL: $url");
+    print("🔗 URL: $endpoint");
     print("📦 PAYLOAD:");
     print(const JsonEncoder.withIndent('  ').convert(payload));
 
+    final api = Get.find<ApiProvider>().dio;
+
     try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(payload),
+      final response = await api.post(
+        endpoint,
+        data: payload,
       );
 
       // 🔹 PRINT RESPONSE INFO
       print("📥 RESPONSE STATUS: ${response.statusCode}");
       print("📥 RAW RESPONSE BODY:");
-      print(response.body);
+      print(response);
 
-      final decoded = jsonDecode(response.body);
+      final decoded = response.data;
 
       // 🔹 PRINT DECODED RESPONSE
       print("📥 DECODED RESPONSE:");

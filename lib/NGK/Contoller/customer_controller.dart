@@ -1,5 +1,5 @@
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
-import 'package:cutomer_app/NGK/Service/customer_service.dart';
+import 'package:cutomer_app/NGK/service/customer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

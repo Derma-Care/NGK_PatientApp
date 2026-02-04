@@ -12,7 +12,7 @@ import 'package:cutomer_app/NGK/Packges/PackageListScreen.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureListScreen.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureScreenName.dart';
 import 'package:cutomer_app/NGK/Screens/ClinicListScreen.dart';
-import 'package:cutomer_app/NGK/Service/customer_service.dart'
+import 'package:cutomer_app/NGK/service/customer_service.dart'
     show CustomerService;
 import 'package:cutomer_app/Notification/NotificationController.dart';
 import 'package:cutomer_app/Notification/Notifications.dart';

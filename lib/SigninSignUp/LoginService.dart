@@ -1,22 +1,17 @@
 import 'dart:convert';
-
-import 'package:cutomer_app/APIs/BaseUrl.dart';
-import 'package:firebase_app_installations/firebase_app_installations.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:http/http.dart' as http;
+import 'package:cutomer_app/NGK/service/api_provider.dart';
+import 'package:get/get.dart';
 import '../Utils/ShowSnackBar.dart';
 
-// import 'BaseUrl.dart';
-
 class LoginApiService {
-  final String endpoint =   "${wifiUrl}/api/auth/send-otp";
-  //  'registerOrLogin'; //VerifyUserCredentialsAndGenerateAndSendOtp
-//  final registerUrl ="http://3.6.119.57:9090";
+  final String endpoint = "/api/auth/send-otp";
+
   Future<Map<String, dynamic>> sendUserDataWithFCMToken(
       String fullname, String mobileNumber, String token) async {
-    print("response for fullname ${fullname}");
-    print("response for mobileNumber ${mobileNumber}");
-    print("response for mobileNumber ${token}");
+
+    print("response for fullname $fullname");
+    print("response for mobileNumber $mobileNumber");
+    print("response for token $token");
 
     try {
       if (token == null) {
@@ -30,26 +25,26 @@ class LoginApiService {
         'deviceId': token,
       };
 
-      print("body.toString() : ${body.toString()}");
+      print("body.toString() : $body");
       print("loginUrl : $endpoint");
 
-      // Send user data and FCM token to backend
-      final response = await http.post(
-        Uri.parse('$endpoint'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
+      final api = Get.find<ApiProvider>().dio;
+
+      // 🔹 SEND OTP
+      final response = await api.post(
+        endpoint,
+        data: {
           'mobile': mobileNumber,
           // 'deviceToken': token,
-        }),
+        },
       );
 
       print("response for statusCode ${response.statusCode}");
-      print("response for statusCode body ${response.body}");
-      print("response for statusCode body ${body}");
+      print("response for data ${response.data}");
+      print("response for body $body");
 
-      final decoded = jsonDecode(response.body);
-      if (response.body.isNotEmpty) {
-        return jsonDecode(response.body);
+      if (response.data != null) {
+        return Map<String, dynamic>.from(response.data);
       } else {
         return {
           'statusCode': response.statusCode,

@@ -13,6 +13,7 @@ import 'package:cutomer_app/Screens/splashScreen.dart';
 import 'package:cutomer_app/TreatmentAndServices/SubserviceController.dart';
 import 'package:cutomer_app/Widget/ControllerInitializer.dart';
 import 'package:cutomer_app/Widget/TimerController.dart';
+import 'package:cutomer_app/bindings/app_binding.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -153,6 +154,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _buildAppTheme(),
       home: homeScreen,
+       initialBinding: AppBinding(),
       scaffoldMessengerKey: rootScaffoldMessengerKey, // ✅ ADD THIS
       // home: SkinCareConsentFormScreen(),
       // SkinCareConsentFormScreen

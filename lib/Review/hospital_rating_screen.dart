@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cutomer_app/APIs/BaseUrl.dart';
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
+import 'package:cutomer_app/NGK/service/api_provider.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/Header.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
@@ -32,68 +33,67 @@ class _HospitalRatingScreenState extends State<HospitalRatingScreen> {
   final TextEditingController _commentController = TextEditingController();
   bool isSubmitting = false;
 
-  void _submit() async {
-    final prefs = await SharedPreferences.getInstance();
-    final mobile = prefs.getString('mobileNumber');
+ void _submit() async {
+  final prefs = await SharedPreferences.getInstance();
+  final mobile = prefs.getString('mobileNumber');
 
-    if (_rating == 0) {
+  if (_rating == 0) {
+    ScaffoldMessageSnackbar.show(
+      context: context,
+      message: "Please select a rating",
+      type: SnackbarType.warning,
+      position: SnackbarPosition.top,
+    );
+    return;
+  }
+
+  setState(() => isSubmitting = true);
+
+  final api = Get.find<ApiProvider>().dio;
+
+  try {
+    final response = await api.post(
+      "/booking/rate",
+      data: {
+        "bookingId": widget.bookingId, // ✅ same as before
+        "rating": _rating,
+        "review": _commentController.text.trim(), // optional
+      },
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      if (!mounted) return;
+
       ScaffoldMessageSnackbar.show(
         context: context,
-        message: "Please select a rating",
-        type: SnackbarType.warning,
+        message: "Thank you for your feedback!",
+        subTitle: "Your feedback helps us improve our services.",
+        type: SnackbarType.success,
         position: SnackbarPosition.top,
       );
-      return;
+
+      Get.offAll(() => BottomNavController(
+            mobileNumber: mobile!,
+            index: 1,
+            appointmentTabIndex: 1,
+          ));
+    } else {
+      final error = response.data;
+      throw error['message'] ?? "Failed to submit rating";
     }
-
-    setState(() => isSubmitting = true);
-
-    try {
-      final response = await http.post(
-        Uri.parse("${wifiUrl}/booking/rate"),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "bookingId": widget.bookingId, // ✅ pass bookingId via widget
-          "rating": _rating,
-          "review": _commentController.text.trim(), // optional
-        }),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (!mounted) return;
-
-        ScaffoldMessageSnackbar.show(
-          context: context,
-          message: "Thank you for your feedback!",
-          subTitle: "Your feedback helps us improve our services.",
-          type: SnackbarType.success,
-          position: SnackbarPosition.top,
-        );
-
-        Get.offAll(() => BottomNavController(
-              mobileNumber: mobile!,
-              index: 1,
-              appointmentTabIndex: 1,
-            ));
-      } else {
-        final error = jsonDecode(response.body);
-        throw error['message'] ?? "Failed to submit rating";
-      }
-    } catch (e) {
-      ScaffoldMessageSnackbar.show(
-        context: context,
-        message: e.toString(),
-        type: SnackbarType.error,
-        position: SnackbarPosition.top,
-      );
-    } finally {
-      if (mounted) {
-        setState(() => isSubmitting = false);
-      }
+  } catch (e) {
+    ScaffoldMessageSnackbar.show(
+      context: context,
+      message: e.toString(),
+      type: SnackbarType.error,
+      position: SnackbarPosition.top,
+    );
+  } finally {
+    if (mounted) {
+      setState(() => isSubmitting = false);
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {

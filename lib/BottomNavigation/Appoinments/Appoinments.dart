@@ -1,7 +1,7 @@
 import 'package:cutomer_app/NGK/BookingAppointmnet/Bookin_Controller.dart';
 import 'package:cutomer_app/NGK/BookingAppointmnet/Booking_Model.dart';
 import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
-import 'package:cutomer_app/NGK/Service/clinic_service.dart';
+import 'package:cutomer_app/NGK/service/clinic_service.dart';
 import 'package:cutomer_app/NGK/Widgets/CommonPaginationBar.dart';
 import 'package:cutomer_app/NGK/Widgets/PackageBookingSheet.dart';
 import 'package:cutomer_app/Review/hospital_rating_screen.dart';

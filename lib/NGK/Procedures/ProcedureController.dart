@@ -12,34 +12,7 @@ class Procedurecontroller {
   ValueNotifier<bool> loading = ValueNotifier(false);
   ValueNotifier<List<ProcedureListModal>> serviceList = ValueNotifier([]);
   ValueNotifier<List<ClinicModel>> clinicList = ValueNotifier([]);
-  // final String baseUrl =
-  //     "http://3.6.119.57:9090/clinic-admin/getSubServiceByHospitalId/0001";
-
-  // Future<void> fetchSubServices() async {
-  //   try {
-  //     loading.value = true;
-
-  //     final response = await http.get(Uri.parse(baseUrl));
-  //     print("responseresponseresponse ${response.body}");
-  //     if (response.statusCode == 200) {
-  //       final jsonData = json.decode(response.body);
-  //       final List rawList = jsonData["data"];
-
-  //       final List<ProcedureListModal> parsed =
-  //           rawList.map((e) => ProcedureListModal.fromJson(e)).toList();
-
-  //       // update service list
-  //       serviceList.value = parsed;
-
-  //       // update filtered list + pagination
-  //       setProcedureData(parsed);
-  //     }
-  //   } catch (e) {
-  //     print("Error fetching services: $e");
-  //   } finally {
-  //     loading.value = false;
-  //   }
-  // }
+ 
 
   // -------------------- CONTROLLER STATE --------------------
   ValueNotifier<List<ProcedureListModal>> procedureList = ValueNotifier([]);
@@ -74,10 +47,7 @@ class Procedurecontroller {
     _filteredList = serviceList.value.where((svc) {
       return svc.procedureName.toLowerCase().contains(q);
 
-      // svc.categoryName.toLowerCase().contains(q);
-      // ||
-      // svc.clinicName.toLowerCase().contains(q) ||
-      // svc.clinicAddress.toLowerCase().contains(q);
+   
     }).toList();
 
     currentPage.value = 1;

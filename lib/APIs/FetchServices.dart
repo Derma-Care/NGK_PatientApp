@@ -3,37 +3,38 @@ import 'dart:typed_data';
 
 import '../Modals/ServiceModal.dart';
 import 'BaseUrl.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
+import 'package:cutomer_app/NGK/service/api_provider.dart';
 
 class ServiceFetcher {
+  // ---------------- FETCH SERVICES ----------------
   Future<List<Service>> fetchServices(String categoryId) async {
-    print("🔄 Sending request to categoryId: $categoryId");
+    debugPrint("🔄 Sending request to categoryId: $categoryId");
 
-    final url = '$getServiceByCategoriesID/$categoryId';
+    final endpoint = '$getServiceByCategoriesID/$categoryId';
+    final api = Get.find<ApiProvider>().dio;
 
     try {
-      print("🔄 Sending request to URL: $url");
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
-      print("📦 API response status: ${response.statusCode}");
+      debugPrint("🔄 Sending request to URL: ${api.options.baseUrl}$endpoint");
+
+      final response = await api.get(endpoint);
+
+      debugPrint("📦 API response status: ${response.statusCode}");
 
       if (response.statusCode == 200 || response.statusCode == 302) {
-        final decodedResponse = json.decode(response.body);
-        print("🧩 Decoded JSON: $decodedResponse");
+        final decodedResponse = response.data;
+        debugPrint("🧩 Decoded JSON: $decodedResponse");
 
         if (decodedResponse['data'] is List) {
           final List<dynamic> data = decodedResponse['data'];
-          print("✅ Data length: ${data.length}");
+          debugPrint("✅ Data length: ${data.length}");
 
           return data.map<Service>((json) {
             try {
               return Service.fromJson(json);
             } catch (e) {
-              print("❌ Error parsing service: $e");
+              debugPrint("❌ Error parsing service: $e");
               return Service(
                 serviceId: '',
                 serviceName: '',
@@ -45,40 +46,42 @@ class ServiceFetcher {
             }
           }).toList();
         } else {
-          print('❗ Error: "data" is not a list');
+          debugPrint('❗ Error: "data" is not a list');
           return [];
         }
       } else {
-        print('❗ Error: ${response.reasonPhrase}');
+        debugPrint('❗ Error: ${response.statusMessage}');
         return [];
       }
     } catch (e) {
-      print('❌ Exception fetching services: $e');
+      debugPrint('❌ Exception fetching services: $e');
       return [];
     }
   }
 
+  // ---------------- FETCH SUB SERVICES ----------------
   Future<List<SubServiceAdmin>> fetchsubServices(String serviceId) async {
-    final url = '$getSubServiceByServiceID/$serviceId';
-    print("🔄 Sending request to URL: $url");
+    final endpoint = '$getSubServiceByServiceID/$serviceId';
+    final api = Get.find<ApiProvider>().dio;
+
+    debugPrint("🔄 Sending request to URL: ${api.options.baseUrl}$endpoint");
 
     try {
-      final response = await http.get(Uri.parse(url));
-      print("📦 Response status: ${response.statusCode}");
+      final response = await api.get(endpoint);
+      debugPrint("📦 Response status: ${response.statusCode}");
 
       if (response.statusCode == 200 || response.statusCode == 302) {
-        final decodedResponse = json.decode(response.body);
+        final decodedResponse = response.data;
         final List<dynamic> data = decodedResponse['data'];
 
-        if (data != null && data is List) {
-          // Flatten subServices from each category object
+        if (data is List) {
           final allSubServices = data
               .expand((category) => category['subServices'] as List<dynamic>)
               .map((json) {
                 try {
                   return SubServiceAdmin.fromJson(json);
                 } catch (e) {
-                  print("❌ Parse error: $e");
+                  debugPrint("❌ Parse error: $e");
                   return null;
                 }
               })
@@ -87,29 +90,29 @@ class ServiceFetcher {
 
           return allSubServices;
         } else {
-          print("❗ 'data' is not a list");
+          debugPrint("❗ 'data' is not a list");
           return [];
         }
       } else {
-        print("❗ HTTP error: ${response.reasonPhrase}");
+        debugPrint("❗ HTTP error: ${response.statusMessage}");
         return [];
       }
     } catch (e) {
-      print("❌ Exception during fetch: $e");
+      debugPrint("❌ Exception during fetch: $e");
       return [];
     }
   }
 
-  // 🛜 Fetch and flatten data
-
+  // ---------------- FETCH ALL PROCEDURES ----------------
   static Future<List<ProcedureNameModel>> fetchAllProcedures() async {
-    final url = Uri.parse("${wifiUrl}/api/customer/procedures");
+    final api = Get.find<ApiProvider>().dio;
+    final endpoint = "/api/customer/procedures";
 
     try {
-      final response = await http.get(url);
+      final response = await api.get(endpoint);
 
       if (response.statusCode == 200) {
-        final decoded = json.decode(response.body);
+        final decoded = response.data;
         final List data = decoded['data'] ?? [];
 
         return data
@@ -117,23 +120,32 @@ class ServiceFetcher {
             .toList();
       }
     } catch (e) {
-      print("Error: $e");
+      debugPrint("❌ Error fetching procedures: $e");
     }
 
     return [];
   }
 
+  // ---------------- FETCH PROCEDURE OFFERS ----------------
   static Future<List<ProcedureOffer>> fetchAllProceduresOffers() async {
-    final response =
-        await http.get(Uri.parse("$wifiUrl/api/customer/procedures/offers"));
+    final api = Get.find<ApiProvider>().dio;
+    final endpoint = "/api/customer/procedures/offers";
 
-    if (response.statusCode == 200) {
-      final decoded = jsonDecode(response.body);
-      final List data = decoded['data'];
-      print("sadjahdsahjkdk${data}");
-      return data
-          .map<ProcedureOffer>((e) => ProcedureOffer.fromJson(e))
-          .toList();
+    try {
+      final response = await api.get(endpoint);
+
+      if (response.statusCode == 200) {
+        final decoded = response.data;
+        final List data = decoded['data'];
+
+        debugPrint("📦 Procedures offers count: ${data.length}");
+
+        return data
+            .map<ProcedureOffer>((e) => ProcedureOffer.fromJson(e))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetching procedure offers: $e");
     }
 
     return [];
@@ -149,7 +161,6 @@ class ProcedureNameModel {
     required this.procedureName,
   });
 
-  /// 🔹 From API JSON
   factory ProcedureNameModel.fromJson(Map<String, dynamic> json) {
     return ProcedureNameModel(
       procedureId: json['procedureId']?.toString() ?? '',
@@ -157,7 +168,6 @@ class ProcedureNameModel {
     );
   }
 
-  /// 🔹 To JSON (if needed later)
   Map<String, dynamic> toJson() {
     return {
       'procedureId': procedureId,

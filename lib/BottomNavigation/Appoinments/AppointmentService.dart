@@ -1,43 +1,50 @@
 import 'dart:convert';
-import 'package:cutomer_app/APIs/BaseUrl.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:cutomer_app/APIs/BaseUrl.dart';
+import 'package:cutomer_app/NGK/service/api_provider.dart';
 import 'GetAppointmentModel.dart';
 
 class AppointmentService {
+
   /// Fetch all bookings for a mobile number
   Future<List<Getappointmentmodel>> fetchAppointments(String customerId) async {
-    final url = '$registerUrl/bookings/customerId/$customerId';
-    print("🔍 URL: $url");
+    final endpoint = '$registerUrl/bookings/customerId/$customerId';
+    final api = Get.find<ApiProvider>().dio;
+
+    debugPrint("🔍 URL: ${api.options.baseUrl}$endpoint");
 
     try {
-      final response = await http.get(Uri.parse(url));
-      print("🔍 Status code: ${response.statusCode}");
-      print("🔍 Body: ${response.body}");
+      final response = await api.get(endpoint);
+
+      debugPrint("🔍 Status code: ${response.statusCode}");
+      debugPrint("🔍 Body: ${response.data}");
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonData = json.decode(response.body);
+        final Map<String, dynamic> jsonData = response.data;
         final List<dynamic> data = jsonData['data'] ?? [];
-        print("📥 Data array length: ${data.length}");
 
-        // Safely parse each item
+        debugPrint("📥 Data array length: ${data.length}");
+
         return data
             .map((item) {
               try {
                 return Getappointmentmodel.fromJson(item);
               } catch (e) {
-                print("❌ Error parsing appointment: $e\nData: $item");
+                debugPrint("❌ Error parsing appointment: $e\nData: $item");
                 return null;
               }
             })
             .whereType<Getappointmentmodel>()
             .toList();
       } else {
-        print("⚠️ HTTP error: ${response.reasonPhrase}");
+        debugPrint("⚠️ HTTP error: ${response.statusMessage}");
         return [];
       }
     } catch (e) {
-      print("❌ Exception in fetchAppointments: $e");
+      debugPrint("❌ Exception in fetchAppointments: $e");
       return [];
     }
   }
@@ -45,27 +52,34 @@ class AppointmentService {
   /// Fetch in-progress appointments
   Future<List<Getappointmentmodel>> fetchInprogressAppointments(
       String customerId) async {
+
     final prefs = await SharedPreferences.getInstance();
     final id = prefs.getString('customerId') ?? "";
-    final url = '$registerUrl/bookings/Inprogress/customerId/$customerId';
-    print("🔍 InprogressURL: $url");
+
+    final endpoint =
+        '$registerUrl/bookings/Inprogress/customerId/$customerId';
+    final api = Get.find<ApiProvider>().dio;
+
+    debugPrint("🔍 InprogressURL: ${api.options.baseUrl}$endpoint");
 
     try {
-      final response = await http.get(Uri.parse(url));
-      print("🔍 Status code: ${response.statusCode}");
-      print("🔍 Body!!!!!: ${response.body}");
+      final response = await api.get(endpoint);
+
+      debugPrint("🔍 Status code: ${response.statusCode}");
+      debugPrint("🔍 Body!!!!!: ${response.data}");
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonData = json.decode(response.body);
+        final Map<String, dynamic> jsonData = response.data;
         final List<dynamic> data = jsonData['data'] ?? [];
-        print("📥 Data array length: ${data.length}");
+
+        debugPrint("📥 Data array length: ${data.length}");
 
         return data
             .map((item) {
               try {
                 return Getappointmentmodel.fromJson(item);
               } catch (e) {
-                print(
+                debugPrint(
                     "❌ Error parsing in-progress appointment: $e\nData: $item");
                 return null;
               }
@@ -73,40 +87,44 @@ class AppointmentService {
             .whereType<Getappointmentmodel>()
             .toList();
       } else {
-        print("⚠️ HTTP error: ${response.reasonPhrase}");
+        debugPrint("⚠️ HTTP error: ${response.statusMessage}");
         return [];
       }
     } catch (e) {
-      print("❌ Exception in fetchInprogressAppointments: $e");
+      debugPrint("❌ Exception in fetchInprogressAppointments: $e");
       return [];
     }
   }
 
   /// Fetch a single appointment by ID
   Future<Getappointmentmodel?> fetchAppointmentById(String appID) async {
-    final url = '$registerUrl/getBookedService/$appID';
-    print("🔍 URL: $url");
+    final endpoint = '$registerUrl/getBookedService/$appID';
+    final api = Get.find<ApiProvider>().dio;
+
+    debugPrint("🔍 URL: ${api.options.baseUrl}$endpoint");
 
     try {
-      final response = await http.get(Uri.parse(url));
-      print("🔍 Status code: ${response.statusCode}");
-      print("🔍 Body: ${response.body}");
+      final response = await api.get(endpoint);
+
+      debugPrint("🔍 Status code: ${response.statusCode}");
+      debugPrint("🔍 Body: ${response.data}");
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonData = json.decode(response.body);
+        final Map<String, dynamic> jsonData = response.data;
         final dynamic data = jsonData['data'];
+
         if (data != null) {
           return Getappointmentmodel.fromJson(data);
         } else {
-          print("⚠️ No appointment data found");
+          debugPrint("⚠️ No appointment data found");
           return null;
         }
       } else {
-        print("⚠️ HTTP error: ${response.reasonPhrase}");
+        debugPrint("⚠️ HTTP error: ${response.statusMessage}");
         return null;
       }
     } catch (e) {
-      print("❌ Exception in fetchAppointmentById: $e");
+      debugPrint("❌ Exception in fetchAppointmentById: $e");
       return null;
     }
   }

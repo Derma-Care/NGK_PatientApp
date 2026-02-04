@@ -1,89 +1,109 @@
 import 'dart:convert';
-import 'package:cutomer_app/APIs/BaseUrl.dart';
-import 'package:cutomer_app/NGK/BookingAppointmnet/Booking_Model.dart';
-import 'package:http/http.dart' as http;
-import 'BookingRequestModel.dart';
+import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 
-import 'dart:convert';
-import 'package:cutomer_app/APIs/BaseUrl.dart';
 import 'package:cutomer_app/NGK/BookingAppointmnet/Booking_Model.dart';
-import 'package:http/http.dart' as http;
+import 'package:cutomer_app/NGK/service/api_provider.dart';
 import 'BookingRequestModel.dart';
 
 class BookingService {
-  static Future<BookingModel> createBooking(BookingRequestModel request) async {
-    final url = Uri.parse("$wifiUrl/booking/create");
+
+  static Future<BookingModel> createBooking(
+      BookingRequestModel request) async {
+
+    final endpoint = "/booking/create";
 
     // 🔹 REQUEST LOGS
-    print("📤 [BOOKING API] URL: $url");
-    print("📤 [BOOKING API] Headers: Content-Type: application/json");
-    print("📤 [BOOKING API] Request Body:");
-    print(const JsonEncoder.withIndent('  ').convert(request.toJson()));
+    debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    debugPrint("📤 [BOOKING API] REQUEST");
+    debugPrint("➡️ ENDPOINT : $endpoint");
+    debugPrint("➡️ HEADERS  : Content-Type: application/json");
+    debugPrint("➡️ BODY ↓↓↓");
+    debugPrint(
+      const JsonEncoder.withIndent('  ').convert(request.toJson()),
+    );
+    debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+    final api = Get.find<ApiProvider>().dio;
 
     try {
-      final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode(request.toJson()),
+      final response = await api.post(
+        endpoint,
+        data: request.toJson(),
       );
 
+      final resData = response.data;
+
       // 🔹 RESPONSE LOGS
-      print("📥 [BOOKING API] Status Code: ${response.statusCode}");
-      print("📥 [BOOKING API] Raw Response:");
-      print(response.body);
+      debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      debugPrint("📥 [BOOKING API] RESPONSE");
+      debugPrint("✅ STATUS CODE : ${response.statusCode}");
+      debugPrint("📦 RESPONSE BODY ↓↓↓");
+      debugPrint(
+        const JsonEncoder.withIndent('  ').convert(resData),
+      );
+      debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-      final body = jsonDecode(response.body);
-
-      // 🔹 PARSED RESPONSE LOG
-      print("📥 [BOOKING API] Parsed Response:");
-      print(const JsonEncoder.withIndent('  ').convert(body));
-
-      if (response.statusCode == 200 && body['success'] == true) {
-        print("✅ [BOOKING API] Booking created successfully");
-        return BookingModel.fromJson(body['data']);
+      if (resData['success'] == true) {
+        debugPrint("✅ [BOOKING API] Booking created successfully");
+        return BookingModel.fromJson(resData['data']);
       } else {
-        print("❌ [BOOKING API] Booking failed: ${body['message']}");
-        throw Exception(body['message'] ?? "Booking failed");
+        debugPrint(
+            "❌ [BOOKING API] Booking failed: ${resData['message']}");
+        throw Exception(resData['message'] ?? "Booking failed");
       }
     } catch (e, stack) {
-      // 🔹 ERROR LOGS
-      print("🔥 [BOOKING API] Exception occurred");
-      print("🔥 Error: $e");
-      print("🔥 StackTrace:");
-      print(stack);
-
+      debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      debugPrint("🔥 [BOOKING API] EXCEPTION");
+      debugPrint("🔥 ERROR : $e");
+      debugPrint("🔥 STACKTRACE ↓↓↓");
+      debugPrint(stack.toString());
+      debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
       rethrow;
     }
   }
 
   static Future<List<BookingModel>> getBookingsByCustomer(
       String customerId) async {
-    final url = Uri.parse("$wifiUrl/booking/customer/$customerId");
 
-    print("📤 [GET BOOKINGS] URL: $url");
+    final endpoint = "/booking/customer/$customerId";
+    final api = Get.find<ApiProvider>().dio;
 
-    final response = await http.get(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    );
+    debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    debugPrint("📤 [GET BOOKINGS] REQUEST");
+    debugPrint("➡️ ENDPOINT : $endpoint");
+    debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-    print("📥 [GET BOOKINGS] Status: ${response.statusCode}");
-    print("📥 [GET BOOKINGS] Body: ${response.body}");
+    try {
+      final response = await api.get(endpoint);
+      final resData = response.data;
 
-    final body = jsonDecode(response.body);
+      debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      debugPrint("📥 [GET BOOKINGS] RESPONSE");
+      debugPrint("✅ STATUS CODE : ${response.statusCode}");
+      debugPrint("📦 RESPONSE BODY ↓↓↓");
+      debugPrint(
+        const JsonEncoder.withIndent('  ').convert(resData),
+      );
+      debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-    if (response.statusCode == 200 && body['success'] == true) {
-      final List data = body['data'] ?? [];
-
-      return data.map<BookingModel>((e) => BookingModel.fromJson(e)).toList();
-    } else {
-      throw Exception(body['message'] ?? "Failed to load bookings");
+      if (resData['success'] == true) {
+        final List list = resData['data'] ?? [];
+        return list
+            .map<BookingModel>((e) => BookingModel.fromJson(e))
+            .toList();
+      } else {
+        throw Exception(
+            resData['message'] ?? "Failed to load bookings");
+      }
+    } catch (e, stack) {
+      debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      debugPrint("🔥 [GET BOOKINGS] EXCEPTION");
+      debugPrint("🔥 ERROR : $e");
+      debugPrint("🔥 STACKTRACE ↓↓↓");
+      debugPrint(stack.toString());
+      debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      rethrow;
     }
   }
-
-
 }

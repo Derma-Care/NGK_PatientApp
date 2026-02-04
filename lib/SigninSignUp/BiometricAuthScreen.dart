@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
-import 'package:cutomer_app/NGK/Service/customer_service.dart';
+import 'package:cutomer_app/NGK/service/customer_service.dart';
 import 'package:cutomer_app/Utils/LocationService.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';

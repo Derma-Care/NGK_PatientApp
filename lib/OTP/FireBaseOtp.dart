@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
-import 'package:cutomer_app/NGK/Service/customer_service.dart';
+import 'package:cutomer_app/NGK/service/api_provider.dart';
+import 'package:cutomer_app/NGK/service/customer_service.dart';
 
 import 'package:cutomer_app/SigninSignUp/BiometricPermissionScreen.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
@@ -94,32 +95,30 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
   //resend otp
 
   Future<void> resendOtp(String mobileNumber, String deviceId) async {
-    print("Resend Otpn: ${deviceId}");
-    print("~ ${mobileNumber}");
-    final url = Uri.parse('$authUrl/resendOtp');
+    print("Resend Otpn: $deviceId");
+    print("~ $mobileNumber");
+
+    final endpoint = "/resendOtp";
+    final api = Get.find<ApiProvider>().dio;
 
     try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
+      final response = await api.post(
+        endpoint,
+        data: {
           'mobileNumber': mobileNumber,
           'deviceId': deviceId,
-        }),
+        },
       );
 
-      final responseData = json.decode(response.body);
+      final responseData = response.data;
 
       if (response.statusCode == 200 && responseData['success'] == true) {
         print('OTP resent successfully');
-        // You can show a success message
       } else {
         print('Failed to resend OTP: ${responseData['message']}');
-        // Show error message from backend
       }
     } catch (e) {
       print('Error resending OTP: $e');
-      // Handle network error
     }
   }
 
@@ -127,25 +126,28 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
   Future<void> verifyOTP(String otp) async {
     setState(() => isLoading = true);
 
+    final api = Get.find<ApiProvider>().dio;
+
     try {
       // ------------------- VERIFY OTP -------------------
-      final response = await http.post(
-        Uri.parse('${wifiUrl}/api/auth/verify-otp'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
+      final response = await api.post(
+        '/api/auth/verify-otp',
+        data: {
           "mobile": widget.mobileNumber,
           "otp": otp.toString(),
-          "deviceToken": widget.deviceId
-        }),
+          "deviceToken": widget.deviceId,
+        },
       );
 
-      final data = json.decode(response.body);
-      print("veryfy data : ${data}");
+      final data = response.data;
+
+      print("veryfy data : $data");
       print("veryfy data : ${widget.mobileNumber}");
-      print("veryfy data : ${otp}");
+      print("veryfy data : $otp");
       print("veryfy data : ${widget.deviceId}");
-      print("veryfy data : ${wifiUrl}/api/auth/verify-otp");
+      print("veryfy data : /api/auth/verify-otp");
       print("veryfy data : ${response.statusCode}");
+
       debugPrint("👤 Customer API result: $data");
 
       if (response.statusCode != 200 || data['success'] != true) {
@@ -168,30 +170,25 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
 
       final token = prefs.getString('fcm');
 
-      // If customer exists
       if (customer != null) {
         if (biometricEnabled) {
-          // USER ALREADY ENABLED BIOMETRIC → DIRECT LOGIN
           Get.offAll(() => BottomNavController(
                 mobileNumber: widget.mobileNumber,
                 index: 0,
               ));
         } else {
-          // ASK USER TO ENABLE BIOMETRIC
           Get.to(() => EnableBiometricScreen(
                 mobileNumber: widget.mobileNumber,
                 deviceId: token,
               ));
         }
       } else {
-        // New user → Go to home directly OR registration
         Get.offAll(() => BottomNavController(
               mobileNumber: widget.mobileNumber,
               index: 0,
             ));
       }
 
-      // Success message
       ScaffoldMessageSnackbar.show(
         context: context,
         message: "Login successful",

@@ -1,35 +1,44 @@
-import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
+
 import 'package:cutomer_app/APIs/BaseUrl.dart';
 import 'package:cutomer_app/Modals/ServiceModal.dart';
-import 'package:http/http.dart' as http;
+import 'package:cutomer_app/NGK/service/api_provider.dart';
 
 Future<SubService?> fetchSubServiceDetails(
     String hospitalId, String subServiceId) async {
-  final url = '$getSubServiceByServiceIDHospitalID/$hospitalId/$subServiceId';
-  print('🔍 Calling: $url');
+
+  final endpoint =
+      '$getSubServiceByServiceIDHospitalID/$hospitalId/$subServiceId';
+  final api = Get.find<ApiProvider>().dio;
+
+  debugPrint(
+      '🔍 Calling: ${api.options.baseUrl}$endpoint');
 
   try {
-    final response = await http.get(Uri.parse(url));
-    print('🔁 Status: ${response.statusCode}');
+    final response = await api.get(endpoint);
+
+    debugPrint('🔁 Status: ${response.statusCode}');
+    debugPrint('📦 Full Response JSON: ${response.data}');
 
     if (response.statusCode == 200 || response.statusCode == 302) {
-      final decoded = json.decode(response.body);
-      print('📦 Full Response JSON: $decoded');
-
+      final decoded = response.data;
       final data = decoded['data'];
+
       if (data != null) {
-        print('✅ SubService Name: ${data['subServiceName']}');
+        debugPrint(
+            '✅ SubService Name: ${data['subServiceName']}');
         return SubService.fromJson(data);
       } else {
-        print("❗ 'data' not found");
+        debugPrint("❗ 'data' not found");
         return null;
       }
     } else {
-      print('❌ HTTP error: ${response.statusCode}');
+      debugPrint('❌ HTTP error: ${response.statusCode}');
       return null;
     }
   } catch (e) {
-    print('❌ Exception: $e');
+    debugPrint('❌ Exception: $e');
     return null;
   }
 }

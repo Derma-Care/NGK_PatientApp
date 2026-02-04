@@ -34,6 +34,7 @@ dependencies:
   url_launcher: ^6.0.20
   whatsapp_chatbot: ^1.0.0
   get: ^4.6.6
+  dio: ^5.4.0
   video_player: ^2.5.0
   permission_handler: ^11.3.1
   geolocator: ^14.0.2 # Check for the latest version of the package

@@ -5,7 +5,7 @@ import 'package:cutomer_app/NGK/Packges/PackageModel.dart';
 
 import 'package:cutomer_app/NGK/Procedures/ProcedureModel.dart';
 import 'package:cutomer_app/NGK/Procedures/procedure_details_modal.dart';
-import 'package:cutomer_app/NGK/Service/clinic_service.dart';
+import 'package:cutomer_app/NGK/service/clinic_service.dart';
 import 'package:cutomer_app/NGK/Widgets/CommonPaginationBar.dart';
 import 'package:cutomer_app/NGK/Widgets/PackageBookingSheet.dart';
 import 'package:cutomer_app/Utils/FormatOfferDate.dart';
