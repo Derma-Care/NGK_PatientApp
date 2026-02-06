@@ -600,6 +600,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
               title,
               style: TextStyle(
                 color: isSelected ? Colors.white : Colors.black,
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
             ),

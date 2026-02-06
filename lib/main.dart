@@ -4,6 +4,7 @@ import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Packges/PackageController.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureController.dart';
+import 'package:cutomer_app/NGK/service/api_provider.dart';
 import 'package:cutomer_app/Notification/NotificationController.dart';
 import 'package:cutomer_app/Notification/Notifications.dart';
 import 'package:cutomer_app/PushNotification/PushNotification.dart';
@@ -35,15 +36,15 @@ import 'Utils/Constant.dart';
 
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter_tts/flutter_tts.dart';
+// import 'package:flutter_tts/flutter_tts.dart';
 
 // ✅ Global Instances
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
-final FlutterTts flutterTts = FlutterTts();
+// final FlutterTts flutterTts = FlutterTts();
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
-
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // initializeControllers();
@@ -77,12 +78,13 @@ Future<void> main() async {
   );
 
   // ✅ Configure TTS
-  await flutterTts.setLanguage('en-US');
-  await flutterTts.setSpeechRate(0.4);
-  await flutterTts.setPitch(1.0);
+  // await flutterTts.setLanguage('en-US');
+  // await flutterTts.setSpeechRate(0.4);
+  // await flutterTts.setPitch(1.0);
 
   // ✅ Your service/controller initialization
   NetworkService().initialize();
+  Get.put(ApiProvider(), permanent: true);
 
   Get.put(Dashboardcontroller());
   Get.put(Serviceselectioncontroller());
@@ -100,7 +102,6 @@ Future<void> main() async {
   Get.put(TimerController(), permanent: true);
   Get.put(ClinicControllerLocation(), permanent: true);
   Get.put(ClinicSlotController(), permanent: true);
-
   // ✅ FCM Notification tap handling
   final RemoteMessage? initialMessage =
       await FirebaseMessaging.instance.getInitialMessage();
@@ -154,8 +155,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _buildAppTheme(),
       home: homeScreen,
-       initialBinding: AppBinding(),
+      initialBinding: AppBinding(),
+      navigatorKey: rootNavigatorKey,
       scaffoldMessengerKey: rootScaffoldMessengerKey, // ✅ ADD THIS
+
       // home: SkinCareConsentFormScreen(),
       // SkinCareConsentFormScreen
       onGenerateRoute: onGenerateRoute,

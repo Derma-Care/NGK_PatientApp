@@ -20,7 +20,8 @@ class Loginscreen extends StatefulWidget {
 
 class _LoginscreenState extends State<Loginscreen> {
   SiginSignUpController siginSignUpController = SiginSignUpController();
-  final dashboardcontroller = Get.put(Dashboardcontroller());
+  final dashboardcontroller = Get.find<Dashboardcontroller>();
+
   @override
   void dispose() {
     NetworkService().dispose();

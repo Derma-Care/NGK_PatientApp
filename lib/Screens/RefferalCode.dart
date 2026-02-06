@@ -2,6 +2,7 @@ import 'package:cutomer_app/APIs/BaseUrl.dart';
 import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
+import 'package:cutomer_app/NGK/Modals/wallet_summary_model.dart';
 import 'package:cutomer_app/NGK/Screens/RewardInfoScreen.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/DateConverter.dart';
@@ -51,7 +52,7 @@ class _ReferralWalletPageState extends State<ReferralWalletPage> {
     }
 
     final String referralCode = customer.referId!;
-    final String appLink = "/referral-registration";
+    final String appLink = "http://3.111.202.212:3000/referral-registration";
 
     final String message = '''
 ✨ Join Neeha’s Glow Kart ✨
@@ -220,12 +221,12 @@ $appLink
     });
   }
 
-  String getMembership(int totalCoins) {
-    if (totalCoins >= 7500) return "Platinum";
-    if (totalCoins >= 5000) return "Gold";
-    if (totalCoins >= 2500) return "Silver";
-    return "Basic";
-  }
+  // String getMembership(int totalCoins) {
+  //   if (totalCoins >= 7500) return "Platinum";
+  //   if (totalCoins >= 5000) return "Gold";
+  //   if (totalCoins >= 2500) return "Silver";
+  //   return "Basic";
+  // }
 
   // Color getMembershipColor(String level) {
   //   switch (level) {
@@ -255,8 +256,9 @@ $appLink
         );
       }
 
-      final totalCoins = summary.totalCredits ?? 0;
-      final membership = getMembership(totalCoins);
+      final totalCoins = summary.balance ?? 0;
+      final membership = summary.membership; // backend-driven
+
       final style = getMembershipStyle(membership);
       final cardGradient = getMembershipGradient(membership);
       return Stack(
@@ -340,7 +342,7 @@ $appLink
                 const SizedBox(height: 20),
 
                 /// PROGRESS
-                _membershipProgress(totalCoins),
+                _membershipProgress(totalCoins, summary),
 
                 const SizedBox(height: 18),
 
@@ -350,7 +352,7 @@ $appLink
                   children: [
                     _walletStat(
                       label: "Total Earned Coins",
-                      value: "$totalCoins",
+                      value: "${summary.totalCredits}",
                     ),
                     _walletStat(
                       label: "Used Coins",
@@ -383,7 +385,7 @@ $appLink
                 ],
               ),
               child: Text(
-                membership.toUpperCase(),
+                summary.membership.toUpperCase(),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -398,34 +400,44 @@ $appLink
     });
   }
 
-  Widget _membershipProgress(int coins) {
-    int nextTarget;
-    String nextLabel;
+  Widget _membershipProgress(int coins, WalletSummary summary) {
+    // 🔥 Remove BASIC since it's default
+    final levels = Map<String, int>.from(summary.levels)..remove("BASIC");
 
-    if (coins < 2500) {
-      nextTarget = 2500;
-      nextLabel = "Silver";
-    } else if (coins < 5000) {
-      nextTarget = 5000;
-      nextLabel = "Gold";
-    } else if (coins < 7500) {
-      nextTarget = 7500;
-      nextLabel = "Platinum";
-    } else {
-      return SizedBox();
+    // Sort remaining levels
+    final sortedLevels = levels.entries.toList()
+      ..sort((a, b) => a.value.compareTo(b.value));
+
+    // Find next level
+    MapEntry<String, int>? nextLevel;
+    for (final level in sortedLevels) {
+      if (coins < level.value) {
+        nextLevel = level;
+        break;
+      }
     }
+
+    // Already at highest level
+    if (nextLevel == null) {
+      return const Text(
+        "🎉 Highest Membership Achieved",
+        style: TextStyle(color: Colors.white70, fontSize: 12),
+      );
+    }
+
+    final progress = coins / nextLevel.value;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         LinearProgressIndicator(
-          value: coins / nextTarget,
+          value: progress.clamp(0.0, 1.0),
           backgroundColor: Colors.white24,
           valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
         ),
         const SizedBox(height: 4),
         Text(
-          "$coins / $nextTarget → $nextLabel",
+          "$coins / ${nextLevel.value} → ${capitalizeEachWord(nextLevel.key)}",
           style: const TextStyle(color: Colors.white70, fontSize: 12),
         ),
       ],

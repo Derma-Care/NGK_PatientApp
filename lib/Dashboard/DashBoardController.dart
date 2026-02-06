@@ -12,8 +12,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-
-
 import '../BottomNavigation/Appoinments/AppointmentService.dart';
 
 import '../BottomNavigation/Appoinments/GetAppointmentModel.dart';
@@ -21,6 +19,9 @@ import '../Services/CarouselSliderService.dart';
 import '../Services/serviceb.dart';
 
 class Dashboardcontroller extends GetxController {
+  Dashboardcontroller() {
+    debugPrint("🔥🔥 Dashboardcontroller CONSTRUCTOR CALLED");
+  }
   final AppointmentService _appointmentService = AppointmentService();
   final ImagePicker _picker = ImagePicker();
   final CarouselSliderService carouselSliderService = CarouselSliderService();
@@ -49,8 +50,6 @@ class Dashboardcontroller extends GetxController {
   }
 
   File? _imageFile;
- 
-  
 
   /// Load saved profile image
   Future<void> loadSavedImage() async {
@@ -60,8 +59,6 @@ class Dashboardcontroller extends GetxController {
       imageFile.value = File(savedImagePath);
     }
   }
-
-
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
@@ -92,9 +89,10 @@ class Dashboardcontroller extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    debugPrint("🔥 Dashboardcontroller onInit CALLED");
     fetchImages();
     fetchserviceImages();
-    loadProfileImage(); 
+    loadProfileImage();
   }
 
   /// Show modal to pick image from gallery or camera
@@ -211,12 +209,10 @@ class Dashboardcontroller extends GetxController {
     }
   }
 
-
   Future<void> onRefresh(String mobileNumber) async {
     isLoading.value = true; // start loading
 
     try {
-
       // Fetch bookings or other needed data
       await fetchAppointments(mobileNumber);
       await fetchImages();

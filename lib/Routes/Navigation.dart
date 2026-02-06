@@ -6,7 +6,7 @@ import 'package:cutomer_app/Terms/TermsAndConditionsScreen.dart';
 import 'package:cutomer_app/UserManuval/AppointmentManual.dart';
 import 'package:flutter/material.dart';
 
-import '../Help/HelpDesk.dart';
+ 
 
 
 var onGenerateRoute = (RouteSettings settings) {
@@ -25,14 +25,6 @@ var onGenerateRoute = (RouteSettings settings) {
     case "/manualscreen":
       return MaterialPageRoute(
           builder: (builder) => AppointmentManualScreen());
-
-// termsandcondition
-
-    case "/gethelp":
-      return MaterialPageRoute(builder: (builder) => HelpDeskScreen());
-
-  
-
     default:
   }
 };

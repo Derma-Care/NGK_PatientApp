@@ -23,7 +23,7 @@ class Copyrights extends StatelessWidget {
             "© 2025 Neeha's Glow Kart. All rights reserved.",
             style: style ??
                 TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   color: color,
                 ),
           ),

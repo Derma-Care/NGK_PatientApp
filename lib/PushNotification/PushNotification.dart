@@ -42,8 +42,8 @@ class NotificationService {
     /// 🟢 FOREGROUND → IN-APP BANNER
     FirebaseMessaging.onMessage.listen((message) {
       controller.handleNotification(message);
-
-      showInAppBanner(
+      if (message.notification == null) return;
+      showTopNotificationModal(
         title: message.notification?.title ?? "Notification",
         body: message.notification?.body ?? "",
       );

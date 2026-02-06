@@ -203,7 +203,11 @@ class _AboutClinicScreenState extends State<AboutClinicScreen> {
           leading: const Icon(Icons.location_on, color: Colors.pinkAccent),
           title: Text(clinic.address,
               maxLines: 2, overflow: TextOverflow.ellipsis),
-          trailing: const Icon(Icons.map, color: Colors.green),
+          trailing: Image.asset(
+            'assets/map.png',
+            width: 60,
+            height: 60,
+          ),
           onTap: () => _openMap(clinic.latitude, clinic.longitude),
         ),
       ],

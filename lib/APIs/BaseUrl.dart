@@ -21,7 +21,6 @@ const String wifiUrl = "https://glowkartapi.ashokfruit.shop";
 // const String getCustomer = '$baseUrl/getCustomer';
 // const String BookingUrl = '${registerUrl}/bookService';
 
-
 // const String serverUrl = "${wifiUrl}";
 const String clinicUrl = "${wifiUrl}/clinic-admin";
 const String baseUrl = '/customers';
@@ -31,9 +30,7 @@ const String registerUrl = '/api/customer';
 const String authUrl = '/api/customer';
 const String categoryUrl = '/admin/getCategories';
 const String getServiceByCategoriesID = '/admin/getServiceById';
-const String getSubServiceByServiceID =
-    '/admin/getSubServicesByServiceId';
-const String getSubServiceByServiceIDHospitalID =
-    '/clinic-admin/getSubService';
+const String getSubServiceByServiceID = '/admin/getSubServicesByServiceId';
+const String getSubServiceByServiceIDHospitalID = '/clinic-admin/getSubService';
 const String getCustomer = '$baseUrl/getCustomer';
 const String BookingUrl = '${registerUrl}/bookService';

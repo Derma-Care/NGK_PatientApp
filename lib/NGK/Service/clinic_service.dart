@@ -14,7 +14,7 @@ class ClinicService {
     required double lat,
     required double lng,
   }) async {
-    final endpoint = "/clinics/nearby?latitude=$lat&longitude=$lng";
+    final endpoint = "$registerUrl/clinics/nearby?latitude=$lat&longitude=$lng";
     final api = Get.find<ApiProvider>().dio;
 
     try {
