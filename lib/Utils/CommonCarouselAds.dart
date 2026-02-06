@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -131,7 +132,12 @@ class _CommonCarouselAdsState extends State<CommonCarouselAds> {
         fit: BoxFit.cover,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
-          return const Center(child: CircularProgressIndicator());
+          return Center(
+            child: SpinKitThreeBounce(
+              color: Colors.pink,
+              size: 22,
+            ),
+          );
         },
         errorBuilder: (context, error, stackTrace) {
           print("❌ Image Load Error: $error");
@@ -257,7 +263,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
     if (_chewieController == null) {
       return Center(
-          child: CircularProgressIndicator()); // ✅ Show loading spinner
+          child: Center(
+        child: SpinKitThreeBounce(
+          color: Colors.pink,
+          size: 22,
+        ),
+      )); // ✅ Show loading spinner
     }
 
     // return ClipRRect(

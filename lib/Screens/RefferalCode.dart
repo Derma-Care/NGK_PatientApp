@@ -241,6 +241,50 @@ $appLink
   //   }
   // }
 
+  LinearGradient getMembershipGradient(String level) {
+    switch (level.toUpperCase()) {
+      case "SILVER":
+        return const LinearGradient(
+          colors: [
+            Color(0xFF9CA3AF),
+            Color(0xFF6B7280),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+
+      case "GOLD":
+        return const LinearGradient(
+          colors: [
+            Color(0xFFFFA000), // rich dark gold
+            Color(0xFFFF6F00), // deep amber
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+
+      case "PLATINUM":
+        return const LinearGradient(
+          colors: [
+            Color(0xFF6A5ACD),
+            Color(0xFF483D8B),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+
+      default: // BASIC
+        return const LinearGradient(
+          colors: [
+            mainColor,
+            secondaryColor,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+    }
+  }
+
   Widget _walletCard() {
     return Obx(() {
       final summary = walletController.walletSummary.value;
@@ -256,7 +300,6 @@ $appLink
         );
       }
 
-      final totalCoins = summary.balance ?? 0;
       final membership = summary.membership; // backend-driven
 
       final style = getMembershipStyle(membership);
@@ -270,13 +313,13 @@ $appLink
             decoration: BoxDecoration(
               gradient: cardGradient,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: mainColor.withOpacity(0.35),
-                  blurRadius: 14,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+              // boxShadow: [
+              //   BoxShadow(
+              //     color: mainColor.withOpacity(0.35),
+              //     blurRadius: 14,
+              //     offset: const Offset(0, 8),
+              //   ),
+              // ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +385,7 @@ $appLink
                 const SizedBox(height: 20),
 
                 /// PROGRESS
-                _membershipProgress(totalCoins, summary),
+                _membershipProgress(summary),
 
                 const SizedBox(height: 18),
 
@@ -400,10 +443,10 @@ $appLink
     });
   }
 
-  Widget _membershipProgress(int coins, WalletSummary summary) {
+  Widget _membershipProgress(WalletSummary summary) {
     // 🔥 Remove BASIC since it's default
     final levels = Map<String, int>.from(summary.levels)..remove("BASIC");
-
+    final int coins = summary.totalCredits ?? 0;
     // Sort remaining levels
     final sortedLevels = levels.entries.toList()
       ..sort((a, b) => a.value.compareTo(b.value));

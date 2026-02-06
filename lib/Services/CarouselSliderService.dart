@@ -78,7 +78,7 @@ class CarouselSliderService {
   // }
 
   Future<List<String>> fetchServiceImages() async {
-    final endpoint = '/admin/dashboard-ads';
+    final endpoint = '/admin/service-ads';
     final api = Get.find<ApiProvider>().dio;
 
     try {
@@ -90,8 +90,8 @@ class CarouselSliderService {
         final List list = response.data['data']; // ✅ FIX
 
         return list
-            .where((e) => e['mediaUrlOrImage'] != null)
-            .map<String>((e) => e['mediaUrlOrImage'].toString())
+            .where((e) => e['url'] != null)
+            .map<String>((e) => e['url'].toString())
             .toList();
       } else {
         throw Exception('Failed to load images');

@@ -27,14 +27,12 @@ class RewardInfoScreen extends StatelessWidget {
               style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 20),
-
-            _infoTile("🎉 Registration Bonus", "Get 100 reward coins instantly"),
-            _infoTile("🤝 Referral Rewards", "Earn 100 coins per referral"),
+            _infoTile(
+                "🎉 Registration Bonus", "Get 100 reward coins instantly"),
+            _infoTile("🤝 Referral Rewards", "Earn 200 coins per referral"),
             _infoTile("💳 Booking Rewards", "1 coin for every ₹100 spent"),
             _infoTile("💸 Redeem Coins", "Use coins for up to 50% of booking"),
-
             const Spacer(),
-
             SizedBox(
               width: double.infinity,
               height: 48,
@@ -98,16 +96,14 @@ class RewardInfoScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 16),
                   _sectionTitle("🪙 What are Reward Coins?"),
-                  _bullet("Earned through registration, referrals, and bookings"),
+                  _bullet(
+                      "Earned through registration, referrals, and bookings"),
                   _bullet("Coins can pay up to 50% of booking amount"),
-
                   const SizedBox(height: 16),
                   _sectionTitle("🎉 Registration Bonus"),
                   _bullet("Every user gets 100 reward coins on registration"),
-
                   const SizedBox(height: 16),
                   _sectionTitle("🏷️ Membership Levels & Coin Value"),
                   _membershipRow("Basic", "Up to 2,500 coins", "₹1 / coin"),
@@ -116,44 +112,37 @@ class RewardInfoScreen extends StatelessWidget {
                   _membershipRow("Platinum", "7,500+", "₹4 / coin"),
                   const SizedBox(height: 6),
                   _bullet("Membership upgrades happen automatically"),
-
                   const SizedBox(height: 16),
                   _sectionTitle("🤝 Referral Rewards"),
-                  _bullet("Earn 100 coins after referral’s first booking"),
+                  _bullet("Earn 200 coins after referral’s first booking"),
                   _bullet("No limit on referrals"),
-
                   const SizedBox(height: 16),
                   _sectionTitle("💳 Booking Rewards"),
                   _bullet("Earn 1 coin for every ₹100 spent"),
                   _example("₹1,000 booking → 10 coins"),
-
                   const SizedBox(height: 16),
                   _sectionTitle("💸 Redeem Rules"),
                   _bullet("Use coins for up to 50% of booking"),
                   _bullet("Remaining amount paid normally"),
                   _example("₹1,000 booking → max ₹500 via coins"),
                   _example("Gold member → 167 coins = ₹500"),
-
                   const SizedBox(height: 16),
                   _sectionTitle("🔁 Membership Upgrade Example"),
                   _bullet("2,500 coins → Silver"),
                   _bullet("5,000 coins → Gold"),
                   _bullet("7,500+ coins → Platinum"),
-
                   const SizedBox(height: 16),
                   _sectionTitle("📌 Important Notes"),
                   _bullet("Coins cannot be converted to cash"),
                   _bullet("Coins usable only for bookings"),
                   _bullet("Membership based on total earned coins"),
                   _bullet("Max 50% discount per booking"),
-
                   const SizedBox(height: 20),
                   _sectionTitle("✅ Simple Summary"),
                   _bullet("Register → Get 100 coins"),
-                  _bullet("Refer → Earn 100 coins"),
+                  _bullet("Refer → Earn 200 coins"),
                   _bullet("Book → Earn coins"),
                   _bullet("Use coins → Save money"),
-
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,

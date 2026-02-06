@@ -19,8 +19,10 @@ import 'package:cutomer_app/Notification/Notifications.dart';
 import 'package:cutomer_app/Screens/RefferalCode.dart';
 import 'package:cutomer_app/Screens/WhatsUpPreviewCard.dart';
 import 'package:cutomer_app/TreatmentAndServices/SubserviceController.dart';
+import 'package:cutomer_app/Utils/CommonCarouselAds.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/GradintColor.dart';
+import 'package:cutomer_app/Utils/GradintColorF.dart';
 import 'package:cutomer_app/Utils/LocationService.dart';
 import 'package:cutomer_app/Utils/capitalizeFirstLetter.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +63,8 @@ class ConsultationsTypeState extends State<ConsultationsType> {
   void initState() {
     super.initState();
 
+    dashboardcontroller.fetchserviceImages();
+
     _loadLocation();
     dashboardcontroller.setMobileNumber(widget.mobileNumber);
     _focusNode.addListener(() {
@@ -95,6 +99,24 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     searchController.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _onFullRefresh() async {
+    try {
+      // Small delay for smooth UX
+      await Future.delayed(const Duration(milliseconds: 600));
+
+      // Reload everything
+      await _reloadLocation();
+      await _loadCustomerProfile();
+      await loadProcedures();
+      walletController.loadWallet();
+      dashboardcontroller.fetchserviceImages();
+
+      debugPrint("🔄 Full dashboard refreshed");
+    } catch (e) {
+      debugPrint("❌ Refresh failed: $e");
+    }
   }
 
   Future<void> _reloadLocation() async {
@@ -189,81 +211,110 @@ class ConsultationsTypeState extends State<ConsultationsType> {
 
   OverlayEntry? overlayEntry;
 
+  // LinearGradient dashboardGradient() {
+  //   return const LinearGradient(
+  //     colors: [
+  //       Color(0xFF6A11CB), // violet
+  //       Color(0xFF2575FC), // blue
+  //     ],
+  //     begin: Alignment.topLeft,
+  //     end: Alignment.bottomRight,
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: mainColor,
       appBar: _buildAppBar(),
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-          hideDropdownOverlay();
-        },
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 10),
-                // CommonCarouselAds(
-                //   media: dashboardcontroller.carouselImages,
-                //   height: 170,
-                // ),
-                const SizedBox(height: 10),
-
-                // ✅ Search box stays visible top
-                _buildSearchBox(),
-                const SizedBox(height: 10),
-
-                // ✅ City banner (only if available)
-                if (cityName != null) _buildLocationBanner(),
-                // const SizedBox(height: 10),
-
-                const SizedBox(height: 20),
-
-                // ✅ Grid content (no IntrinsicHeight)
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.9,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: ngkScaffoldGradient(),
+        ),
+        child: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+            hideDropdownOverlay();
+          },
+          child: RefreshIndicator(
+            color: mainColor,
+            backgroundColor: Colors.white,
+            onRefresh: _onFullRefresh,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _mainCard(
-                      "Procedures",
-                      "assets/treat.png",
-                      () {
-                        Get.to(ProcedureGridScreen());
-                      },
+                    // CommonCarouselAds(
+                    //   media: dashboardcontroller.carouselImages,
+                    //   height: 170,
+                    // ),
+
+                    // ✅ Search box stays visible top
+                    Divider(),
+                    if (cityName != null) _buildLocationBanner(),
+                    const SizedBox(height: 10),
+                    _buildSearchBox(),
+                    const SizedBox(height: 10),
+
+                    // ✅ City banner (only if available)
+                    const SizedBox(height: 10),
+                    if (dashboardcontroller.carouseServicelImages.isNotEmpty)
+                      CommonCarouselAds(
+                        media: dashboardcontroller.carouseServicelImages,
+                        height: 80,
+                      ),
+                    const SizedBox(height: 20),
+
+                    // ✅ Grid content (no IntrinsicHeight)
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.9,
+                      children: [
+                        _mainCard(
+                          "Procedures",
+                          "assets/treat.png",
+                          () {
+                            Get.to(ProcedureGridScreen());
+                          },
+                        ),
+                        _mainCard(
+                          "Packages",
+                          "assets/package.png",
+                          () {
+                            Get.to(PackageListScreen());
+                          },
+                        ),
+                        _mainCard(
+                          "Clinics",
+                          "assets/clinic.png",
+                          () {
+                            Get.to(ClinicListScreen());
+                          },
+                        ),
+                        _mainCard(
+                          "Offers",
+                          "assets/offer.png",
+                          () {
+                            Get.to(Offerslistscreen());
+                          },
+                        ),
+                      ],
                     ),
-                    _mainCard(
-                      "Packages",
-                      "assets/package.png",
-                      () {
-                        Get.to(PackageListScreen());
-                      },
-                    ),
-                    _mainCard(
-                      "Clinics",
-                      "assets/clinic.png",
-                      () {
-                        Get.to(ClinicListScreen());
-                      },
-                    ),
-                    _mainCard(
-                      "Offers",
-                      "assets/offer.png",
-                      () {
-                        Get.to(Offerslistscreen());
-                      },
-                    ),
+
+                    const SizedBox(height: 20),
+                    // WhatsAppPreviewCard()
                   ],
                 ),
-
-                const SizedBox(height: 20),
-                // WhatsAppPreviewCard()
-              ],
+              ),
             ),
           ),
         ),
@@ -393,56 +444,26 @@ class ConsultationsTypeState extends State<ConsultationsType> {
   }
 
   Widget _buildLocationBanner() {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [mainColor, secondaryColor],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.location_on, color: Colors.white, size: 18),
-          const SizedBox(width: 6),
-
-          /// 📍 CITY NAME
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
-              "You're in : $cityName",
+              "You're in $cityName",
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
-
-          /// 🔄 REFRESH LOCATION ICON
           InkWell(
             onTap: _reloadLocation,
-            child: const Padding(
-              padding: EdgeInsets.all(4),
-              child: Icon(
-                Icons.refresh,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
+            child: const Icon(Icons.refresh, color: Colors.white, size: 18),
           ),
         ],
       ),
@@ -450,36 +471,45 @@ class ConsultationsTypeState extends State<ConsultationsType> {
   }
 
   Widget _buildSearchBox() {
-    return TextField(
-      key: _searchFieldKey,
-      controller: searchController,
-      focusNode: _focusNode,
-      decoration: InputDecoration(
-        labelText: 'Search Procedures',
-        prefixIcon: const Icon(Icons.search),
-        suffixIcon: searchController.text.isNotEmpty
-            ? IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  searchController.clear();
-                  filteredProcedures.clear();
-                  hideDropdownOverlay();
-                  setState(() {});
-                },
-              )
-            : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
-      onChanged: (query) {
-        filterSearch(query);
-        if (query.isNotEmpty) {
-          showDropdownOverlay();
-        } else {
-          hideDropdownOverlay();
-        }
-      },
+      child: TextField(
+        key: _searchFieldKey,
+        controller: searchController,
+        focusNode: _focusNode,
+        decoration: InputDecoration(
+          hintText: "Search treatments, procedures",
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    searchController.clear();
+                    filteredProcedures.clear();
+                    hideDropdownOverlay();
+                    setState(() {});
+                  },
+                )
+              : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+        onChanged: (query) {
+          filterSearch(query);
+          query.isNotEmpty ? showDropdownOverlay() : hideDropdownOverlay();
+        },
+      ),
     );
   }
 
@@ -581,8 +611,8 @@ class ConsultationsTypeState extends State<ConsultationsType> {
       automaticallyImplyLeading: false,
       backgroundColor: Colors.transparent,
       elevation: 0,
-      flexibleSpace:
-          Container(decoration: BoxDecoration(gradient: appGradient())),
+      // flexibleSpace:
+      //     Container(decoration: BoxDecoration(gradient: dashboardGradient())),
       title: Row(children: [
         Obx(() {
           final image = dashboardcontroller.imageFile.value;
@@ -596,7 +626,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
             },
             child: CircleAvatar(
               radius: 20,
-              backgroundColor: Colors.grey[200],
+              // backgroundColor: Colors.grey[200],
               backgroundImage: image != null
                   ? FileImage(image)
                   : const AssetImage('assets/ic_launcher.png') as ImageProvider,
@@ -758,12 +788,13 @@ class ConsultationsTypeState extends State<ConsultationsType> {
           margin: const EdgeInsets.all(8),
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: mainColor),
+            color: const Color.fromARGB(218, 240, 238, 238),
+            border: Border.all(color: const Color.fromARGB(255, 255, 255, 255)),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.15),
+                color:
+                    const Color.fromARGB(255, 255, 255, 255).withOpacity(0.15),
                 blurRadius: 6,
                 spreadRadius: 2,
               ),

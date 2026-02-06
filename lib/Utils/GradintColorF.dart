@@ -45,3 +45,14 @@ LinearGradient getMembershipGradient(String membership) {
       );
   }
 }
+
+LinearGradient ngkScaffoldGradient() {
+  return const LinearGradient(
+    colors: [
+      mainColor, // top pink
+      Color(0xFFFFEEF5), // bottom light pink
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+}
