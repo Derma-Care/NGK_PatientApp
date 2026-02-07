@@ -40,7 +40,10 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
   int? selectedIndex;
   bool useCoins = false;
   final ReferralWalletController walletController =
-      Get.find<ReferralWalletController>();
+      Get.isRegistered<ReferralWalletController>()
+          ? Get.find<ReferralWalletController>()
+          : Get.put(ReferralWalletController());
+
   final ClinicSlotController slotController = Get.put(ClinicSlotController());
 
   double get coinValue =>
@@ -56,17 +59,24 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
   @override
   void initState() {
     super.initState();
-    slotController.fetchSlots(widget.payment.clinicId);
+    if (widget.payment.clinicId != null) {
+      slotController.fetchSlots(widget.payment.clinicId!);
+    } else {
+      debugPrint("❌ clinicId is null for ${widget.payment.serviceType}");
+    }
+
 // ✅ Force FULL_PAYMENT if partial is not valid
     if ((widget.payment.partialPaymentPercentage ?? 0) <= 0) {
       _paymentType = PaymentType.FULL_PAYMENT;
     }
     _loadCustomer();
+    debugPrint("Wallet controller registered: "
+        "${Get.isRegistered<ReferralWalletController>()}");
   }
 
   double get payableAmount {
     final double fullAmount =
-        priceCalc?.originalFinalAmount ?? widget.payment.finalCost;
+        priceCalc?.originalFinalAmount ?? widget.payment.finalCost ?? 0;
 
     final double coinsReducedAmount =
         (useCoins && priceCalc != null) ? priceCalc!.finalAmount : fullAmount;
@@ -118,7 +128,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
     double platformFee = widget.payment.platformFee ?? 0;
     // double platformFee = 0;
 
-    double total = widget.payment.finalCost;
+    double total = widget.payment.finalCost ?? 0;
 
     double coinsUsed = 0;
 
@@ -200,7 +210,9 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                   itemCount: slotController.slots.length,
                   itemBuilder: (_, i) {
                     final slot = slotController.slots[i];
-                    final date = DateTime.parse(slot.date);
+                    final date = DateTime.tryParse(slot.date);
+                    if (date == null) return const SizedBox();
+
                     final isDisabled = !slot.workingHours;
 
                     return Obx(() {
@@ -286,7 +298,7 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                   const SizedBox(width: 12),
                   paymentTab(
                     title:
-                        "Partial Payment (${widget.payment.partialPaymentPercentage!.toStringAsFixed(0)}%)",
+                        "Partial Payment (${(widget.payment.partialPaymentPercentage ?? 0).toStringAsFixed(0)}%)",
                     value: PaymentType.PARTIAL_PAYMENT,
                   ),
                 ],
@@ -380,20 +392,24 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                       style: TextStyle(fontSize: 12, color: mainColor),
                     ),
                   const SizedBox(height: 8),
-                  priceRow("Original Price", widget.payment.price, ""),
-                  priceRow("Consultation", widget.payment.consultationFee, ""),
+                  priceRow("Original Price", widget.payment.price ?? 0, ""),
                   priceRow(
-                    "GST (${widget.payment.gst.toStringAsFixed(0)}%)",
+                    "Consultation",
+                    widget.payment.consultationFee ?? 0,
+                    "",
+                  ),
+                  priceRow(
+                    "GST (${(widget.payment.gst ?? 0).toStringAsFixed(0)}%)",
                     widget.payment.gstAmount,
                     "",
                   ),
-                  if (widget.payment.taxAmount != 0)
+                  if ((widget.payment.taxAmount ?? 0) > 0)
                     priceRow(
-                      "Tax (${widget.payment.taxPercentage.toStringAsFixed(0)}%)",
-                      widget.payment.taxAmount,
+                      "Tax (${(widget.payment.taxPercentage ?? 0).toStringAsFixed(0)}%)",
+                      widget.payment.taxAmount ?? 0,
                       "",
                     ),
-                  if (widget.payment.totalDiscountPercentage != 0)
+                  if ((widget.payment.totalDiscountPercentage ?? 0) != 0)
                     priceRow(
                       "Discount (${widget.payment.totalDiscountPercentage.toStringAsFixed(0)}%)",
                       widget.payment.totalDiscountAmount,
@@ -438,14 +454,23 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                         priceLoading = true;
                       });
 
+                      final customer = customerController.customer.value;
+                      if (customer == null) {
+                        showSnackbar(
+                            "Error", "Customer data not loaded yet", "error");
+                        setState(() {
+                          useCoins = false;
+                          priceLoading = false;
+                        });
+                        return;
+                      }
+
                       final payload = {
-                        "customerId":
-                            customerController.customer.value!.customerId,
+                        "customerId": customer.customerId,
                         "clinicId": widget.payment.clinicId,
                         "serviceId": widget.payment.serviceId,
                         "serviceType": widget.payment.serviceType,
-                        if (v)
-                          "pointsToRedeem": coinValue.toInt(), // ✅ only when ON
+                        if (v) "pointsToRedeem": coinValue.toInt(),
                       };
 
                       try {
@@ -510,13 +535,23 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                 if (slotController.selectedIndex.value == -1) {
                   showSnackbar(
                       "Warning", "Please select an available date", "warning");
-
                   return;
                 }
-                final customer = customerController.customer.value;
 
+                final customer = customerController.customer.value;
                 if (customer == null) {
                   showSnackbar("Error", "Customer data not loaded", "error");
+                  return;
+                }
+
+                if (mobile == null || mobile!.isEmpty) {
+                  showSnackbar("Error", "Mobile number not available", "error");
+                  return;
+                }
+
+                if (slotController.selectedIndex.value >=
+                    slotController.slots.length) {
+                  showSnackbar("Error", "Invalid slot selected", "error");
                   return;
                 }
 
@@ -525,31 +560,27 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                   customerId: customer.customerId,
                   serviceId: widget.payment.serviceId,
                   serviceType: widget.payment.serviceType,
-
                   paymentType: _paymentType == PaymentType.FULL_PAYMENT
                       ? "FULL_PAYMENT"
                       : "PARTIAL_PAYMENT",
-                  //TODO:  Check this ont acceprt other but here keep Patial amount and full amount
                   appointmentDate: slotController
                       .slots[slotController.selectedIndex.value].date,
-
-                  // ✅ send ONLY when toggle ON
                   pointsToRedeem:
                       useCoins ? (priceCalc?.appliedPoints ?? 0) : 0,
                   paymentMode: "ONLINE",
                 );
 
-                print("Booing payload final ${payload.toJson()}");
-                final totalAmt = payableAmount;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (_) => RazorpaySubscription(
-                          amount: totalAmt,
-                          onPaymentInitiated: () {},
-                          context: context,
-                          mobileNumber: mobile!,
-                          bookingData: payload)),
+                    builder: (_) => RazorpaySubscription(
+                      amount: payableAmount,
+                      onPaymentInitiated: () {},
+                      context: context,
+                      mobileNumber: mobile!,
+                      bookingData: payload,
+                    ),
+                  ),
                 );
               },
               style: ElevatedButton.styleFrom(

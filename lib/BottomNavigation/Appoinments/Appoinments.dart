@@ -7,12 +7,12 @@ import 'package:cutomer_app/NGK/Widgets/PackageBookingSheet.dart';
 import 'package:cutomer_app/Review/hospital_rating_screen.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/FirstLatterCap.dart';
+import 'package:cutomer_app/Utils/GradintColorF.dart';
 import 'package:cutomer_app/Utils/MapOnGoogle.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingListScreen extends StatefulWidget {
   final int initialTabIndex; // ✅ NEW
@@ -83,12 +83,19 @@ class _BookingListScreenState extends State<BookingListScreen>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: tabController,
-        children: [
-          _buildList("Pending"),
-          _buildList("Completed"),
-        ],
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: ngkScaffoldGradient(),
+        ),
+        child: TabBarView(
+          controller: tabController,
+          children: [
+            _buildList("Pending"),
+            _buildList("Completed"),
+          ],
+        ),
       ),
     );
   }
@@ -100,7 +107,7 @@ class _BookingListScreenState extends State<BookingListScreen>
         return const Center(
           child: const Center(
             child: SpinKitFadingCircle(
-              color: mainColor,
+              color: Colors.white,
               size: 40,
             ),
           ),
@@ -112,7 +119,7 @@ class _BookingListScreenState extends State<BookingListScreen>
         return Center(
           child: Text(
             "No $status Appointments",
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
+            style: const TextStyle(fontSize: 16, color: Colors.white),
           ),
         );
       }
@@ -133,14 +140,14 @@ class _BookingListScreenState extends State<BookingListScreen>
                   double getDisplayAmount() {
                     // If fully paid → always show final amount
                     if (b.paymentStatus == "PAID") {
-                      return b.finalAmount ?? 0;
+                      return b.finalAmount;
                     }
 
                     // If payment is due
                     if (b.paymentStatus == "DUE") {
                       // Full payment selected
                       if (b.paymentType == "FULL_PAYMENT") {
-                        return b.finalAmount ?? 0;
+                        return b.finalAmount;
                       }
 
                       // Partial payment selected and percentage valid
@@ -161,7 +168,7 @@ class _BookingListScreenState extends State<BookingListScreen>
                       margin: const EdgeInsets.only(bottom: 14),
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: const Color.fromARGB(235, 240, 238, 238),
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
                           color: _getStatusBorderColor(b.status),
@@ -375,7 +382,7 @@ class _BookingListScreenState extends State<BookingListScreen>
   Color _getStatusBorderColor(String status) {
     switch (status) {
       case "CONFIRMED":
-        return Colors.orange;
+        return const Color.fromARGB(255, 255, 255, 255);
       case "COMPLETED":
         return Colors.green;
       case "CANCELLED":
@@ -398,8 +405,8 @@ class _BookingListScreenState extends State<BookingListScreen>
         /// 🔹 PROCEDURE FLOW
         if (b.serviceType.toLowerCase() == "procedure") {
           final pricing = await ClinicService.getProcedurePricingWithClinicId(
-            clinicId: b.clinicId!, // make sure this exists in BookingModel
-            procedureId: b.serviceId!, // serviceId = procedureId
+            clinicId: b.clinicId ?? "", // make sure this exists in BookingModel
+            procedureId: b.serviceId ?? "", // serviceId = procedureId
           );
 
           /// ✅ Convert API response → PaymentModal
@@ -677,8 +684,7 @@ class _BookingListScreenState extends State<BookingListScreen>
                           // if (b.serviceType.toLowerCase() == "package" &&
                           //     b.procedures != null)
                           if (b.serviceType.toLowerCase() == "package" &&
-                              b.procedures != null &&
-                              b.procedures!.isNotEmpty)
+                              (b.procedures?.isNotEmpty ?? false))
                             ExpansionTile(
                               title: const Text(
                                 "Package Procedures",
@@ -689,6 +695,9 @@ class _BookingListScreenState extends State<BookingListScreen>
                                 color: mainColor,
                               ),
                               children: b.procedures!.map((p) {
+                                final name = p.procedureName ?? "Procedure";
+                                final sittings = p.noOfSittings ?? 0;
+
                                 return ListTile(
                                   leading: const Icon(
                                     Icons.check_circle_outline,
@@ -696,7 +705,7 @@ class _BookingListScreenState extends State<BookingListScreen>
                                     size: 18,
                                   ),
                                   title: Text(
-                                    p.procedureName,
+                                    name,
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   trailing: Container(
@@ -707,7 +716,7 @@ class _BookingListScreenState extends State<BookingListScreen>
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
-                                      "${p.noOfSittings} sittings",
+                                      "$sittings sittings",
                                       style: const TextStyle(
                                         color: mainColor,
                                         fontSize: 12,

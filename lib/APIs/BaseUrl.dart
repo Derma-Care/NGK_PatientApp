@@ -22,7 +22,7 @@ const String wifiUrl = "https://glowkartapi.ashokfruit.shop";
 // const String BookingUrl = '${registerUrl}/bookService';
 
 // const String serverUrl = "${wifiUrl}";
-const String clinicUrl = "${wifiUrl}/clinic-admin";
+const String clinicUrl = "/clinic-admin";
 const String baseUrl = '/customers';
 const String booking_Url = '/booking/customer';
 const String consultationUrl = "/api/customer/getAllConsultations";

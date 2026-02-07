@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:cutomer_app/BottomNavigation/Profile/ProfileScreens.dart';
 import 'package:cutomer_app/Dashboard/DashBoardController.dart';
+import 'package:cutomer_app/Help/HelpSupport.dart';
 import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
+import 'package:cutomer_app/Screens/ngk_terms_conditions_screen.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 import 'package:flutter/material.dart';
@@ -259,15 +261,26 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
             },
           ),
 
-          // Logout
           _menuItem(
-            icon: Icons.logout,
-            title: "Logout",
+            icon: Icons.gavel,
+            title: "Terms & Conditions",
             onTap: () {
-              _showLogoutConfirmation(context);
+              Get.to(() => const NgkTermsConditionsScreen());
             },
           ),
-
+          _menuItem(
+            icon: Icons.help_outline,
+            title: "Help & Support",
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (_) => const HelpSupportSheet(),
+              );
+            },
+          ),
           _loadingBio
               ? const Center(
                   child: SpinKitFadingCircle(
@@ -298,7 +311,16 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                       ),
                     ),
                   ),
-                )
+                ),
+
+          // Logout
+          _menuItem(
+            icon: Icons.logout,
+            title: "Logout",
+            onTap: () {
+              _showLogoutConfirmation(context);
+            },
+          ),
         ],
       ),
     );

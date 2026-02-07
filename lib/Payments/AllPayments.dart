@@ -1,7 +1,7 @@
-import 'dart:convert';
+ 
 
-import 'package:cutomer_app/BottomNavigation/Appoinments/PostBooingModel.dart';
-import 'package:cutomer_app/BottomNavigation/BottomNavigation.dart';
+ 
+ 
 
 import 'package:cutomer_app/Loading/FullScreeenLoader.dart';
 import 'package:cutomer_app/NGK/BookingAppointmnet/BookingRequestModel.dart';
@@ -11,16 +11,16 @@ import 'package:cutomer_app/NGK/Screens/BookingSuccessScreen.dart';
 import 'package:cutomer_app/Toasters/Toaster.dart';
 import 'package:cutomer_app/Utils/Header.dart';
 import 'package:cutomer_app/Utils/ShowSnackBar%20copy.dart';
-import 'package:cutomer_app/Widget/GobelTimer.dart';
-import 'package:cutomer_app/Widget/TimerController.dart';
+ 
+ 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:intl/intl.dart';
+ 
+ 
+ 
+ 
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
-import '../PatientsDetails/PatientModel.dart';
+ 
 
 import '../Utils/ScaffoldMessageSnacber.dart';
 
@@ -68,30 +68,9 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
         'email': 'prashanthr803@gmail.com',
       },
     };
-    final timerController = Get.find<TimerController>();
+    
 
-// Listen for timeout
-    ever(timerController.isTimeUp, (isTimeUp) {
-      if (isTimeUp == true) {
-        try {
-          _razorpay.clear(); // Close Razorpay if open
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-                builder: (_) => BottomNavController(
-                      mobileNumber: widget.mobileNumber,
-                      // username: "User",
-                      index: 0,
-                    )),
-            (route) => false,
-          );
-        } catch (e) {
-          debugPrint("Error closing Razorpay on timeout: $e");
-        }
-      }
-    });
-
-    // Razorpay event listeners
+     // Razorpay event listeners
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
@@ -222,9 +201,7 @@ class _RazorpaySubscriptionState extends State<RazorpaySubscription> {
   @override
   void dispose() {
     _razorpay.clear();
-    if (Get.isRegistered<TimerController>()) {
-      Get.delete<TimerController>();
-    }
+    
     super.dispose();
   }
 }

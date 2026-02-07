@@ -11,9 +11,6 @@ import 'package:cutomer_app/PushNotification/PushNotification.dart';
 import 'package:cutomer_app/Routes/Navigation.dart';
 import 'package:cutomer_app/Screens/splashScreen.dart';
 
-import 'package:cutomer_app/TreatmentAndServices/SubserviceController.dart';
-import 'package:cutomer_app/Widget/ControllerInitializer.dart';
-import 'package:cutomer_app/Widget/TimerController.dart';
 import 'package:cutomer_app/bindings/app_binding.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -24,14 +21,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'APIs/FetchServices.dart';
 
-import 'Controller/CustomerController.dart';
 import 'Dashboard/DashBoardController.dart';
 
 import 'NetworkCheck/NetworkService.dart';
 
-import 'SigninSignUp/BiometricAuthScreen.dart';
-import 'SigninSignUp/LoginScreen.dart';
-import 'TreatmentAndServices/ServiceSelectionController.dart';
 import 'Utils/Constant.dart';
 
 import 'package:timezone/data/latest.dart' as tz;
@@ -87,26 +80,21 @@ Future<void> main() async {
   Get.put(ApiProvider(), permanent: true);
 
   Get.put(Dashboardcontroller());
-  Get.put(Serviceselectioncontroller());
 
   Get.put(NotificationController());
   Get.put(ServiceFetcher());
-
-  Get.put(SubServiceController());
-  Get.put(SelectedServicesController());
 
   Get.put(PackageController());
   Get.put(Procedurecontroller());
   Get.put(CustomerGetController(), permanent: true);
   Get.put(ReferralWalletController(), permanent: true);
-  Get.put(TimerController(), permanent: true);
+
   Get.put(ClinicControllerLocation(), permanent: true);
   Get.put(ClinicSlotController(), permanent: true);
   // ✅ FCM Notification tap handling
   final RemoteMessage? initialMessage =
       await FirebaseMessaging.instance.getInitialMessage();
 
-  final notificationController = Get.put(NotificationController());
   await NotificationService.instance.init();
   // FirebaseMessaging.onMessageOpenedApp.listen((message) {
   //   notificationController.handleNotification(message);
@@ -167,7 +155,7 @@ class MyApp extends StatelessWidget {
 
   ThemeData _buildAppTheme() {
     return ThemeData(
-      fontFamily: 'LeagueSpartan',
+      fontFamily: 'Inter',
       colorScheme: ColorScheme.fromSeed(seedColor: mainColor),
       primaryColor: mainColor,
       appBarTheme: const AppBarTheme(

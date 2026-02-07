@@ -4,8 +4,8 @@ import 'package:cutomer_app/NGK/Packges/PackageModel.dart';
 class PaymentModal {
   final String clinicId;
 
-  final String serviceId; // procedureId / packageId / cardId
-  final String serviceType; // PROCEDURE / PACKAGE / CARD
+  final String serviceId;
+  final String serviceType;
 
   final double price;
   final double consultationFee;
@@ -107,9 +107,7 @@ class PaymentModal {
         partialPaymentPercentage: p.partialPaymentPercentage,
         platformFee: p.platformFee, // ✅ ADD
         platformFeePercentage: p.platformFeePercentage, // ✅ ADD
-        totalDiscountPercentage: p.totalDiscountPercentage
-        
-        );
+        totalDiscountPercentage: p.totalDiscountPercentage);
   }
 
   // ================= JSON SUPPORT =================

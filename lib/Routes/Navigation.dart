@@ -1,13 +1,11 @@
 // ignore: file_names
+import 'package:cutomer_app/Screens/ngk_terms_conditions_screen.dart';
 import 'package:cutomer_app/SigninSignUp/LoginScreen.dart';
 import 'package:cutomer_app/Screens/splashScreen.dart';
 
 import 'package:cutomer_app/Terms/TermsAndConditionsScreen.dart';
-import 'package:cutomer_app/UserManuval/AppointmentManual.dart';
+
 import 'package:flutter/material.dart';
-
- 
-
 
 var onGenerateRoute = (RouteSettings settings) {
   print('my routs: ${settings.name}');
@@ -22,9 +20,9 @@ var onGenerateRoute = (RouteSettings settings) {
       return MaterialPageRoute(
           builder: (builder) => TermsAndConditionsScreen());
 
-    case "/manualscreen":
+    case "/ngktermsconditions":
       return MaterialPageRoute(
-          builder: (builder) => AppointmentManualScreen());
+          builder: (builder) => NgkTermsConditionsScreen());
     default:
   }
 };

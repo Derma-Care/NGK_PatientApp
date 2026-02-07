@@ -89,7 +89,8 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen> {
 
       // 🔍 FETCH USER DATA
       final customer = await CustomerService.getCustomer(mobile);
-
+      await prefs.setString('customer_full_name', customer?.fullName ?? "");
+      await prefs.setString('customer_Id', customer?.customerId ?? "");
       if (customer == null) {
         // ❌ No customer exists → Login again
         _goToLogin();

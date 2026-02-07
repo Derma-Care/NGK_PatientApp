@@ -37,7 +37,7 @@ class _OfferslistscreenState extends State<Offerslistscreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: CommonHeader(title: "Nearby Clinics"),
+      appBar: CommonHeader(title: "Nearby Clinics with Offers"),
       body: RefreshIndicator(
         color: mainColor,
         onRefresh: () {
@@ -377,7 +377,4 @@ class _OfferslistscreenState extends State<Offerslistscreen> {
       ),
     );
   }
-
- 
-
 }

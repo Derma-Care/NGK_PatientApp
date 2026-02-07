@@ -31,18 +31,18 @@ class CommonHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final NotificationController notificationController = Get.find();
     return AppBar(
-      backgroundColor: Colors.transparent,
+      backgroundColor: mainColor,
       elevation: 0,
       automaticallyImplyLeading: automaticallyImplyLeading,
-      flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [mainColor, secondaryColor],
-          ),
-        ),
-      ),
+      // flexibleSpace: Container(
+      //   decoration: const BoxDecoration(
+      //     gradient: LinearGradient(
+      //       begin: Alignment.topLeft,
+      //       end: Alignment.bottomRight,
+      //       colors: [mainColor, secondaryColor],
+      //     ),
+      //   ),
+      // ),
       title: Row(
         children: [
           // Title and Subtitle
@@ -129,7 +129,6 @@ class CommonHeader extends StatelessWidget implements PreferredSizeWidget {
           // onHelpPressed
         ],
       ),
-   
     );
   }
 

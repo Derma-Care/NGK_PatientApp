@@ -1,3 +1,5 @@
+import 'package:cutomer_app/NGK/Contoller/referred_customer_model.dart';
+
 class CustomerProfileModel {
   final String customerId;
   final String fullName;
@@ -30,6 +32,8 @@ class CustomerProfileModel {
   final bool spinWheelCompleted;
   final bool userProfileCompleted;
   final String? referId;
+  final int? rewardPoints;
+  final List<ReferredCustomerModel>? referredCustomers;
 
   CustomerProfileModel({
     required this.customerId,
@@ -48,7 +52,7 @@ class CustomerProfileModel {
     this.photo,
     this.registrationCode,
     this.referBy,
-      this.aadharNumber,
+    this.aadharNumber,
     this.prescription,
     this.spinRewardId,
     this.spinRewardValue,
@@ -57,10 +61,12 @@ class CustomerProfileModel {
     this.followScreenshot,
     this.address,
     this.referId,
+    this.rewardPoints,
     required this.registrationCodeVerified,
     required this.registrationCompleted,
     required this.spinWheelCompleted,
     required this.userProfileCompleted,
+    this.referredCustomers,
   });
 
   factory CustomerProfileModel.fromJson(Map<String, dynamic> json) {
@@ -97,6 +103,14 @@ class CustomerProfileModel {
       spinWheelCompleted: json["spinWheelCompleted"] ?? false,
       userProfileCompleted: json["userProfileCompleted"] ?? false,
       referId: json["referId"],
+      rewardPoints: json["rewardPoints"],
+      referredCustomers: json['referredCustomers'] != null
+          ? (json['referredCustomers'] as List)
+              .map((e) => ReferredCustomerModel.fromJson(e))
+              .toList()
+          : [],
     );
   }
 }
+
+ 

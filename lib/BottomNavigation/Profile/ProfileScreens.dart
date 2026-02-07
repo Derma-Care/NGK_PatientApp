@@ -109,6 +109,7 @@ class ProfileModalCard extends StatelessWidget {
                   profile.spinWheelCompleted ? "Yes" : "No"),
               _info("Profile Completed",
                   profile.userProfileCompleted ? "Yes" : "No"),
+              _info("Your Reward Points", safe(profile.rewardPoints)),
 
               const SizedBox(height: 15),
 

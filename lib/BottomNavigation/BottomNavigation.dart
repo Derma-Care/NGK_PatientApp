@@ -1,7 +1,7 @@
 import 'package:cutomer_app/BottomNavigation/Appoinments/Appoinments.dart';
 import 'package:flutter/material.dart';
 
-import 'package:cutomer_app/ConfirmBooking/Consultations.dart';
+import 'package:cutomer_app/ConfirmBooking/Dashboard.dart';
 
 import 'package:cutomer_app/BottomNavigation/Profile/Profile.dart';
 import 'package:cutomer_app/Utils/Constant.dart';

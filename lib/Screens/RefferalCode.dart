@@ -1,17 +1,18 @@
-import 'package:cutomer_app/APIs/BaseUrl.dart';
 import 'package:cutomer_app/NGK/Contoller/customer_controller.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
 import 'package:cutomer_app/NGK/Modals/wallet_summary_model.dart';
 import 'package:cutomer_app/NGK/Screens/RewardInfoScreen.dart';
+import 'package:cutomer_app/Screens/ReferredMembersScreen.dart';
 import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/DateConverter.dart';
-import 'package:cutomer_app/Utils/GradintColorF.dart';
+import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
+
 import 'package:cutomer_app/Utils/capitalizeFirstLetter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -86,7 +87,7 @@ $appLink
         body: Obx(() {
           if (walletController.isLoading.value) {
             return const Center(
-              child: SpinKitFadingCircle(
+              child: SpinKitThreeBounce(
                 color: mainColor,
                 size: 40,
               ),
@@ -105,29 +106,141 @@ $appLink
                         children: [
                           _walletCard(),
                           const SizedBox(height: 20),
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              icon: const Icon(Icons.info_outline,
-                                  color: mainColor),
-                              label: const Text(
-                                "Reward Coins & Membership",
-                                style: TextStyle(color: mainColor),
+                          _referralCodeCard(context),
+                          const SizedBox(height: 20),
+                          GestureDetector(
+                            onTap: () {
+                              Get.to(() => const RewardInfoScreen());
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: mainColor.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                    color: mainColor.withOpacity(0.4)),
                               ),
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: mainColor),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: mainColor.withOpacity(0.15),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.card_giftcard,
+                                      color: mainColor,
+                                      size: 22,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: const [
+                                        Text(
+                                          "Reward Coins & Membership",
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          "Keep referring & earn exciting rewards",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 16,
+                                    color: mainColor,
+                                  ),
+                                ],
                               ),
-                              onPressed: () {
-                                Get.to(() => const RewardInfoScreen());
-                              },
                             ),
                           ),
                           const SizedBox(height: 20),
-                          _referralCodeCard(context),
+                          GestureDetector(
+                            onTap: () {
+                              final referredList = customerController
+                                      .customer.value?.referredCustomers ??
+                                  [];
+
+                              Get.to(() => ReferredMembersScreen(
+                                    referredCustomers: referredList,
+                                  ));
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                    color: Colors.blue.withOpacity(0.4)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.withOpacity(0.15),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.group,
+                                      color: Colors.blue,
+                                      size: 22,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: const [
+                                        Text(
+                                          "Your Referred Members",
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          "View names & referral IDs",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 16,
+                                    color: Colors.blue,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 20),
+                          Text("Transaction History",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -291,13 +404,17 @@ $appLink
 
       if (summary == null) {
         return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Center(child: CircularProgressIndicator()),
-        );
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(
+              child: SpinKitThreeBounce(
+                color: mainColor,
+                size: 40,
+              ),
+            ));
       }
 
       final membership = summary.membership; // backend-driven
@@ -544,38 +661,106 @@ $appLink
 
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: mainColor),
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: mainColor.withOpacity(0.4)),
         ),
-        child: Column(
+        child: Stack(
           children: [
-            const Text(
-              "Your Referral Code",
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              capitalizeEachWord(customer.fullName),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: mainColor,
+            /// Share Icon (Top Right)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: InkWell(
+                onTap: () => _shareOnWhatsApp(context),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: mainColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.share,
+                    size: 18,
+                    color: mainColor,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              customer.referId ?? "",
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              onPressed: () => _shareOnWhatsApp(context),
-              icon: const Icon(Icons.share),
-              label: const Text("Share Code"),
-              style: ElevatedButton.styleFrom(backgroundColor: mainColor),
+
+            /// Content
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Your Referral Code",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  capitalizeEachWord(customer.fullName),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: mainColor.withOpacity(0.08), // soft background
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        customer.referId ?? "",
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.1,
+                          color: mainColor,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () {
+                          final referralText =
+                              "NGK Registration Referral Code: ${customer.referId ?? ""}";
+
+                          Clipboard.setData(
+                            ClipboardData(text: referralText),
+                          );
+
+                          ScaffoldMessageSnackbar.show(
+                            context: context,
+                            message: "Referral code copied",
+                            type: SnackbarType.success,
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.copy,
+                            size: 18,
+                            color: mainColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),

@@ -167,7 +167,8 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
 
       // ------------------- CHECK CUSTOMER EXIST -------------------
       final customer = await CustomerService.getCustomer(widget.mobileNumber);
-
+      await prefs.setString('customer_full_name', customer?.fullName ?? "");
+      await prefs.setString('customer_Id', customer?.customerId ?? "");
       final token = prefs.getString('fcm');
 
       if (customer != null) {

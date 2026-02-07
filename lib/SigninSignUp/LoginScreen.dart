@@ -1,4 +1,6 @@
 import 'package:cutomer_app/Dashboard/DashBoardController.dart';
+import 'package:cutomer_app/Help/HelpSupport.dart';
+import 'package:cutomer_app/Screens/ngk_terms_conditions_screen.dart';
 import 'package:cutomer_app/Utils/CommonCarouselAds.dart';
 import 'package:cutomer_app/Utils/UpperCase.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +88,7 @@ class _LoginscreenState extends State<Loginscreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30.0),
+                    const SizedBox(height: 10.0),
                     CustomTextField(
                       controller: siginSignUpController.mobileController,
                       labelText: 'Enter Mobile Number',
@@ -129,16 +131,23 @@ class _LoginscreenState extends State<Loginscreen> {
                 ),
               ),
             ),
-
-            // GestureDetector(
-            //   onTap: () {
-            //     Navigator.of(context).pushNamed('/manualscreen');
-            //   },
-            //   child: const Text(
-            //     'App User Manual',
-            //     style: TextStyle(color: mainColor),
-            //   ),
-            // ),
+            const SizedBox(height: 10.0),
+            GestureDetector(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  builder: (_) => const HelpSupportSheet(),
+                );
+              },
+              child: const Text(
+                'Help & Support',
+                style: TextStyle(color: mainColor),
+              ),
+            ),
           ],
         ),
       ),

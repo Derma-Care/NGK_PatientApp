@@ -1,9 +1,9 @@
 // lib/services/notification_service.dart
-import 'dart:io';
+ 
 
-import 'package:cutomer_app/Notification/LocalNotification.dart';
+ 
 import 'package:cutomer_app/Notification/NotificationController.dart';
-import 'package:cutomer_app/Notification/Notifications.dart';
+ 
 import 'package:cutomer_app/Notification/notification_intent.dart';
 import 'package:cutomer_app/Services/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,10 +11,10 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+ 
 
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+ 
 
 final _flutterLocal = FlutterLocalNotificationsPlugin();
 

@@ -1,46 +1,43 @@
 import 'dart:async';
-import 'dart:convert';
+ 
 import 'dart:io';
 
 import 'package:cutomer_app/Dashboard/ImagePreview.dart';
-import 'package:cutomer_app/Modals/ServiceModal.dart';
+ 
 
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
+ 
 
-import '../BottomNavigation/Appoinments/AppointmentService.dart';
+ 
 
-import '../BottomNavigation/Appoinments/GetAppointmentModel.dart';
+ 
 import '../Services/CarouselSliderService.dart';
-import '../Services/serviceb.dart';
+ 
 
 class Dashboardcontroller extends GetxController {
   Dashboardcontroller() {
     debugPrint("🔥🔥 Dashboardcontroller CONSTRUCTOR CALLED");
   }
-  final AppointmentService _appointmentService = AppointmentService();
+ 
   final ImagePicker _picker = ImagePicker();
   final CarouselSliderService carouselSliderService = CarouselSliderService();
 
   final Rx<File?> imageFile = Rx<File?>(null);
   final RxBool isLoading = true.obs;
-  final RxList<Serviceb> services = <Serviceb>[].obs;
-  final RxList<Getappointmentmodel> allAppointments =
-      <Getappointmentmodel>[].obs;
+ 
+ 
   final RxList<String> carouselImages = <String>[].obs;
   final RxList<String> carouseServicelImages = <String>[].obs;
-  final selectedService = Rxn<Serviceb>();
+ 
 
-  var selectedSubService = Rxn<Service>();
-  var selectedSubSubService = Rxn<SubServiceAdmin>();
-  var serviceList = <Serviceb>[];
+ 
+ 
 
-  var subServiceList = <Service>[].obs;
-  var subServiceArray = <SubServiceAdmin>[].obs;
+ 
 
   String statusMessage = "";
 
@@ -149,44 +146,8 @@ class Dashboardcontroller extends GetxController {
     );
   }
 
-  /// Fetch user appointments
-  Future<void> fetchAppointments(String mobileNumber) async {
-    if (mobileNumber.trim().isEmpty) {
-      // No mobile number provided, clear list and exit
-      allAppointments.clear();
-      return;
-    }
-
-    try {
-      isLoading.value = true;
-
-      // Fetch all appointments from the service
-      final appointments =
-          await _appointmentService.fetchAppointments(mobileNumber);
-
-      if (appointments != null && appointments.isNotEmpty) {
-        // Filter appointments with status 'in_progress' (case-insensitive)
-        final filtered = appointments
-            .where((appointment) =>
-                appointment.status.toLowerCase() == 'in_progress')
-            .toList();
-
-        // Update reactive list
-        allAppointments.assignAll(filtered);
-      } else {
-        // No appointments found
-        allAppointments.clear();
-      }
-    } catch (e) {
-      // Handle error gracefully
-      print("Error fetching appointments: $e");
-      allAppointments.clear();
-    } finally {
-      // Always set loading to false at the end
-      isLoading.value = false;
-    }
-  }
-
+ 
+ 
   /// Fetch images for carousel
   Future<void> fetchImages() async {
     try {
@@ -214,7 +175,7 @@ class Dashboardcontroller extends GetxController {
 
     try {
       // Fetch bookings or other needed data
-      await fetchAppointments(mobileNumber);
+ 
       await fetchImages();
       await fetchserviceImages();
       // ✅ Only after data is fetched, stop loading
