@@ -3,21 +3,62 @@ import 'dart:io';
 import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureModel.dart';
 import 'package:cutomer_app/NGK/Widgets/PackageBookingSheet.dart';
+import 'package:cutomer_app/NGK/service/clinic_service.dart';
 import 'package:cutomer_app/Utils/DateConverter.dart';
+import 'package:cutomer_app/Utils/Header.dart';
 import 'package:cutomer_app/Utils/procedureImageWidget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProcedureDetailsPage extends StatefulWidget {
-  final ProcedureListModal service;
+  // final ProcedureListModal service;
+  final String clinicId;
+  final String procedureId;
+  final String clinicName;
 
-  const ProcedureDetailsPage({super.key, required this.service});
+  const ProcedureDetailsPage(
+      {super.key,
+      // required this.service,
+      required this.clinicId,
+      required this.procedureId,
+      required this.clinicName});
 
   @override
   State<ProcedureDetailsPage> createState() => _ProcedureDetailsPageState();
 }
 
 class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
+  bool isLoading = true;
+  ProcedureListModal? pricing; // use your actual model
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPricing();
+  }
+
+  Future<void> _loadPricing() async {
+    try {
+      final result = await ClinicService.getProcedurePricingWithClinicId(
+        clinicId: widget.clinicId,
+        procedureId: widget.procedureId,
+      );
+      if (!mounted) return;
+      setState(() {
+        pricing = result;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        error = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
   bool _isFutureOrToday(String date) {
     try {
       final endDate = DateTime.parse(date);
@@ -34,14 +75,26 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final service = widget.service;
+    final service = pricing;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(service.procedureName),
-        backgroundColor: Colors.pink,
+      appBar: CommonHeader(
+        title: service?.procedureName ?? " ",
+        subtitle: widget.clinicName ?? "",
       ),
-      body: _buildDetailsView(service),
+
+      body: isLoading
+          ? const Center(
+              child: SpinKitFadingCircle(
+                color: Colors.pink,
+                size: 40,
+              ),
+            )
+          : error != null
+              ? Center(child: Text(error!))
+              : pricing == null
+                  ? const Center(child: Text("No data found"))
+                  : _buildDetailsView(pricing!), // ✅ SAFE
     );
   }
 
@@ -145,7 +198,7 @@ class _ProcedureDetailsPageState extends State<ProcedureDetailsPage> {
                 /// 🏷 Offer End Date
                 if (service.offerValidDate != null &&
                     service.offerValidDate!.isNotEmpty &&
-                    _isFutureOrToday(service.offerValidDate!))
+                    _isFutureOrToday(service.offerValidDate ?? ""))
                   infoItem(
                     label: "Offer End Date",
                     icon: Icons.calendar_today,

@@ -9,6 +9,7 @@ import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:cutomer_app/Utils/FirstLatterCap.dart';
 import 'package:cutomer_app/Utils/GradintColorF.dart';
 import 'package:cutomer_app/Utils/MapOnGoogle.dart';
+import 'package:cutomer_app/Utils/ShowSnackBar.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -31,6 +32,7 @@ class _BookingListScreenState extends State<BookingListScreen>
   final BookingController controller = Get.put(BookingController());
   // late String fullname;
   bool showBillDetails = false;
+  late BuildContext rootContext;
 
   @override
   void initState() {
@@ -68,6 +70,7 @@ class _BookingListScreenState extends State<BookingListScreen>
 
   @override
   Widget build(BuildContext context) {
+    rootContext = context;
     return Scaffold(
       appBar: AppBar(
         title: const Text("My Appointments"),
@@ -395,19 +398,27 @@ class _BookingListScreenState extends State<BookingListScreen>
   }
 
   void _showBookingDetails(BuildContext context, BookingModel b) {
-    Future<void> handleBookAgain(BuildContext context, BookingModel b) async {
+    Future<void> handleBookAgain(BuildContext ctx, BookingModel b) async {
       if (b.clinicId == null || b.serviceId == null) {
-        Get.snackbar("Error", "Invalid booking data");
+        showSnackbar("Warning", "Invalid booking data", "warning");
+
         return;
       }
 
+      debugPrint(
+          "Book Again for ${b.serviceType} with ID ${b.serviceId} at clinic ${b.clinicId}");
+
       try {
+        debugPrint(
+            "try calling API for ${b.serviceType} with ID ${b.serviceId} at clinic ${b.clinicId}");
+
         /// 🔹 PROCEDURE FLOW
         if (b.serviceType.toLowerCase() == "procedure") {
           final pricing = await ClinicService.getProcedurePricingWithClinicId(
             clinicId: b.clinicId ?? "", // make sure this exists in BookingModel
             procedureId: b.serviceId ?? "", // serviceId = procedureId
           );
+          debugPrint(pricing.toString());
 
           /// ✅ Convert API response → PaymentModal
           final payment = PaymentModal.fromProcedure(pricing);
@@ -415,9 +426,11 @@ class _BookingListScreenState extends State<BookingListScreen>
           debugPrint("========== PROCEDURE PAYMENT ==========");
           debugPrint(payment.toJson().toString());
           debugPrint("======================================");
+// ✅ CLOSE LOADER FIRST
+          Navigator.of(ctx, rootNavigator: true).pop();
 
           showModalBottomSheet(
-            context: context,
+            context: ctx,
             isScrollControlled: true,
             backgroundColor: Colors.white,
             shape: const RoundedRectangleBorder(
@@ -434,15 +447,27 @@ class _BookingListScreenState extends State<BookingListScreen>
         /// 🔹 PACKAGE FLOW
         else if (b.serviceType.toLowerCase() == "package") {
           final pricing = await ClinicService.getPackagePricingWithClinicId(
-            clinicId: b.clinicId!, // make sure this exists in BookingModel
-            packageId: b.serviceId!, // serviceId = procedureId
+            clinicId: b.clinicId ?? "",
+            packageId: b.serviceId ?? "",
           );
+
           debugPrint("%%%%  : ${pricing.consultationFee.toString()}");
           final payment = PaymentModal.fromPackage(pricing);
 
           debugPrint("========== PACKAGE PAYMENT ==========");
           debugPrint(payment.toJson().toString());
           debugPrint("====================================");
+          if (payment.clinicId.isEmpty) {
+            Get.snackbar("Error", "Clinic data missing");
+            return;
+          }
+
+          if (payment.serviceId.isEmpty) {
+            Get.snackbar("Error", "Service data missing");
+            return;
+          }
+// ✅ CLOSE LOADER FIRST
+          Navigator.of(ctx, rootNavigator: true).pop();
 
           showModalBottomSheet(
             context: context,
@@ -459,12 +484,19 @@ class _BookingListScreenState extends State<BookingListScreen>
           );
         }
         print("PACKAGE PAYMENT ${b.serviceType}");
-      } catch (e) {
+      } catch (e, s) {
         debugPrint("BOOK AGAIN ERROR: $e");
-        Get.snackbar("Error", "Unable to rebook. Please try again");
+        debugPrintStack(stackTrace: s);
+
+        if (Get.context != null) {
+          ScaffoldMessenger.of(Get.context!).showSnackBar(
+            const SnackBar(content: Text("Unable to rebook. Please try again")),
+          );
+        }
       }
     }
 
+    if (!context.mounted) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -755,7 +787,26 @@ class _BookingListScreenState extends State<BookingListScreen>
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.pop(context);
-                                handleBookAgain(context, b);
+
+                                Future.delayed(
+                                    const Duration(milliseconds: 300), () {
+                                  if (!mounted) return;
+
+                                  showModalBottomSheet(
+                                    context: rootContext,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.white,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(20)),
+                                    ),
+                                    builder: (_) {
+                                      return const _BottomSheetLoader();
+                                    },
+                                  );
+
+                                  handleBookAgain(rootContext, b);
+                                });
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.pink,
@@ -841,6 +892,23 @@ class _BookingListScreenState extends State<BookingListScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BottomSheetLoader extends StatelessWidget {
+  const _BottomSheetLoader();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.5,
+      child: const Center(
+        child: SpinKitFadingCircle(
+          color: Colors.pink,
+          size: 40,
+        ),
       ),
     );
   }

@@ -38,7 +38,7 @@ class _PackageListScreenState extends State<PackageListScreen> {
   double lastOffset = 0;
   double? lat;
   double? long;
-
+  String? stateName;
   final ClinicControllerLocation ccontroller =
       Get.put(ClinicControllerLocation());
 
@@ -57,9 +57,10 @@ class _PackageListScreenState extends State<PackageListScreen> {
 
     lat = prefs.getDouble('latitude');
     long = prefs.getDouble('longitude');
+    stateName = prefs.getString('stateName');
 
     // ✅ Fallback safety (optional)
-    if (lat == null || long == null) {
+    if (lat == null || long == null || stateName == null) {
       debugPrint("❌ Location not found in storage");
       return;
     }
@@ -68,6 +69,7 @@ class _PackageListScreenState extends State<PackageListScreen> {
     controller.loadPackages(
       latitude: lat!,
       longitude: long!,
+      state: stateName!,
     );
   }
 

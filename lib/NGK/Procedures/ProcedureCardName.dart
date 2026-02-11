@@ -32,6 +32,7 @@ class ProcedureCard extends StatelessWidget {
   Widget build(
     BuildContext context,
   ) {
+    final bool hasOffer = procedure.maxOffer > 0;
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: () {
@@ -90,35 +91,40 @@ class ProcedureCard extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 6),
+              /// ✅ SHOW OFFER ONLY IF EXISTS
+              if (hasOffer) ...[
+                const SizedBox(height: 6),
 
-              // Offer
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.25),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  "${procedure.minOffer}% - ${procedure.maxOffer}%",
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                // Offer
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.25),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    "${procedure.minOffer}% - ${procedure.maxOffer}%",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10.0),
-                child: Text(
-                  "OFF",
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
+
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Text(
+                    "OFF",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
-              ),
+              ]
             ],
           ),
         ),

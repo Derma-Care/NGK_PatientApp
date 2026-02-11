@@ -156,7 +156,7 @@ class _OfferslistscreenState extends State<Offerslistscreen> {
                                       onTap: () {
                                         Get.to(() => ServicesTabScreen(
                                               clinicId: clinic.clinicId,
-                                              isofferClinic: true,
+                                              isofferClinic: true, clinicName: clinic.name,
                                             ));
                                       },
                                       child: Row(

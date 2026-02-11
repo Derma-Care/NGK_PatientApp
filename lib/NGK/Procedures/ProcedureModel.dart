@@ -43,6 +43,8 @@ class ProcedureListModal {
   final double? platformFeePercentage;
   final double? platformFee;
 
+ 
+
   ProcedureListModal({
     required this.procedureId,
     required this.procedureName,
@@ -67,6 +69,7 @@ class ProcedureListModal {
     required this.clinicPay,
     required this.finalCost,
     this.offerStart,
+   
     this.offerValidDate,
     required this.offerActive,
     required this.ngkDiscountPercentage,

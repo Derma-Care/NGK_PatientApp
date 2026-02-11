@@ -31,7 +31,7 @@ class PaymentModal {
   final double? partialPaymentPercentage;
   final double? platformFeePercentage;
   final double? platformFee;
-
+  final bool? offerActive;
   PaymentModal({
     required this.clinicId,
     required this.serviceId,
@@ -52,6 +52,7 @@ class PaymentModal {
     required this.totalDiscountedAmount,
     required this.totalDiscountPercentage,
     this.paymentType,
+    this.offerActive,
     this.partialPaymentPercentage,
     this.platformFeePercentage,
   });
@@ -61,53 +62,67 @@ class PaymentModal {
   /// 🔹 From Procedure
   factory PaymentModal.fromProcedure(ProcedureListModal p) {
     return PaymentModal(
-        clinicId: p.clinicId,
-        serviceId: p.procedureId,
-        serviceType: "PROCEDURE",
-        price: p.price,
-        consultationFee: p.consultationFee,
-        gst: p.gst,
-        gstAmount: p.gstAmount,
-        taxPercentage: p.taxPercentage,
-        taxAmount: p.taxAmount,
-        discountPercentage: p.totalDiscountPercentage,
-        discountAmount: p.totalDiscountAmount,
-        finalCost: p.finalCost,
-        ngkDiscountPercentage: p.ngkDiscountPercentage,
-        ngkDiscountAmount: p.ngkDiscountAmount,
-        totalDiscountAmount: p.totalDiscountAmount,
-        totalDiscountedAmount: p.totalDiscountedAmount,
-        paymentType: p.paymentType,
-        partialPaymentPercentage: p.partialPaymentPercentage,
-        platformFee: p.platformFee, // ✅ ADD
-        platformFeePercentage: p.platformFeePercentage, // ✅ ADD
-        totalDiscountPercentage: p.totalDiscountPercentage);
+      clinicId: p.clinicId ,
+      serviceId: p.procedureId,
+      serviceType: "PROCEDURE",
+
+      price: p.price,
+      consultationFee: p.consultationFee ,
+
+      gst: p.gst ,
+      gstAmount: p.gstAmount ,
+
+      taxPercentage: p.taxPercentage ,
+      taxAmount: p.taxAmount ,
+
+      discountPercentage: p.totalDiscountPercentage ,
+      discountAmount: p.totalDiscountAmount ,
+
+      finalCost: p.finalCost ,
+
+      ngkDiscountPercentage: p.ngkDiscountPercentage ,
+      ngkDiscountAmount: p.ngkDiscountAmount ,
+
+      totalDiscountAmount: p.totalDiscountAmount,
+      totalDiscountedAmount: p.totalDiscountedAmount ,
+      totalDiscountPercentage: p.totalDiscountPercentage ,
+
+      // 🔥 FORCE SAFE DEFAULTS FOR PROCEDURE
+      paymentType: "FULL_PAYMENT",
+      partialPaymentPercentage: 0,
+
+      platformFee: p.platformFee ?? 0,
+      platformFeePercentage: p.platformFeePercentage ?? 0,
+      offerActive:p.offerActive ,
+    );
   }
 
   // /// 🔹 From Package
   factory PaymentModal.fromPackage(PackageModel p) {
     return PaymentModal(
-        clinicId: p.clinicId,
-        serviceId: p.packageId,
-        serviceType: "PACKAGE",
-        price: p.price,
-        consultationFee: p.consultationFee,
-        gst: p.gst,
-        gstAmount: p.gstAmount,
-        taxPercentage: p.taxPercentage,
-        taxAmount: p.taxAmount,
-        discountPercentage: p.discountPercentage,
-        discountAmount: p.totalDiscountAmount,
-        finalCost: p.finalCost,
-        ngkDiscountPercentage: p.ngkDiscountPercentage,
-        ngkDiscountAmount: p.ngkDiscountAmount,
-        totalDiscountAmount: p.totalDiscountAmount,
-        totalDiscountedAmount: p.totalDiscountedAmount,
-        paymentType: p.paymentType,
-        partialPaymentPercentage: p.partialPaymentPercentage,
-        platformFee: p.platformFee, // ✅ ADD
-        platformFeePercentage: p.platformFeePercentage, // ✅ ADD
-        totalDiscountPercentage: p.totalDiscountPercentage);
+      clinicId: p.clinicId ,
+      serviceId: p.packageId ,
+      serviceType: "PACKAGE",
+      price: p.price ,
+      consultationFee: p.consultationFee ,
+      gst: p.gst ,
+      gstAmount: p.gstAmount ,
+      taxPercentage: p.taxPercentage ,
+      taxAmount: p.taxAmount ,
+      discountPercentage: p.discountPercentage ,
+      discountAmount: p.totalDiscountAmount,
+      finalCost: p.finalCost ,
+      ngkDiscountPercentage: p.ngkDiscountPercentage ,
+      ngkDiscountAmount: p.ngkDiscountAmount ,
+      totalDiscountAmount: p.totalDiscountAmount ,
+      totalDiscountedAmount: p.totalDiscountedAmount ,
+      totalDiscountPercentage: p.totalDiscountPercentage ,
+      paymentType: p.paymentType ?? "FULL_PAYMENT",
+      partialPaymentPercentage: p.partialPaymentPercentage ?? 0,
+      platformFee: p.platformFee ?? 0,
+      platformFeePercentage: p.platformFeePercentage ?? 0,
+      offerActive:p.offerActive ,
+    );
   }
 
   // ================= JSON SUPPORT =================
@@ -116,10 +131,11 @@ class PaymentModal {
   factory PaymentModal.fromJson(Map<String, dynamic> json) {
     return PaymentModal(
       clinicId: json['clinicId'],
+      offerActive: json['offerActive'],
       serviceId: json['serviceId'],
       paymentType: json['paymentType'],
       partialPaymentPercentage:
-          (json['partialPaymentPercentage'] as num).toDouble(),
+          (json['partialPaymentPercentage'] as num?)?.toDouble() ?? 0,
       serviceType: json['serviceType'],
       price: (json['price'] as num).toDouble(),
       consultationFee: (json['consultationFee'] as num).toDouble(),
@@ -145,6 +161,7 @@ class PaymentModal {
   Map<String, dynamic> toJson() {
     return {
       "clinicId": clinicId,
+      "offerActive": offerActive,
       "serviceId": serviceId,
       "serviceType": serviceType,
       "price": price,

@@ -16,76 +16,28 @@ class ProcedureGridScreen extends StatefulWidget {
 class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
   final TextEditingController _searchController = TextEditingController();
 
-  RangeValues _offerRange = const RangeValues(0, 100);
+  /// 🔥 Range slider values
+  RangeValues _offerRange = const RangeValues(0, 0);
+
+  /// 🔥 Max offer from API (used for default range)
+  double _maxAvailableOffer = 0;
 
   List<ProcedureOffer> allProcedures = [];
   bool isLoading = false;
 
-  // final List<Procedure> _allProcedures = [
-  //   Procedure(
-  //     procedureId: "1",
-  //     name: "Facial",
-  //     minOffer: 10,
-  //     maxOffer: 30,
-  //   ),
-  //   Procedure(
-  //     procedureId: "2",
-  //     name: "Laser",
-  //     minOffer: 15,
-  //     maxOffer: 25,
-  //   ),
-  //   Procedure(
-  //     procedureId: "3",
-  //     name: "PRP",
-  //     minOffer: 20,
-  //     maxOffer: 40,
-  //   ),
-  //   Procedure(
-  //     procedureId: "4",
-  //     name: "Botox",
-  //     minOffer: 5,
-  //     maxOffer: 15,
-  //   ),
-  //   Procedure(
-  //     procedureId: "5",
-  //     name: "Botox4",
-  //     minOffer: 5,
-  //     maxOffer: 15,
-  //   ),
-  //   Procedure(
-  //     procedureId: "6",
-  //     name: "Botox1",
-  //     minOffer: 5,
-  //     maxOffer: 15,
-  //   ),
-  //   Procedure(
-  //     procedureId: "7",
-  //     name: "Botox2",
-  //     minOffer: 5,
-  //     maxOffer: 15,
-  //   ),
-  //   Procedure(
-  //     procedureId: "8",
-  //     name: "Hydra Facial",
-  //     minOffer: 10,
-  //     maxOffer: 20,
-  //   ),
-  //   Procedure(
-  //     procedureId: "9",
-  //     name: "Chemical Peel",
-  //     minOffer: 15,
-  //     maxOffer: 35,
-  //   ),
-  // ];
-
-  // 🔥 SEARCH + RANGE FILTER (FIXED)
+  /// 🔍 SEARCH + OFFER FILTER (FINAL LOGIC)
   List<ProcedureOffer> get _filteredProcedures {
     return allProcedures.where((p) {
       final matchesName =
           p.name.toLowerCase().contains(_searchController.text.toLowerCase());
 
-      final matchesOffer =
-          p.maxOffer >= _offerRange.start && p.minOffer <= _offerRange.end;
+      /// ✅ Default state = show all
+      final bool isDefaultRange =
+          _offerRange.start == 0 && _offerRange.end == _maxAvailableOffer;
+
+      final bool matchesOffer = isDefaultRange
+          ? true
+          : (p.maxOffer >= _offerRange.start && p.minOffer <= _offerRange.end);
 
       return matchesName && matchesOffer;
     }).toList();
@@ -95,28 +47,41 @@ class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
   void initState() {
     super.initState();
     loadProcedures();
-    // 🔥 THIS MAKES SEARCH WORK
+
     _searchController.addListener(() {
       setState(() {});
     });
   }
 
+  /// 🔄 FETCH DATA
   Future<void> loadProcedures() async {
     setState(() => isLoading = true);
-    allProcedures = await ServiceFetcher.fetchAllProceduresOffers();
-    setState(() => isLoading = false);
+
+    final data = await ServiceFetcher.fetchAllProceduresOffers();
+
+    double maxOffer = 0;
+    for (final p in data) {
+      if (p.maxOffer > maxOffer) {
+        maxOffer = p.maxOffer.toDouble();
+      }
+    }
+
+    setState(() {
+      allProcedures = data;
+      _maxAvailableOffer = maxOffer;
+
+      /// ✅ DEFAULT RANGE = 0 → MAX (show all)
+      _offerRange = RangeValues(0, maxOffer);
+
+      isLoading = false;
+    });
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
+  /// ❌ CLEAR FILTERS
   void _clearFilters() {
     setState(() {
       _searchController.clear();
-      _offerRange = const RangeValues(0, 100);
+      _offerRange = RangeValues(0, _maxAvailableOffer);
     });
   }
 
@@ -125,6 +90,11 @@ class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,10 +108,11 @@ class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
             )
           : Column(
               children: [
-                /// 🔹 FILTER BAR (ALWAYS VISIBLE)
+                /// 🔹 FILTER BAR
                 ProcedureFilterBar(
                   searchController: _searchController,
                   offerRange: _offerRange,
+                  maxAvailableOffer: _maxAvailableOffer,
                   onRangeChanged: (value) {
                     setState(() => _offerRange = value);
                   },
@@ -150,7 +121,7 @@ class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
 
                 const SizedBox(height: 10),
 
-                /// 🔹 CONTENT AREA
+                /// 🔹 GRID
                 Expanded(
                   child: _filteredProcedures.isEmpty
                       ? Column(

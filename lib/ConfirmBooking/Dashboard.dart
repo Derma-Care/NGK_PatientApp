@@ -645,6 +645,14 @@ class ConsultationsTypeState extends State<ConsultationsType> {
     }
   }
 
+  String formatCoinValue(num? value) {
+    if (value == null) return "0";
+
+    if (value >= 1000) return "999+";
+
+    return value.toInt().toString();
+  }
+
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       automaticallyImplyLeading: false,
@@ -776,38 +784,33 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                 ),
               ),
               Positioned(
-                right: 4,
+                right: 1,
                 top: 0,
-                child: Obx(() => Row(
-                      children: [
-                        Container(
-                          width: 14,
-                          height: 14,
+                child: Obx(() {
+                  final coins = walletController.walletSummary.value?.balance;
 
-                          // decoration: BoxDecoration(
-                          //   color: Colors.white.withOpacity(0.2),
-                          //   shape: BoxShape.circle,
-                          // ),
-                          child: Image.asset(
-                            "assets/coin.png",
-                            fit: BoxFit.contain,
-                          ),
+                  return Row(
+                    children: [
+                      SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: Image.asset(
+                          "assets/coin.png",
+                          fit: BoxFit.contain,
                         ),
-                        Text(
-                          "${walletController.walletSummary.value?.balance.toDouble().toStringAsFixed(0)}",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        formatCoinValue(coins),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
-                      ],
-                    )),
-                // child: Text('💰 2000',
-                //     style: TextStyle(
-                //         color: Colors.white,
-                //         fontSize: 12,
-                //         fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  );
+                }),
               ),
             ],
           ),

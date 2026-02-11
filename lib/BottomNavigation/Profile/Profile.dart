@@ -274,6 +274,7 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
             onTap: () {
               showModalBottomSheet(
                 context: context,
+                backgroundColor: Colors.white,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),

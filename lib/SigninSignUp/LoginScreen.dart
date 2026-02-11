@@ -6,6 +6,7 @@ import 'package:cutomer_app/Utils/UpperCase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../Inputs/CustomInputField.dart';
 import '../NetworkCheck/NetworkService.dart';
 import '../Utils/Constant.dart';
@@ -82,7 +83,7 @@ class _LoginscreenState extends State<Loginscreen> {
                       child: Text(
                         'User Login',
                         style: TextStyle(
-                          fontSize: 24.0,
+                          fontSize: 20.0,
                           fontWeight: FontWeight.normal,
                           color: secondaryColor,
                         ),
@@ -132,20 +133,52 @@ class _LoginscreenState extends State<Loginscreen> {
               ),
             ),
             const SizedBox(height: 10.0),
-            GestureDetector(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(20)),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 25.0,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.white,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        builder: (_) => const HelpSupportSheet(),
+                      );
+                    },
+                    child: const Text(
+                      'Help & Support',
+                      style: TextStyle(color: mainColor),
+                    ),
                   ),
-                  builder: (_) => const HelpSupportSheet(),
-                );
-              },
-              child: const Text(
-                'Help & Support',
-                style: TextStyle(color: mainColor),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () async {
+                      final uri = Uri.parse(AppConstants.appLink);
+
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Could not open link")),
+                        );
+                      }
+                    },
+                    child: const Text(
+                      'Register Here',
+                      style: TextStyle(color: mainColor),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

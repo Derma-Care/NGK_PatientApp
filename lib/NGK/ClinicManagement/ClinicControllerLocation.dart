@@ -26,6 +26,8 @@ class ClinicControllerLocation extends GetxController {
     required double latitude,
     required double longitude,
     required String procedureId,
+    required String state
+,
   }) async {
     try {
       isLoading.value = true;
@@ -36,6 +38,7 @@ class ClinicControllerLocation extends GetxController {
         latitude: latitude,
         longitude: longitude,
         procedureId: procedureId,
+        state: state
       );
 
       clinicList.assignAll(clinics);

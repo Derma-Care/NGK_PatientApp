@@ -20,12 +20,14 @@ class ClinicContoller {
       final prefs = await SharedPreferences.getInstance();
       final lat = prefs.getDouble('latitude');
       final lng = prefs.getDouble('longitude');
+      final state = prefs.getString('stateName');
 
-      if (lat == null || lng == null) return;
+      if (lat == null || lng == null || state == null) return;
 
       _allClinics = await ClinicService.fetchNearbyClinics(
         lat: lat,
         lng: lng,
+        state: state,
       );
 
       // ✅ DEFAULT STATE
@@ -45,12 +47,14 @@ class ClinicContoller {
       final prefs = await SharedPreferences.getInstance();
       final lat = prefs.getDouble('latitude');
       final lng = prefs.getDouble('longitude');
+      final state = prefs.getString('stateName');
 
-      if (lat == null || lng == null) return;
+      if (lat == null || lng == null || state == null) return;
 
       _allClinics = await ClinicService.fetchNearbyClinicsWithOffers(
         lat: lat,
         lng: lng,
+        state:state,
       );
 
       // ✅ DEFAULT STATE

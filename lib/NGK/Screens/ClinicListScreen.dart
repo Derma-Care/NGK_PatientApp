@@ -151,6 +151,7 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
                                     onTap: () {
                                       Get.to(() => ServicesTabScreen(
                                             clinicId: clinic.clinicId,
+                                            clinicName: clinic.name,
                                           ));
                                     },
                                     child: Row(

@@ -59,19 +59,22 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
   @override
   void initState() {
     super.initState();
-    if (widget.payment.clinicId != null) {
-      slotController.fetchSlots(widget.payment.clinicId!);
+    final clinicId = widget.payment.clinicId;
+    if (clinicId != null && clinicId.isNotEmpty) {
+      slotController.fetchSlots(clinicId);
     } else {
-      debugPrint("❌ clinicId is null for ${widget.payment.serviceType}");
+      debugPrint("❌ clinicId missing, cannot fetch slots");
     }
-
 // ✅ Force FULL_PAYMENT if partial is not valid
     if ((widget.payment.partialPaymentPercentage ?? 0) <= 0) {
       _paymentType = PaymentType.FULL_PAYMENT;
     }
     _loadCustomer();
-    debugPrint("Wallet controller registered: "
-        "${Get.isRegistered<ReferralWalletController>()}");
+
+    /// ✅ IMPORTANT: Refresh wallet EVERY TIME
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      walletController.fetchWalletSummary();
+    });
   }
 
   double get payableAmount {
@@ -409,7 +412,8 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                       widget.payment.taxAmount ?? 0,
                       "",
                     ),
-                  if ((widget.payment.totalDiscountPercentage ?? 0) != 0)
+                  if ((widget.payment.totalDiscountPercentage) > 0 &&
+                      widget.payment.offerActive == true)
                     priceRow(
                       "Discount (${widget.payment.totalDiscountPercentage.toStringAsFixed(0)}%)",
                       widget.payment.totalDiscountAmount,
@@ -510,14 +514,19 @@ class _PackageBookingSheetState extends State<PackageBookingSheet> {
                 // }),
               ],
             ),
-            Text(
-              "ℹ️ You have ${walletController.walletSummary.value?.balance} coins. By enabling this option, up to half of your coins will be used for this booking.",
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey, // ⚠️ don't use white unless dark bg
-              ),
-            ),
+            Obx(() {
+              final coins = walletController.walletSummary.value?.balance ?? 0;
+
+              return Text(
+                "ℹ️ You have $coins coins. By enabling this option, up to half of your coins will be used for this booking.",
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                ),
+              );
+            }),
+
             const Divider(thickness: 1.2),
 
             priceRow(

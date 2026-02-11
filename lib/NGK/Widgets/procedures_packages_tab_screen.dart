@@ -17,11 +17,13 @@ import 'package:get/get.dart';
 
 class ServicesTabScreen extends StatefulWidget {
   final String clinicId;
+  final String clinicName;
   final bool isofferClinic;
 
   const ServicesTabScreen({
     super.key,
     required this.clinicId,
+    required this.clinicName,
     this.isofferClinic = false,
   });
 
@@ -100,7 +102,7 @@ class _ServicesTabScreenState extends State<ServicesTabScreen>
     final isProcedureTab = tabController.index == 0;
 
     return Scaffold(
-      appBar: CommonHeader(title: "Services"),
+      appBar: CommonHeader(title: "Services", subtitle: "${widget.clinicName}"),
       body: Column(
         children: [
           /// 🔹 Tabs
@@ -166,10 +168,12 @@ class _ServicesTabScreenState extends State<ServicesTabScreen>
                       ServicesListView(
                         items: procedureItems,
                         isPackage: false,
+                        clinicName: widget.clinicName,
                       ),
                       ServicesListView(
                         items: packageItems,
                         isPackage: true,
+                        clinicName: widget.clinicName,
                       ),
                     ],
                   ),
@@ -221,11 +225,12 @@ class _ServicesTabScreenState extends State<ServicesTabScreen>
 class ServicesListView extends StatelessWidget {
   final List items;
   final bool isPackage;
-
+  final String clinicName;
   const ServicesListView({
     super.key,
     required this.items,
     required this.isPackage,
+    required this.clinicName,
   });
 
   @override
@@ -248,6 +253,7 @@ class ServicesListView extends StatelessWidget {
         return ServiceExpandableCard(
           item: items[index],
           isPackage: isPackage,
+          clinicName: clinicName,
         );
       },
     );
@@ -257,11 +263,13 @@ class ServicesListView extends StatelessWidget {
 class ServiceExpandableCard extends StatelessWidget {
   final dynamic item;
   final bool isPackage;
+  final String clinicName;
 
   const ServiceExpandableCard({
     super.key,
     required this.item,
     required this.isPackage,
+    required this.clinicName,
   });
 
   @override
@@ -452,7 +460,11 @@ class ServiceExpandableCard extends StatelessWidget {
                       );
                     } else {
                       Get.to(
-                        () => ProcedureDetailsPage(service: item),
+                        () => ProcedureDetailsPage(
+                          clinicId: item.clinicId,
+                          procedureId: item.procedureId,
+                          clinicName: clinicName,
+                        ),
                       );
                     }
                   },

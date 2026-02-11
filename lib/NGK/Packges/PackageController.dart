@@ -21,6 +21,7 @@ class PackageController {
   Future<void> loadPackages({
     required double latitude,
     required double longitude,
+    required String state,
   }) async {
     loading.value = true;
 
@@ -28,6 +29,7 @@ class PackageController {
       final data = await PackageService.fetchPackages(
         latitude: latitude,
         longitude: longitude,
+        state: state,
       );
 
       _originalList = data.map((e) => PackageModel.fromApi(e)).toList();

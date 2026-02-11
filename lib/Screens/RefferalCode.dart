@@ -53,7 +53,7 @@ class _ReferralWalletPageState extends State<ReferralWalletPage> {
     }
 
     final String referralCode = customer.referId!;
-    final String appLink = "http://3.111.202.212:3000/referral-registration";
+    final String appLink = AppConstants.appLink;
 
     final String message = '''
 ✨ Join Neeha’s Glow Kart ✨

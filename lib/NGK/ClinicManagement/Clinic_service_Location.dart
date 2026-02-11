@@ -11,11 +11,12 @@ class ClinicServiceLocation {
     required double latitude,
     required double longitude,
     required String procedureId,
+    required String state,
   }) async {
     final endpoint = "${registerUrl}/procedures/clinics"
         "?latitude=$latitude"
         "&longitude=$longitude"
-        "&procedureId=$procedureId";
+        "&procedureId=$procedureId&state=$state";
 
     final api = Get.find<ApiProvider>().dio;
 

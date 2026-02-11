@@ -7,10 +7,11 @@ class PackageService {
   static Future<List<dynamic>> fetchPackages({
     required double latitude,
     required double longitude,
+    required String state,
   }) async {
     final endpoint = "$registerUrl/procedures/packages"
         "?latitude=$latitude"
-        "&longitude=$longitude";
+        "&longitude=$longitude&state=$state";
 
     final api = Get.find<ApiProvider>().dio;
 

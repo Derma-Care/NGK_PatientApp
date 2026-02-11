@@ -13,8 +13,9 @@ class ClinicService {
   static Future<List<ClinicModelWithLocation>> fetchNearbyClinics({
     required double lat,
     required double lng,
+    required String state,
   }) async {
-    final endpoint = "$registerUrl/clinics/nearby?latitude=$lat&longitude=$lng";
+    final endpoint = "$registerUrl/clinics/nearby?latitude=$lat&longitude=$lng&state=$state";
     final api = Get.find<ApiProvider>().dio;
 
     try {
@@ -105,9 +106,10 @@ class ClinicService {
   static Future<List<ClinicModelWithLocation>> fetchNearbyClinicsWithOffers({
     required double lat,
     required double lng,
+    required String state,
   }) async {
     final endpoint =
-        "$registerUrl/offers/clinics/nearby?latitude=$lat&longitude=$lng";
+        "$registerUrl/offers/clinics/nearby?latitude=$lat&longitude=$lng&state=$state";
     final api = Get.find<ApiProvider>().dio;
 
     try {

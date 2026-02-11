@@ -48,14 +48,12 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
     final prefs = await SharedPreferences.getInstance();
     final lat = prefs.getDouble('latitude');
     final lng = prefs.getDouble('longitude');
+    final state = prefs.getString('stateName');
 
-    if (lat == null || lng == null) return;
+    if (lat == null || lng == null || state == null) return;
 
     controller.loadClinics(
-      latitude: lat,
-      longitude: lng,
-      procedureId: procedureId,
-    );
+        latitude: lat, longitude: lng, procedureId: procedureId, state: state);
   }
 
   Future<void> _onRefreshClinics() async {
@@ -150,15 +148,38 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           /// 🖼 IMAGE (20%)
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.20,
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(16),
-                                bottomLeft: Radius.circular(16),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.20,
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(16),
+                                    bottomLeft: Radius.circular(16),
+                                  ),
+                                  child: buildClinicImage(clinic.hospitalLogo),
+                                ),
                               ),
-                              child: buildClinicImage(clinic.hospitalLogo),
-                            ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.star,
+                                    size: 14,
+                                    color: mainColor,
+                                  ),
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    clinic.hospitalOverallRating
+                                        .toStringAsFixed(1),
+                                    style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.black45,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
 
                           /// 📄 DETAILS
@@ -217,20 +238,6 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
                                                 fontWeight: FontWeight.bold),
                                           ),
                                           const SizedBox(width: 12),
-                                          const Icon(
-                                            Icons.star,
-                                            size: 14,
-                                            color: mainColor,
-                                          ),
-                                          const SizedBox(width: 2),
-                                          Text(
-                                            clinic.hospitalOverallRating
-                                                .toStringAsFixed(1),
-                                            style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.black45,
-                                                fontWeight: FontWeight.bold),
-                                          ),
                                         ],
                                       ),
                                       Row(
@@ -247,7 +254,6 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
                                             ),
                                           ),
                                           const SizedBox(width: 12),
-                                          const SizedBox(width: 2),
                                           Text(
                                             "₹ ${procedure?.discountedCost.toStringAsFixed(0)}",
                                             style: const TextStyle(
@@ -303,7 +309,11 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
                                         child: ElevatedButton(
                                           onPressed: () {
                                             Get.to(() => ProcedureDetailsPage(
-                                                service: procedure!));
+                                                  clinicId: procedure!.clinicId,
+                                                  procedureId:
+                                                      procedure.procedureId,
+                                                  clinicName: clinic.name,
+                                                ));
                                           },
                                           style: ElevatedButton.styleFrom(
                                             padding: const EdgeInsets.symmetric(

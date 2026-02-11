@@ -1,5 +1,9 @@
+import 'package:cutomer_app/Utils/Constant.dart';
 import 'package:flutter/material.dart';
 import 'package:cutomer_app/Help/Numbers.dart';
+
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 // Replace with your actual functions
@@ -15,7 +19,7 @@ class HelpSupportSheet extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Column(
             mainAxisSize: MainAxisSize.min,
@@ -24,7 +28,11 @@ class HelpSupportSheet extends StatelessWidget {
                 onTap: () {
                   whatsUpChat(); // Call your WhatsApp chat function
                 },
-                child: const Icon(Icons.message, color: Colors.green),
+                child: const CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.green,
+                  child: Icon(FontAwesomeIcons.whatsapp, color: Colors.white),
+                ),
               ),
               const SizedBox(height: 8),
               const Text("WhatsApp"),
@@ -34,13 +42,21 @@ class HelpSupportSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               GestureDetector(
-                onTap: () {
-                  emailSupport(); // Call your email function
-                },
-                child: const Icon(Icons.email, color: Colors.blue),
+                onTap: emailSupport, // your phone function
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundColor:
+                      const Color.fromARGB(255, 134, 92, 96), // circle color
+                  child: Image.asset(
+                    'assets/gmail.png',
+                    width: 34,
+                    height: 34,
+                    // optional tint (remove if you want original colors)
+                  ),
+                ),
               ),
               const SizedBox(height: 8),
-              const Text("E-mail"),
+              const Text("Email"),
             ],
           ),
           Column(
@@ -50,10 +66,16 @@ class HelpSupportSheet extends StatelessWidget {
                 onTap: () {
                   customerCare(); // Call your Contact Us function
                 },
-                child: const Icon(Icons.phone, color: Colors.orange),
+                child: const CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Color.fromARGB(255, 110, 174, 216),
+                  child: Icon(FontAwesomeIcons.phone,
+                      color:
+                          mainColor), // Use your main color for the phone icon
+                ),
               ),
               const SizedBox(height: 8),
-              const Text("Contact Us"),
+              const Text("Call"),
             ],
           ),
         ],
