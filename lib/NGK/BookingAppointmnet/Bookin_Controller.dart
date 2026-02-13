@@ -14,7 +14,8 @@ class BookingController extends GetxController {
   RxInt pendingPage = 1.obs;
   RxInt completedPage = 1.obs;
   RxInt totalPages = 1.obs;
- 
+  RxInt pendingTotalPages = 1.obs;
+  RxInt completedTotalPages = 1.obs;
 
   // 🔹 Fetch bookings from backend
   Future<void> fetchBookings() async {
@@ -43,8 +44,6 @@ class BookingController extends GetxController {
       print("🔥 Stored bookings length: ${bookings.length}");
       print(
           "🔥 Stored bookings length: ${bookings.first.procedures?.first.procedureName}");
-
-      _updateTotalPages(data.length);
     } catch (e) {
       print("❌ fetchBookings error: $e");
       error.value = e.toString();
@@ -69,24 +68,15 @@ class BookingController extends GetxController {
 
     final int perPage = itemsPerPage.value;
     final int totalItems = filtered.length;
-    final int total = (totalItems / perPage).ceil();
 
-    // ✅ CLAMP PAGE
     int page = tabStatus == "Pending" ? pendingPage.value : completedPage.value;
 
+    final int total = (totalItems / perPage).ceil();
     page = page.clamp(1, total);
-
-    // ✅ UPDATE PAGE IF IT WAS INVALID
-    if (tabStatus == "Pending") {
-      pendingPage.value = page;
-    } else {
-      completedPage.value = page;
-    }
 
     final int start = (page - 1) * perPage;
     final int end = (start + perPage).clamp(0, totalItems);
 
-    // ✅ FINAL SAFETY
     if (start >= totalItems) return [];
 
     return filtered.sublist(start, end);
@@ -114,7 +104,8 @@ class BookingController extends GetxController {
     } else {
       completedPage.value = 1;
     }
-    _updateTotalPages(bookings.length);
+
+    updateTotalPages(status);
   }
 
   void refreshData(String status) async {
@@ -131,11 +122,16 @@ class BookingController extends GetxController {
     fetchBookings(); // or API call
   }
 
-  void changeItemsPerPage(int value) {
+  void changeItemsPerPage(int value, String status) {
     itemsPerPage.value = value;
-    pendingPage.value = 1;
-    completedPage.value = 1;
-    _updateTotalPages(bookings.length);
+
+    if (status == "Pending") {
+      pendingPage.value = 1;
+    } else {
+      completedPage.value = 1;
+    }
+
+    updateTotalPages(status);
   }
 
   void goToPage(String status, int page) {
@@ -146,7 +142,20 @@ class BookingController extends GetxController {
     }
   }
 
-  void _updateTotalPages(int length) {
-    totalPages.value = length == 0 ? 1 : (length / itemsPerPage.value).ceil();
+  void updateTotalPages(String status) {
+    List<BookingModel> filtered;
+
+    if (status == "Pending") {
+      filtered =
+          bookings.where((b) => b.status.toUpperCase() == "CONFIRMED").toList();
+    } else {
+      filtered =
+          bookings.where((b) => b.status.toUpperCase() == "COMPLETED").toList();
+    }
+
+    final int total =
+        filtered.isEmpty ? 1 : (filtered.length / itemsPerPage.value).ceil();
+
+    totalPages.value = total;
   }
 }

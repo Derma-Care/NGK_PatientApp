@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cutomer_app/NGK/Modals/ClinicAdModel.dart';
+import 'package:cutomer_app/NGK/Widgets/procedures_packages_tab_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class CommonCarouselAds extends StatefulWidget {
-  final List<String> media;
+  final List<ClinicAdModel> media;
   final double height;
 
   const CommonCarouselAds({
@@ -26,23 +29,45 @@ class _CommonCarouselAdsState extends State<CommonCarouselAds> {
   @override
   Widget build(BuildContext context) {
     print("🎯 Media List: ${widget.media}");
+    // if (widget.media.isEmpty) {
+    //   return SizedBox(
+    //     height: widget.height,
+    //     child: _fallbackImage(), // ✅ Show fallback image instead of spinner
+    //   );
+    // }
     if (widget.media.isEmpty) {
-      return SizedBox(
-        height: widget.height,
-        child: _fallbackImage(), // ✅ Show fallback image instead of spinner
-      );
+      return const SizedBox.shrink(); // 👈 Show nothing
     }
 
     return CarouselSlider.builder(
       itemCount: widget.media.length,
       itemBuilder: (context, index, realIndex) {
-        String mediaPath = widget.media[index];
-
-        if (_isVideo(mediaPath)) {
-          return _buildVideoItem(mediaPath);
-        } else {
-          return _buildImageItem(mediaPath);
+        // ✅ SAFETY CHECK (VERY IMPORTANT)
+        if (index >= widget.media.length) {
+          return const SizedBox.shrink();
         }
+
+        final ad = widget.media[index];
+
+        final mediaPath = ad.url;
+
+        return GestureDetector(
+          onTap: () {
+            if (ad.clinicId == null || ad.clinicId!.isEmpty) {
+              return; // 👈 Do nothing
+            }
+
+            Get.to(
+              () => ServicesTabScreen(
+                clinicId: ad.clinicId!,
+                clinicName: ad.clinicName ?? '',
+              ),
+            );
+          },
+          child: _isVideo(mediaPath)
+              ? _buildVideoItem(mediaPath)
+              : _buildImageItem(mediaPath),
+        );
       },
       options: CarouselOptions(
         height: widget.height,
@@ -121,7 +146,7 @@ class _CommonCarouselAdsState extends State<CommonCarouselAds> {
         );
       } catch (e) {
         print("❌ Failed to decode base64 image: $e");
-        return _fallbackImage();
+        return const SizedBox.shrink();
       }
     }
 
@@ -271,26 +296,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       )); // ✅ Show loading spinner
     }
 
-    // return ClipRRect(
-    //   borderRadius: BorderRadius.circular(10),
-    //   child: Container(
-    //     width: double.infinity, // ✅ Full Width
-    //     height: 250, // ✅ Adjust height as needed
-    //     child: Stack(
-    //       children: [
-    //         Chewie(controller: _chewieController!), // ✅ Show Video
-    //         Positioned(
-    //           bottom: 10,
-    //           right: 10,
-    //           child: IconButton(
-    //             icon: Icon(Icons.fullscreen, color: Colors.white, size: 35),
-    //             onPressed: _enterFullScreen,
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // );
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: AspectRatio(

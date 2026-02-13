@@ -334,7 +334,7 @@ class _BookingListScreenState extends State<BookingListScreen>
               onPrev: () => controller.prevPage(status),
               onPageSelected: (page) => controller.goToPage(status, page),
               onItemsPerPageChanged: (val) {
-                controller.changeItemsPerPage(val);
+                controller.changeItemsPerPage(val, status);
               },
             );
           }),

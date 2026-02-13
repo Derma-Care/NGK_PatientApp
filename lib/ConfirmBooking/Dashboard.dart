@@ -106,7 +106,7 @@ class ConsultationsTypeState extends State<ConsultationsType> {
       await Future.delayed(const Duration(milliseconds: 600));
 
       // Reload everything
-      await _reloadLocation();
+      // await _reloadLocation();
       await _loadCustomerProfile();
       await loadProcedures();
       walletController.loadWallet();
@@ -258,11 +258,12 @@ class ConsultationsTypeState extends State<ConsultationsType> {
 
                     // ✅ City banner (only if available)
                     const SizedBox(height: 10),
-                    if (dashboardcontroller.carouseServicelImages.isNotEmpty)
+                    if (dashboardcontroller.carouseServiceAds.isNotEmpty)
                       CommonCarouselAds(
-                        media: dashboardcontroller.carouseServicelImages,
                         height: 80,
+                        media: dashboardcontroller.carouseServiceAds,
                       ),
+
                     const SizedBox(height: 20),
 
                     // ✅ Grid content (no IntrinsicHeight)

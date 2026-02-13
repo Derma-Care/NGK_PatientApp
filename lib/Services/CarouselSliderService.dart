@@ -1,32 +1,27 @@
+import 'package:cutomer_app/NGK/Modals/ClinicAdModel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
- 
 import 'package:cutomer_app/NGK/service/api_provider.dart';
 
 class CarouselSliderService {
   /// Fetch dashboard image ads (customer side)
-  Future<List<String>> fetchImages() async {
+  Future<List<ClinicAdModel>> fetchImages() async {
     final endpoint = '/api/login/dashboard-ads';
     final api = Get.find<ApiProvider>().dio;
 
-    debugPrint(
-        "📤 [CAROUSEL] Fetch images URL: ${api.options.baseUrl}$endpoint");
+    debugPrint("📤 Fetch images URL: ${api.options.baseUrl}$endpoint");
 
     try {
       final response = await api.get(endpoint);
 
-      debugPrint("📥 [CAROUSEL] Status: ${response.statusCode}");
-      debugPrint("📥 [CAROUSEL] Body: ${response.data}");
+      debugPrint("📥 Status: ${response.statusCode}");
+      debugPrint("📥 Body: ${response.data}");
 
       if (response.statusCode == 200) {
-        final decoded = response.data;
-        final List list = decoded['data']; // ✅ correct path
+        final List list = response.data['data'];
 
-        return list
-            .where((item) => item['type'] == 'image') // optional filter
-            .map<String>((item) => item['url'].toString()) // ✅ correct key
-            .toList();
+        return list.map((item) => ClinicAdModel.fromJson(item)).toList();
       } else {
         throw Exception('Failed to load images');
       }
@@ -35,29 +30,23 @@ class CarouselSliderService {
       return [];
     }
   }
- 
 
-  Future<List<String>> fetchServiceImages() async {
+  Future<List<ClinicAdModel>> fetchServiceImages() async {
     final endpoint = '/admin/service-ads';
     final api = Get.find<ApiProvider>().dio;
 
     try {
       final response = await api.get(endpoint);
 
-      debugPrint("📥 Body: ${response.data}");
-
       if (response.statusCode == 200) {
-        final List list = response.data['data']; // ✅ FIX
+        final List list = response.data['data'];
 
-        return list
-            .where((e) => e['url'] != null)
-            .map<String>((e) => e['url'].toString())
-            .toList();
+        return list.map((e) => ClinicAdModel.fromJson(e)).toList();
       } else {
-        throw Exception('Failed to load images');
+        throw Exception('Failed to load ads');
       }
     } catch (e) {
-      debugPrint("❌ Error fetching images: $e");
+      debugPrint("❌ Error fetching ads: $e");
       return [];
     }
   }

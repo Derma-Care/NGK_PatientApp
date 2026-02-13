@@ -1,43 +1,31 @@
 import 'dart:async';
- 
+
 import 'dart:io';
 
 import 'package:cutomer_app/Dashboard/ImagePreview.dart';
- 
+import 'package:cutomer_app/NGK/Modals/ClinicAdModel.dart';
 
 import 'package:cutomer_app/Utils/ScaffoldMessageSnacber.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
- 
 
- 
-
- 
 import '../Services/CarouselSliderService.dart';
- 
 
 class Dashboardcontroller extends GetxController {
   Dashboardcontroller() {
     debugPrint("🔥🔥 Dashboardcontroller CONSTRUCTOR CALLED");
   }
- 
+
   final ImagePicker _picker = ImagePicker();
   final CarouselSliderService carouselSliderService = CarouselSliderService();
 
   final Rx<File?> imageFile = Rx<File?>(null);
   final RxBool isLoading = true.obs;
- 
- 
-  final RxList<String> carouselImages = <String>[].obs;
-  final RxList<String> carouseServicelImages = <String>[].obs;
- 
 
- 
- 
-
- 
+  final RxList<ClinicAdModel> carouselImages = <ClinicAdModel>[].obs;
+  final RxList<ClinicAdModel> carouseServiceAds = <ClinicAdModel>[].obs;
 
   String statusMessage = "";
 
@@ -146,8 +134,6 @@ class Dashboardcontroller extends GetxController {
     );
   }
 
- 
- 
   /// Fetch images for carousel
   Future<void> fetchImages() async {
     try {
@@ -162,11 +148,10 @@ class Dashboardcontroller extends GetxController {
   /// Fetch service images for carousel
   Future<void> fetchserviceImages() async {
     try {
-      final images = await carouselSliderService.fetchServiceImages();
-      carouseServicelImages.assignAll(images);
-      print("imagesimages fetchServiceImages ${images.length}");
+      final ads = await carouselSliderService.fetchServiceImages();
+      carouseServiceAds.assignAll(ads);
     } catch (e) {
-      print("Error fetching images: $e");
+      print("Error fetching ads: $e");
     }
   }
 
@@ -175,7 +160,7 @@ class Dashboardcontroller extends GetxController {
 
     try {
       // Fetch bookings or other needed data
- 
+
       await fetchImages();
       await fetchserviceImages();
       // ✅ Only after data is fetched, stop loading
