@@ -96,17 +96,27 @@ class ProfileModalCard extends StatelessWidget {
                 ),
 
               // _info("Blood Group", safe(profile.blood)),
-              _info("Registration Code", safe(profile.registrationCode)),
-              _info("Referred By", safe(profile.referBy)),
-              _info("Aadhar Number", safe(profile.aadharNumber)),
-              _info("Address", safe(profile.address)),
+              if (profile.registrationCode != null &&
+                  profile.registrationCode!.trim().isNotEmpty)
+                _info("Registration Code", safe(profile.registrationCode)),
 
-              _info("Code Verified",
-                  profile.registrationCodeVerified ? "Yes" : "No"),
+              if (profile.referBy != null && profile.referBy!.trim().isNotEmpty)
+                _info("Referred By", safe(profile.referBy)),
+
+              // _info("Aadhar Number", safe(profile.aadharNumber)),
+              _info("Address", safe(profile.address)),
+              if (profile.registrationCodeVerified == true)
+                _info(
+                  "Code Verified",
+                  profile.registrationCodeVerified ? "Yes" : "No",
+                ),
               _info("Registration Done",
                   profile.registrationCompleted ? "Yes" : "No"),
-              _info("Spin Wheel Completed",
-                  profile.spinWheelCompleted ? "Yes" : "No"),
+              if (profile.spinWheelCompleted == true)
+                _info(
+                  "Spin Wheel Completed",
+                  profile.spinWheelCompleted ? "Yes" : "No",
+                ),
               _info("Profile Completed",
                   profile.userProfileCompleted ? "Yes" : "No"),
               _info("Your Reward Points", safe(profile.rewardPoints)),

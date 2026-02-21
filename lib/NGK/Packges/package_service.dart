@@ -1,10 +1,11 @@
 import 'package:cutomer_app/APIs/BaseUrl.dart';
+import 'package:cutomer_app/NGK/ClinicManagement/ClinicModelWithLocation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:cutomer_app/NGK/service/api_provider.dart';
 
 class PackageService {
-  static Future<List<dynamic>> fetchPackages({
+  static Future<List<ClinicModelWithLocation>> fetchPackagesClinics({
     required double latitude,
     required double longitude,
     required String state,
@@ -23,8 +24,9 @@ class PackageService {
     debugPrint("📦 [PACKAGE API] BODY: ${response.data}");
 
     if (response.statusCode == 200) {
-      final decoded = response.data;
-      return decoded['data'] ?? [];
+      final List data = response.data['data'] ?? [];
+
+      return data.map((e) => ClinicModelWithLocation.fromJson(e)).toList();
     } else {
       throw Exception("Failed to fetch packages");
     }

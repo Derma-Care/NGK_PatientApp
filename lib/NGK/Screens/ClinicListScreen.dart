@@ -165,7 +165,6 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(10),
                                             child: SizedBox(
-                                              height: 70,
                                               child: clinicLogoWidget(
                                                   clinic.hospitalLogo),
                                             ),
@@ -181,26 +180,57 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                clinic.name,
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  /// 🔹 CLINIC NAME
+                                                  Expanded(
+                                                    child: Text(
+                                                      clinic.name,
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ),
+
+                                                  const SizedBox(width: 6),
+
+                                                  /// 🔹 VIEW ICON BUTTON
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      Get.to(() =>
+                                                          AboutClinicScreen(
+                                                            distanceInKm: clinic
+                                                                    .distanceInKm ??
+                                                                "",
+                                                            clinicId:
+                                                                clinic.clinicId,
+                                                          ));
+                                                    },
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              6),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.orange
+                                                            .withOpacity(0.1),
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      child: const Icon(
+                                                        Icons.info_outline,
+                                                        size: 18,
+                                                        color: mainColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                clinic.address,
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: 13,
-                                                  color: Colors.grey.shade700,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
                                               Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment
@@ -222,56 +252,66 @@ class _ClinicListScreenState extends State<ClinicListScreen> {
                                                       Text(clinic.distanceInKm),
                                                     ],
                                                   ),
-                                                  Column(
-                                                    children: [
-                                                      SizedBox(
-                                                        height: 30,
-                                                        child: OutlinedButton(
-                                                          onPressed: () {
-                                                            Get.to(() =>
-                                                                AboutClinicScreen(
-                                                                  clinicId: clinic
-                                                                      .clinicId,
-                                                                  distanceInKm:
-                                                                      clinic
-                                                                          .distanceInKm,
-                                                                ));
-                                                          },
-                                                          style: OutlinedButton
-                                                              .styleFrom(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .symmetric(
-                                                                    horizontal:
-                                                                        14),
-                                                            side: const BorderSide(
-                                                                color: Colors
-                                                                    .deepOrange),
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          6),
-                                                            ),
-                                                          ),
-                                                          child: const Text(
-                                                            "About",
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              color: Colors
-                                                                  .deepOrange,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
+                                                  // Column(
+                                                  //   children: [
+                                                  //     SizedBox(
+                                                  //       height: 30,
+                                                  //       child: OutlinedButton(
+                                                  //         onPressed: () {
+                                                  //           Get.to(() =>
+                                                  //               AboutClinicScreen(
+                                                  //                 clinicId: clinic
+                                                  //                     .clinicId,
+                                                  //                 distanceInKm:
+                                                  //                     clinic
+                                                  //                         .distanceInKm,
+                                                  //               ));
+                                                  //         },
+                                                  //         style: OutlinedButton
+                                                  //             .styleFrom(
+                                                  //           padding:
+                                                  //               const EdgeInsets
+                                                  //                   .symmetric(
+                                                  //                   horizontal:
+                                                  //                       14),
+                                                  //           side: const BorderSide(
+                                                  //               color: Colors
+                                                  //                   .deepOrange),
+                                                  //           shape:
+                                                  //               RoundedRectangleBorder(
+                                                  //             borderRadius:
+                                                  //                 BorderRadius
+                                                  //                     .circular(
+                                                  //                         6),
+                                                  //           ),
+                                                  //         ),
+                                                  //         child: const Text(
+                                                  //           "About",
+                                                  //           style: TextStyle(
+                                                  //             fontSize: 12,
+                                                  //             fontWeight:
+                                                  //                 FontWeight
+                                                  //                     .w600,
+                                                  //             color: Colors
+                                                  //                 .deepOrange,
+                                                  //           ),
+                                                  //         ),
+                                                  //       ),
+                                                  //     ),
+                                                  //   ],
+                                                  // ),
                                                 ],
                                               ),
+                                              Text(
+                                                clinic.address,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey.shade700,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
                                             ],
                                           ),
                                         ),

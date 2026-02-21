@@ -32,8 +32,8 @@ class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
           p.name.toLowerCase().contains(_searchController.text.toLowerCase());
 
       /// ✅ Default state = show all
-      final bool isDefaultRange =
-          _offerRange.start == 0 && _offerRange.end == _maxAvailableOffer;
+      final bool isDefaultRange = _maxAvailableOffer == 0 ||
+          (_offerRange.start == 0 && _offerRange.end == _maxAvailableOffer);
 
       final bool matchesOffer = isDefaultRange
           ? true
@@ -96,6 +96,7 @@ class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonHeader(title: "Procedures"),
@@ -121,17 +122,45 @@ class _ProcedureGridScreenState extends State<ProcedureGridScreen> {
 
                 const SizedBox(height: 10),
 
-                /// 🔹 GRID
+                /// 🔹 GRID / EMPTY STATE
                 Expanded(
                   child: _filteredProcedures.isEmpty
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.search_off,
-                                size: 48, color: Colors.grey),
-                            SizedBox(height: 8),
-                            Text("No procedures match your filters"),
-                          ],
+                      ? RefreshIndicator(
+                          color: Colors.pink,
+                          onRefresh: _onRefresh,
+                          child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.6,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    SizedBox(height: 12),
+                                    Center(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: const [
+                                          Icon(Icons.search_off,
+                                              size: 60, color: Colors.grey),
+                                          SizedBox(height: 12),
+                                          Text(
+                                            "No procedures match your filters",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         )
                       : RefreshIndicator(
                           color: Colors.pink,

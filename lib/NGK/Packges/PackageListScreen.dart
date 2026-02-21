@@ -1,5 +1,6 @@
 import 'package:cutomer_app/NGK/ClinicManagement/AboutClinicScreen.dart';
 import 'package:cutomer_app/NGK/ClinicManagement/ClinicControllerLocation.dart';
+import 'package:cutomer_app/NGK/ClinicManagement/ClinicModelWithLocation.dart';
 import 'package:cutomer_app/NGK/Modals/PaymentModal.dart';
 import 'package:cutomer_app/NGK/Packges/PackageController.dart';
 import 'package:cutomer_app/NGK/Widgets/CommonPaginationBar.dart';
@@ -21,10 +22,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'PackageModel.dart';
 
 class PackageListScreen extends StatefulWidget {
+  final ClinicModelWithLocation clinicData;
   final bool hideHeader;
 
   final bool isClinic;
-  PackageListScreen({this.hideHeader = false, this.isClinic = false});
+  PackageListScreen(
+      {this.hideHeader = false,
+      this.isClinic = false,
+      required this.clinicData});
   @override
   State<PackageListScreen> createState() => _PackageListScreenState();
 }
@@ -39,6 +44,7 @@ class _PackageListScreenState extends State<PackageListScreen> {
   double? lat;
   double? long;
   String? stateName;
+  String? expandedPackageId;
   final ClinicControllerLocation ccontroller =
       Get.put(ClinicControllerLocation());
 
@@ -48,28 +54,12 @@ class _PackageListScreenState extends State<PackageListScreen> {
     controller = PackageController();
     scrollController = ScrollController();
     scrollController.addListener(_onScroll);
-    // ✅ LOAD BACKEND DATA
-    loadCoordinates();
+    loadClinicPacakages();
   }
 
-  Future<void> loadCoordinates() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    lat = prefs.getDouble('latitude');
-    long = prefs.getDouble('longitude');
-    stateName = prefs.getString('stateName');
-
-    // ✅ Fallback safety (optional)
-    if (lat == null || long == null || stateName == null) {
-      debugPrint("❌ Location not found in storage");
-      return;
-    }
-
-    // ✅ Call backend API with stored coordinates
+  Future<void> loadClinicPacakages() async {
     controller.loadPackages(
-      latitude: lat!,
-      longitude: long!,
-      state: stateName!,
+      clinicId: widget.clinicData.clinicId,
     );
   }
 
@@ -97,7 +87,7 @@ class _PackageListScreenState extends State<PackageListScreen> {
   Future<void> _onRefresh() async {
     openCard = null; // collapse expanded card
 
-    await loadCoordinates(); // reload backend data
+    await loadClinicPacakages(); // reload backend data
   }
 
   @override
@@ -185,29 +175,44 @@ class _PackageListScreenState extends State<PackageListScreen> {
                     return Column(
                       children: [
                         /// ✅ SHOW FILTERS ONLY IF DATA EXISTS
-                        if (list.isNotEmpty)
-                          Column(
-                            children: [
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: [
-                                    widget.isClinic
-                                        ? const SizedBox()
-                                        : filterButton("All", controller),
-                                    filterButton("Near Me", controller),
-                                    filterButton("High Discount", controller),
-                                    filterButton("Low Price", controller),
-                                    widget.isClinic
-                                        ? const SizedBox()
-                                        : filterButton("Rating", controller),
-                                    filterButton("High Price", controller),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                            ],
-                          ),
+                        // if (list.isNotEmpty)
+                        //   Column(
+                        //     children: [
+                        //       SingleChildScrollView(
+                        //         scrollDirection: Axis.horizontal,
+                        //         child: Row(
+                        //           children: [
+                        //             widget.isClinic
+                        //                 ? const SizedBox()
+                        //                 : filterButton("All", controller),
+                        //             filterButton("Near Me", controller),
+                        //             filterButton("High Discount", controller),
+                        //             filterButton("Low Price", controller),
+                        //             widget.isClinic
+                        //                 ? const SizedBox()
+                        //                 : filterButton("Rating", controller),
+                        //             filterButton("High Price", controller),
+                        //           ],
+                        //         ),
+                        //       ),
+                        //       const SizedBox(height: 10),
+                        //     ],
+                        //   ),
+
+                        buildSmallHospitalCard(
+                          hospitalName: widget.clinicData.name,
+                          distanceKm: widget.clinicData.distanceInKm,
+                          rating: widget.clinicData.hospitalOverallRating,
+                          city: widget.clinicData.city,
+                          address: widget.clinicData.address,
+                          onAboutPressed: () {
+                            Get.to(() => AboutClinicScreen(
+                                  clinicId: widget.clinicData.clinicId,
+                                  distanceInKm: widget.clinicData.distanceInKm,
+                                ));
+                            print("About Clicked");
+                          },
+                        ),
 
                         /// 📦 LIST / EMPTY STATE
                         Expanded(
@@ -230,6 +235,7 @@ class _PackageListScreenState extends State<PackageListScreen> {
                                     itemCount: list.length,
                                     itemBuilder: (context, index) {
                                       final pkg = list[index];
+
                                       return _buildPackageCard(pkg);
                                     },
                                   ),
@@ -258,406 +264,257 @@ class _PackageListScreenState extends State<PackageListScreen> {
     );
   }
 
+  int getOfferDaysLeft(String? offerDate) {
+    if (offerDate == null || offerDate.isEmpty) return 0;
+
+    try {
+      final expiry = DateTime.parse(offerDate);
+      final now = DateTime.now();
+      final difference = expiry.difference(now).inDays;
+
+      return difference > 0 ? difference : 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   Widget _buildPackageCard(PackageModel pkg) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 250),
-      margin: EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          )
-        ],
-      ),
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            openCard = openCard == pkg.packageId ? null : pkg.packageId;
-          });
-        },
+    final int discountPercent = pkg.totalDiscountPercentage.toInt();
+    final double saveAmount = pkg.totalDiscountAmount ?? 0;
+    final int daysLeft = getOfferDaysLeft(pkg.offerValidDate);
+
+    bool isExpanded = expandedPackageId == pkg.packageId;
+
+    String offerText;
+    if (!pkg.offerActive) {
+      offerText = "";
+    } else if (pkg.offerValidDate == null ||
+        pkg.offerValidDate!.isEmpty ||
+        daysLeft <= 0) {
+      offerText = "Limited Offer";
+    } else {
+      offerText = "$daysLeft Days Left";
+    }
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          expandedPackageId =
+              isExpanded ? null : pkg.packageId; // toggle expand
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            )
+          ],
+        ),
         child: Stack(
           children: [
-            if (pkg.offerActive)
-              // 🔥 OFFER RIBBON
+            /// 🔴 TOP RIGHT DISCOUNT
+            if (pkg.offerActive && discountPercent > 0)
               Positioned(
                 top: 0,
-                left: 0,
-                right: 0, // 👈 THIS IS THE KEY
+                right: 0,
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: const BoxDecoration(
                     color: Colors.redAccent,
                     borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(16),
-                      topLeft: Radius.circular(12),
+                      bottomLeft: Radius.circular(10),
+                      topRight: Radius.circular(14),
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      // ⏳ OFFER DATE (LEFT)
-
-                      Expanded(
-                        child: Text(
-                          formatOfferDate(pkg.offerValidDate),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-
-                      // 💯 DISCOUNT (RIGHT)
-
-                      Text(
-                        "${pkg.totalDiscountPercentage.toStringAsFixed(0)}% OFF",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    "$discountPercent% OFF",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            Padding(
-              padding: EdgeInsets.only(
-                top: pkg.offerActive ? 24 : 0, // ✅ KEY FIX
-                left: 16,
-                right: 16,
-                bottom: 16,
+
+            /// 🟣 TOP LEFT OFFER
+            if (pkg.offerActive)
+              Positioned(
+                top: 0,
+                left: 0,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: const BoxDecoration(
+                    color: mainColor,
+                    borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(10),
+                      topLeft: Radius.circular(14),
+                    ),
+                  ),
+                  child: Text(
+                    offerText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
               ),
+
+            Padding(
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                  // CLINIC NAME + RATING
+                  /// PACKAGE NAME
+                  Text(
+                    pkg.packageName,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
 
-                  widget.isClinic
-                      ? SizedBox()
-                      : // ===== COLLAPSED HEADER =====
-                      Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // LEFT INFO (70%)
-                            Expanded(
-                              flex: 7,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // PACKAGE NAME
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.local_offer,
-                                        color: mainColor,
-                                        size: 26,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          pkg.packageName,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                  const SizedBox(height: 8),
 
-                                  const SizedBox(height: 4),
-
-                                  // HOSPITAL NAME + CITY
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              pkg.clinicName,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey[600],
-                                              ),
-                                            ),
-                                            Text(
-                                              pkg.city,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey[600],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      SizedBox(
-                                        height: 28,
-                                        child: OutlinedButton(
-                                          onPressed: () {
-                                            Get.to(() => AboutClinicScreen(
-                                                  clinicId: pkg.clinicId,
-                                                  distanceInKm: pkg.distance,
-                                                ));
-                                          },
-                                          style: OutlinedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 12),
-                                            side: const BorderSide(
-                                                color: Colors.deepOrange),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                            ),
-                                          ),
-                                          child: const Text(
-                                            "About",
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.deepOrange,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-
-                            // RIGHT DISCOUNT (30%)
-                          ],
-                        ),
-
+                  /// PRICE ROW
                   Row(
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.star, color: Colors.amber, size: 18),
-                          Text(" ${pkg.clinicRating}"),
-                        ],
+                      Text(
+                        "₹${pkg.price.toStringAsFixed(0)}",
+                        style: const TextStyle(
+                          fontSize: 13,
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.grey,
+                        ),
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.location_on,
-                              color: Colors.red, size: 18),
-                          const SizedBox(width: 3),
-                          Text(
-                            pkg.distance,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                        ],
+                      const SizedBox(width: 8),
+                      Text(
+                        "₹${pkg.totalDiscountedAmount.toStringAsFixed(0)}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.pink,
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 12),
 
-                  Text(
-                    "tap to view more details",
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w500, color: Colors.redAccent),
-                  ),
-                  // ▼ EXPANDABLE PROCEDURES
-                  if (openCard == pkg.packageId) ...[
-                    AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: openCard == pkg.packageId ? 0 : 1,
-                      child: const Text(
-                        "tap to view more details",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.redAccent,
-                        ),
+                  if (saveAmount > 0)
+                    Text(
+                      "Save ₹${saveAmount.toStringAsFixed(0)}",
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.redAccent,
                       ),
                     ),
 
-                    AnimatedCrossFade(
-                      duration: const Duration(milliseconds: 300),
-                      firstChild: const SizedBox(),
-                      secondChild: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 📍 ADDRESS (SHOW ONCE)
-                          if (!widget.isClinic)
+                  const SizedBox(height: 8),
+
+                  /// TAP TEXT (ONLY WHEN COLLAPSED)
+                  if (!isExpanded)
+                    const Text(
+                      "Tap to view details",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+
+                  /// ---------------- EXPANDED CONTENT ----------------
+                  if (isExpanded) ...[
+                    const SizedBox(height: 12),
+
+                    /// PROCEDURES LIST
+                    ...pkg.procedures.map((p) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /// NO OF SITTINGS (FIRST)
+                            Text(
+                              "${p.noOfSittings} sittings",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.pink,
+                              ),
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            /// PROCEDURE NAME (SECOND)
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.map,
-                                    color: Colors.red, size: 18),
-                                const SizedBox(width: 5),
+                                const Icon(
+                                  Icons.check_circle,
+                                  size: 16,
+                                  color: mainColor,
+                                ),
+                                const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    pkg.clinicAddress,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(color: Colors.grey[700]),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                              ],
-                            ),
-
-                          const SizedBox(height: 12),
-
-                          // 🧪 PROCEDURES + SITTINGS (LOOP ONLY HERE)
-                          ...pkg.procedures.map((p) {
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                children: [
-                                  // 70% – Procedure Name (max 2 lines)
-                                  Expanded(
-                                    flex: 7,
-                                    child: Text(
-                                      p.procedureName,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 14),
+                                    p.procedureName,
+                                    style: const TextStyle(
+                                      fontSize: 13,
                                     ),
                                   ),
-
-                                  // 30% – Sittings (right aligned)
-                                  Expanded(
-                                    flex: 3,
-                                    child: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                        "${p.noOfSittings} sittings",
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-
-                          const SizedBox(height: 12),
-
-                          // 💰 PRICE CARD (ONLY ONCE)
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.pink.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.pink.shade100),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text("Original Price",
-                                        style: TextStyle(fontSize: 13)),
-                                    Column(
-                                      children: [
-                                        Text(
-                                          "₹${pkg.price.toStringAsFixed(0)}",
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            decoration:
-                                                TextDecoration.lineThrough,
-                                            color: Colors.redAccent,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Save ₹${pkg.totalDiscountAmount.toStringAsFixed(0)}",
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.redAccent,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    const Text("Now",
-                                        style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600)),
-                                    Text(
-                                      "₹${pkg.totalDiscountedAmount.toStringAsFixed(0)}",
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        color: Colors.pink.shade700,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                      crossFadeState: openCard == pkg.packageId
-                          ? CrossFadeState.showSecond
-                          : CrossFadeState.showFirst,
-                    ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
 
                     const SizedBox(height: 12),
 
-                    // 🔘 BOOK BUTTON (ONCE)
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pink,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () {
-                        final paymentModal = PaymentModal.fromPackage(pkg);
-                        showModalBottomSheet(
-                          backgroundColor: Colors.white,
-                          context: context,
-                          isScrollControlled: true,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
+                    /// BOOK BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      height: 40,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pink,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          builder: (_) =>
-                              PackageBookingSheet(payment: paymentModal),
-                        );
-                      },
-                      child: const Text(
-                        "Book Package",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                        onPressed: () {
+                          final payment = PaymentModal.fromPackage(pkg);
+
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.white,
+                            isScrollControlled: true,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(20)),
+                            ),
+                            builder: (_) =>
+                                PackageBookingSheet(payment: payment),
+                          );
+                        },
+                        child: const Text(
+                          "Book Package",
+                          style: TextStyle(fontSize: 14),
+                        ),
                       ),
                     ),
                   ]
@@ -666,6 +523,103 @@ class _PackageListScreenState extends State<PackageListScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget buildSmallHospitalCard({
+    required String hospitalName,
+    required String distanceKm,
+    required double rating,
+    required String city,
+    required String address,
+    required VoidCallback onAboutPressed,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          /// 🔹 Left Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  hospitalName,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.star, size: 14, color: Colors.orange),
+                    const SizedBox(width: 4),
+                    Text(
+                      rating.toStringAsFixed(1),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    const SizedBox(width: 10),
+                    const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                    const SizedBox(width: 2),
+                    Text(
+                      "${distanceKm} ",
+                      style:
+                          const TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  "${address} ",
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.black45,
+                  ),
+                ),
+                Text(
+                  city,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.black45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          /// 🔹 About Button (Small)
+          TextButton(
+            onPressed: onAboutPressed,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              "About",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.pink,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

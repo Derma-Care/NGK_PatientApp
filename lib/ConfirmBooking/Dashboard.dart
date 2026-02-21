@@ -8,6 +8,7 @@ import 'package:cutomer_app/NGK/ClinicManagement/ClinicLactionScreen.dart';
 import 'package:cutomer_app/NGK/Contoller/referral_wallet_controller.dart';
 import 'package:cutomer_app/NGK/Modals/customer_profile_model.dart';
 import 'package:cutomer_app/NGK/Offers/OffersListScreen.dart';
+import 'package:cutomer_app/NGK/Packges/PackageListClinics.dart';
 import 'package:cutomer_app/NGK/Packges/PackageListScreen.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureListScreen.dart';
 import 'package:cutomer_app/NGK/Procedures/ProcedureScreenName.dart';
@@ -277,14 +278,14 @@ class ConsultationsTypeState extends State<ConsultationsType> {
                           "Procedures",
                           "assets/treat.png",
                           () {
-                            Get.to(ProcedureGridScreen());
+                            Get.to(() => const ProcedureGridScreen());
                           },
                         ),
                         _mainCard(
                           "Packages",
                           "assets/package.png",
                           () {
-                            Get.to(PackageListScreen());
+                            Get.to(PackageListClinics());
                           },
                         ),
                         _mainCard(

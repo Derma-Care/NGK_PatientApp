@@ -33,16 +33,16 @@ class ClinicServiceLocation {
     final decoded = response.data;
 
     // Always check data exists
-    if (decoded['data'] != null &&
-        decoded['data'].isNotEmpty &&
-        decoded['data'][0]['procedurePricing'] != null) {
-      final procedurePricing = decoded['data'][0]['procedurePricing'];
+    // if (decoded['data'] != null &&
+    //     decoded['data'].isNotEmpty &&
+    //     decoded['data'][0]['procedurePricing'] != null) {
+    //   final procedurePricing = decoded['data'][0]['procedurePricing'];
 
-      debugPrint(
-          "💰 Procedure Pricing ↓↓↓\n${encoder.convert(procedurePricing)}");
-    } else {
-      debugPrint("❌ procedurePricing not found");
-    }
+    //   debugPrint(
+    //       "💰 Procedure Pricing ↓↓↓\n${encoder.convert(procedurePricing)}");
+    // } else {
+    //   debugPrint("❌ procedurePricing not found");
+    // }
 
     if (response.statusCode == 200) {
       final List list = decoded['data'];

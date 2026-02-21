@@ -15,7 +15,8 @@ class ClinicService {
     required double lng,
     required String state,
   }) async {
-    final endpoint = "$registerUrl/clinics/nearby?latitude=$lat&longitude=$lng&state=$state";
+    final endpoint =
+        "$registerUrl/clinics/nearby?latitude=$lat&longitude=$lng&state=$state";
     final api = Get.find<ApiProvider>().dio;
 
     try {
@@ -33,6 +34,48 @@ class ClinicService {
         return data
             .map<ClinicModelWithLocation>(
                 (e) => ClinicModelWithLocation.fromJson(e))
+            .toList();
+      }
+
+      // 🔴 BACKEND BUG CASE (distance = "4 KM")
+      if (response.statusCode == 400) {
+        final body = response.data;
+        final msg = body['message'] ?? "";
+
+        if (msg.toString().contains("KM")) {
+          debugPrint("Backend distance format error ignored");
+          return [];
+        }
+      }
+
+      return [];
+    } catch (e) {
+      debugPrint("Clinic API Exception: $e");
+      return [];
+    }
+  }
+
+  static Future<List<PackageModel>> fetchPackagesByClinicId({
+    required String clinicId,
+  }) async {
+    final endpoint = "/clinic-admin/packages/clinic/$clinicId";
+    final api = Get.find<ApiProvider>().dio;
+
+    try {
+      final response = await api.get(endpoint);
+
+      debugPrint("PACKAGE API STATUS: ${response.statusCode}");
+      debugPrint("PACKAGE API BODY: ${response.data}");
+
+      if (response.statusCode == 200) {
+        final body = response.data;
+        final data = body['data'];
+        debugPrint("PACKAGE API BODY INSIDE: ${data}");
+
+        if (data == null || data is! List) return [];
+
+        return data
+            .map<PackageModel>((e) => PackageModel.fromDirectApi(e))
             .toList();
       }
 

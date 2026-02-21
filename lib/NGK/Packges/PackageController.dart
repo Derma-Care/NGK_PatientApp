@@ -1,150 +1,319 @@
- 
 import 'package:flutter/material.dart';
-import 'PackageModel.dart';
-import 'package_service.dart';
+import 'package:cutomer_app/NGK/ClinicManagement/ClinicModelWithLocation.dart';
+import 'package:cutomer_app/NGK/Packges/PackageModel.dart';
+import 'package:cutomer_app/NGK/service/clinic_service.dart';
+import 'package:cutomer_app/NGK/Packges/package_service.dart';
 
 class PackageController {
-  // ---------- Backend Data ----------
-  List<PackageModel> _originalList = [];
-  late List<PackageModel> _filteredList;
+  // =====================================================
+  // MODE SWITCH (VERY IMPORTANT)
+  // =====================================================
+  bool isPackageMode = false;
 
-  // ---------- Notifiers ----------
-  ValueNotifier<List<PackageModel>> packageList = ValueNotifier([]);
+  // =====================================================
+  // CLINIC DATA
+  // =====================================================
+  List<ClinicModelWithLocation> _originalClinicList = [];
+  List<ClinicModelWithLocation> _filteredClinicList = [];
+
+  // =====================================================
+  // PACKAGE DATA
+  // =====================================================
+  List<PackageModel> _originalPackageList = [];
+  List<PackageModel> _filteredPackageList = [];
+
+  // =====================================================
+  // NOTIFIERS
+  // =====================================================
+  ValueNotifier<List<ClinicModelWithLocation>> clinicList = ValueNotifier([]);
   ValueNotifier<String> selectedFilter = ValueNotifier("All");
-  ValueNotifier<String> searchQuery = ValueNotifier("");
+
+  ValueNotifier<List<PackageModel>> packageList = ValueNotifier([]);
+
   ValueNotifier<int> itemsPerPage = ValueNotifier(5);
   ValueNotifier<int> currentPage = ValueNotifier(1);
   ValueNotifier<int> totalPages = ValueNotifier(1);
   ValueNotifier<bool> loading = ValueNotifier(false);
 
-  // ---------- INIT ----------
-  Future<void> loadPackages({
+  // =====================================================
+  // LOAD CLINICS
+  // =====================================================
+  Future<void> loadClinics({
     required double latitude,
     required double longitude,
     required String state,
   }) async {
     loading.value = true;
+    isPackageMode = false;
 
     try {
-      final data = await PackageService.fetchPackages(
+      final data = await PackageService.fetchPackagesClinics(
         latitude: latitude,
         longitude: longitude,
         state: state,
       );
 
-      _originalList = data.map((e) => PackageModel.fromApi(e)).toList();
+      _originalClinicList = data;
+      _filteredClinicList = List.from(data);
 
-      _filteredList = List.from(_originalList);
       currentPage.value = 1;
-      _updatePageData();
+      _updateClinicPageData();
     } catch (e) {
-      debugPrint("Package fetch error: $e");
+      debugPrint("Clinic fetch error: $e");
     } finally {
       loading.value = false;
     }
   }
 
-  // ---------- Helpers ----------
-  double _rating(String r) => double.tryParse(r) ?? 0;
-  double _distance(String d) =>
-      double.tryParse(d.replaceAll("KM", "").trim()) ?? 0;
+  // =====================================================
+  // LOAD PACKAGES
+  // =====================================================
+  Future<void> loadPackages({
+    required String clinicId,
+  }) async {
+    loading.value = true;
+    isPackageMode = true;
 
-  // ============================================================
-  // SEARCH
-  // ============================================================
-  void applySearch(String query) {
-    searchQuery.value = query.toLowerCase();
+    debugPrint("📦 Loading packages for clinicId: $clinicId");
 
-    _filteredList = _originalList.where((pkg) {
-      return pkg.packageName.toLowerCase().contains(query) ||
-          pkg.clinicName.toLowerCase().contains(query) ||
-          pkg.clinicAddress.toLowerCase().contains(query);
-    }).toList();
+    try {
+      final data = await ClinicService.fetchPackagesByClinicId(
+        clinicId: clinicId,
+      );
 
-    currentPage.value = 1;
-    _updatePageData();
+      debugPrint("📦 API Returned Packages Count: ${data.length}");
+
+      if (data.isNotEmpty) {
+        debugPrint("📦 First Package Name: ${data.first.packageName}");
+        debugPrint("💰 Price: ${data.first.price}");
+        debugPrint("🎯 Discount %: ${data.first.totalDiscountPercentage}");
+        debugPrint("💸 Discounted Amount: ${data.first.totalDiscountedAmount}");
+        debugPrint("💸 Platform Fee: ${data.first.platformFee}");
+        debugPrint(
+            "💸 Platform platformFeePercentage: ${data.first.platformFeePercentage}");
+      } else {
+        debugPrint("⚠️ No packages received from API");
+      }
+
+      _originalPackageList = data;
+      _filteredPackageList = List.from(data);
+
+      debugPrint("📦 Original List Length: ${_originalPackageList.length}");
+      debugPrint("📦 Filtered List Length: ${_filteredPackageList.length}");
+
+      currentPage.value = 1;
+      _updatePackagePageData();
+
+      debugPrint("📄 Paginated List Length: ${packageList.value.length}");
+    } catch (e) {
+      debugPrint("❌ Package fetch error: $e");
+    } finally {
+      loading.value = false;
+      debugPrint("📦 Loading Finished");
+    }
   }
 
-  // ============================================================
-  // FILTER
-  // ============================================================
-  void applyFilter(String filter) {
-    selectedFilter.value = filter;
+  // =====================================================
+  // CLINIC PAGINATION
+  // =====================================================
+  void _updateClinicPageData() {
+    final perPage = itemsPerPage.value;
+    final total = _filteredClinicList.length;
 
-    final list = List<PackageModel>.from(_filteredList);
-
-    switch (filter) {
-      case "High Discount":
-        list.sort(
-            (a, b) => b.discountPercentage.compareTo(a.discountPercentage));
-        break;
-
-      case "Low Price":
-        list.sort((a, b) => a.finalCost.compareTo(b.finalCost));
-        break;
-
-      case "High Price":
-        list.sort((a, b) => b.finalCost.compareTo(a.finalCost));
-        break;
-
-      case "Rating":
-        list.sort((a, b) =>
-            _rating(b.clinicRating).compareTo(_rating(a.clinicRating)));
-        break;
-
-      case "Near Me":
-        list.sort(
-            (a, b) => _distance(a.distance).compareTo(_distance(b.distance)));
-        break;
-      case "All":
-      default:
-        _filteredList = List.from(_originalList);
-        break;
+    if (total == 0) {
+      clinicList.value = [];
+      totalPages.value = 1;
+      return;
     }
 
-    _filteredList = list;
-    currentPage.value = 1;
-    _updatePageData();
-  }
-
-  // ============================================================
-  // PAGINATION
-  // ============================================================
-  void _updatePageData() {
-    final perPage = itemsPerPage.value;
-    final total = _filteredList.length;
-
     totalPages.value = (total / perPage).ceil();
-    if (totalPages.value == 0) totalPages.value = 1;
 
     final start = (currentPage.value - 1) * perPage;
-    final end = (start + perPage).clamp(0, total);
+    final end = start + perPage > total ? total : start + perPage;
 
-    packageList.value = _filteredList.sublist(start, end);
+    clinicList.value = _filteredClinicList.sublist(start, end);
   }
 
+  // =====================================================
+  // PACKAGE PAGINATION
+  // =====================================================
+  void _updatePackagePageData() {
+    final perPage = itemsPerPage.value;
+    final total = _filteredPackageList.length;
+
+    if (total == 0) {
+      packageList.value = [];
+      totalPages.value = 1;
+      return;
+    }
+
+    totalPages.value = (total / perPage).ceil();
+
+    final start = (currentPage.value - 1) * perPage;
+    final end = start + perPage > total ? total : start + perPage;
+
+    packageList.value = _filteredPackageList.sublist(start, end);
+  }
+
+  // =====================================================
+  // COMMON PAGINATION CONTROLS
+  // =====================================================
   void changeItemsPerPage(int count) {
     itemsPerPage.value = count;
     currentPage.value = 1;
-    _updatePageData();
+
+    if (isPackageMode) {
+      _updatePackagePageData();
+    } else {
+      _updateClinicPageData();
+    }
   }
 
   void goToPage(int page) {
     currentPage.value = page;
-    _updatePageData();
+
+    if (isPackageMode) {
+      _updatePackagePageData();
+    } else {
+      _updateClinicPageData();
+    }
   }
 
   void nextPage() {
     if (currentPage.value < totalPages.value) {
       currentPage.value++;
-      _updatePageData();
+
+      if (isPackageMode) {
+        _updatePackagePageData();
+      } else {
+        _updateClinicPageData();
+      }
     }
   }
 
   void prevPage() {
     if (currentPage.value > 1) {
       currentPage.value--;
-      _updatePageData();
+
+      if (isPackageMode) {
+        _updatePackagePageData();
+      } else {
+        _updateClinicPageData();
+      }
+    }
+  }
+
+  // =====================================================
+// SEARCH (WORKS FOR BOTH CLINIC + PACKAGE)
+// =====================================================
+  void applySearch(String query) {
+    final search = query.toLowerCase();
+
+    currentPage.value = 1;
+
+    if (isPackageMode) {
+      // 🔹 PACKAGE SEARCH
+      _filteredPackageList = _originalPackageList.where((pkg) {
+        return pkg.packageName.toLowerCase().contains(search) ||
+            (pkg.clinicName ?? "").toLowerCase().contains(search) ||
+            (pkg.clinicAddress ?? "").toLowerCase().contains(search);
+      }).toList();
+
+      _updatePackagePageData();
+    } else {
+      // 🔹 CLINIC SEARCH
+      _filteredClinicList = _originalClinicList.where((clinic) {
+        return clinic.name.toLowerCase().contains(search) ||
+            clinic.address.toLowerCase().contains(search) ||
+            clinic.city.toLowerCase().contains(search);
+      }).toList();
+
+      _updateClinicPageData();
+    }
+  }
+
+  void clearSearch() {
+    currentPage.value = 1;
+
+    if (isPackageMode) {
+      _filteredPackageList = List.from(_originalPackageList);
+      _updatePackagePageData();
+    } else {
+      _filteredClinicList = List.from(_originalClinicList);
+      _updateClinicPageData();
+    }
+  }
+
+  double _distance(String? d) {
+    if (d == null) return 0;
+    return double.tryParse(
+            d.replaceAll("KM", "").replaceAll("km", "").trim()) ??
+        0;
+  }
+
+  // =====================================================
+// FILTER (WORKS FOR BOTH CLINIC + PACKAGE)
+// =====================================================
+  void applyFilter(String filter) {
+    selectedFilter.value = filter;
+    currentPage.value = 1;
+
+    if (isPackageMode) {
+      // 🔹 PACKAGE FILTERS
+      List<PackageModel> list = List.from(_originalPackageList);
+
+      switch (filter) {
+        case "High Discount":
+          list.sort((a, b) =>
+              (b.totalDiscountPercentage).compareTo(a.totalDiscountPercentage));
+          break;
+
+        case "Low Price":
+          list.sort((a, b) =>
+              a.totalDiscountedAmount.compareTo(b.totalDiscountedAmount));
+          break;
+
+        case "High Price":
+          list.sort((a, b) =>
+              b.totalDiscountedAmount.compareTo(a.totalDiscountedAmount));
+          break;
+
+        case "All":
+        default:
+          list = List.from(_originalPackageList);
+          break;
+      }
+
+      _filteredPackageList = list;
+      _updatePackagePageData();
+    } else {
+      // 🔹 CLINIC FILTERS
+      List<ClinicModelWithLocation> list = List.from(_originalClinicList);
+
+      switch (filter) {
+        case "Near Me":
+          list.sort((a, b) =>
+              _distance(a.distanceInKm).compareTo(_distance(b.distanceInKm)));
+          break;
+
+        case "Rating":
+          list.sort((a, b) =>
+              b.hospitalOverallRating.compareTo(a.hospitalOverallRating));
+          break;
+
+        case "High Discount":
+          list.sort((a, b) =>
+              (b.maxOfferPercentage ?? 0).compareTo(a.maxOfferPercentage ?? 0));
+          break;
+
+        case "All":
+        default:
+          list = List.from(_originalClinicList);
+          break;
+      }
+
+      _filteredClinicList = list;
+      _updateClinicPageData();
     }
   }
 }

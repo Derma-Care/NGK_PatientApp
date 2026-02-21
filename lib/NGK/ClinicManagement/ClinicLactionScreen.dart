@@ -255,7 +255,7 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
                                           ),
                                           const SizedBox(width: 12),
                                           Text(
-                                            "₹ ${procedure?.discountedCost.toStringAsFixed(0)}",
+                                            "₹ ${procedure?.totalDiscountedAmount.toStringAsFixed(0)}",
                                             style: const TextStyle(
                                               fontSize: 12,
                                               color: Colors.black87,
@@ -309,9 +309,9 @@ class _ClinicListLocationScreenState extends State<ClinicListLocationScreen> {
                                         child: ElevatedButton(
                                           onPressed: () {
                                             Get.to(() => ProcedureDetailsPage(
-                                                  clinicId: procedure!.clinicId,
+                                                  clinicId: clinic.clinicId,
                                                   procedureId:
-                                                      procedure.procedureId,
+                                                      procedure!.procedureId,
                                                   clinicName: clinic.name,
                                                 ));
                                           },

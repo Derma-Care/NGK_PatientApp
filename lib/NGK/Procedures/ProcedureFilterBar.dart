@@ -61,15 +61,24 @@ class ProcedureFilterBar extends StatelessWidget {
               RangeSlider(
                 activeColor: mainColor,
                 min: 0,
-                max: maxAvailableOffer,
-                divisions: maxAvailableOffer.toInt(),
+                max: maxAvailableOffer == 0 ? 1 : maxAvailableOffer,
+
+                /// IMPORTANT FIX
+                divisions:
+                    maxAvailableOffer > 0 ? maxAvailableOffer.toInt() : null,
+
                 values: offerRange,
+
                 labels: RangeLabels(
                   "${offerRange.start.toInt()}%",
                   "${offerRange.end.toInt()}%",
                 ),
-                onChanged: onRangeChanged,
-              ),
+
+                /// Disable slider if no offers
+                onChanged: maxAvailableOffer == 0
+                    ? null
+                    : (value) => onRangeChanged(value),
+              )
             ],
           ),
         ),
